@@ -1,0 +1,2001 @@
+{
+ "_note": "실제 TPO 오답 원본 데이터. 출처: tpo2.rtf / tpo3.rtf / tpo4.rtf 진단 보고서 + tpo오답 폴더 스크린샷 51장. my=null 은 기록 없음(UNKNOWN). trap/causeAI 는 AI 추정이며 사용자가 앱에서 확인/수정한다.",
+ "tests": [
+  {
+   "id": "TPO2",
+   "date": "2026-10-02",
+   "reading": [
+    24,
+    37
+   ],
+   "listening": [
+    16,
+    24
+   ],
+   "ctest": [
+    13,
+    20
+   ],
+   "errors": 21,
+   "report": {
+    "headline": "이해보다 선택 단계에서 손실: 본문에 있는 '맞는 말'을 질문의 답으로 고른 오답이 R·L 양쪽에서 반복.",
+    "findings": [
+     {
+      "skill": "TARGET",
+      "recurrence": "new",
+      "text": "library located, carbon emissions, social/political issues — 사실이지만 질문 표적 밖인 선택지를 고름 (R2·L1)."
+     },
+     {
+      "skill": "BIND",
+      "recurrence": "new",
+      "text": "REM↔slow-wave, 고양이(여자)↔남자, Peers↔Religion — 다른 대상의 진짜 특징을 연결."
+     },
+     {
+      "skill": "FORM",
+      "recurrence": "new",
+      "text": "C-Test 13/20. fascinating·contributing·richness — 빈칸 자리(형용사·분사·명사) 판정 전에 철자를 만듦."
+     },
+     {
+      "skill": "AUDIT",
+      "recurrence": "new",
+      "text": "controversial, emotional stability, salinity — 그럴듯한 한 요소가 근거 없이 덧붙은 선택지."
+     }
+    ],
+    "next": "질문 표적 고정 + 대상↔특징 묶기 + C-Test 자리 먼저."
+   }
+  },
+  {
+   "id": "TPO3",
+   "date": "2026-10-08",
+   "reading": [
+    23,
+    33
+   ],
+   "listening": null,
+   "ctest": [
+    14,
+    20
+   ],
+   "errors": 20,
+   "note": "Listening 전체 분모 확인 불가. 사용자가 당일 4/6 언급(영역 불명확).",
+   "report": {
+    "headline": "Listen & Reply 오답 7개에서 발화 기능(요청·제안·사실확인)과 시간축 불일치가 반복. Insert Text 2/2 오답.",
+    "findings": [
+     {
+      "skill": "ACT",
+      "recurrence": "new",
+      "text": "Can you help…? → I appreciate the offer / Exactly, starts Saturday → I missed it — 기능·시간축 불일치."
+     },
+     {
+      "skill": "FORM",
+      "recurrence": "repeat",
+      "text": "involves·comprehending·encompassing·continuously — TPO2에 이어 자리 판정 오류 재발 (C-Test 14/20)."
+     },
+     {
+      "skill": "ROLE",
+      "recurrence": "new",
+      "text": "Insert 2개 모두 오답 (해결책 문장, In short 요약) + calm/stressed driver 예시 기능."
+     },
+     {
+      "skill": "TARGET",
+      "recurrence": "repeat",
+      "text": "Instead of A, B에서 옛 방식(A)을 변화로 선택."
+     }
+    ],
+    "next": "발화 기능 분류 → 응답, 삽입문 기능 태깅."
+   }
+  },
+  {
+   "id": "TPO4",
+   "date": "2026-10-12",
+   "reading": [
+    20,
+    28
+   ],
+   "listening": [
+    23,
+    37
+   ],
+   "ctest": [
+    16,
+    20
+   ],
+   "errors": 22,
+   "report": {
+    "headline": "Listening 손실이 가장 큼(23/37): 강의 속 여러 대상의 특징을 섞고, 직접 나온 신호(I'll…, Lakeside Park)를 놓침. ACT는 11/13으로 회복세.",
+    "findings": [
+     {
+      "skill": "BIND",
+      "recurrence": "repeat",
+      "text": "Transformational↔Transactional↔Servant, green roofs↔asphalt, East India Company↔tea bags."
+     },
+     {
+      "skill": "CATCH",
+      "recurrence": "repeat",
+      "text": "Lakeside Park, learn more, look online, accidentally — 직접 나온 신호 문장을 정답에 쓰지 못함."
+     },
+     {
+      "skill": "WORD",
+      "recurrence": "repeat",
+      "text": "resident↔residue, mitigate↔eliminate. C-Test는 80%로 개선, 오류 성격이 형태→어휘로 바뀜."
+     },
+     {
+      "skill": "ACT",
+      "recurrence": "improved",
+      "text": "Listen & Reply 11/13 — TPO3 대비 개선 신호 (새 문제로 검증 필요)."
+     }
+    ],
+    "next": "강의 노트를 대상별 줄로, 신호 표현 직후 2단어 메모."
+   }
+  }
+ ],
+ "audioSets": {
+  "o-t2-reply-hardware": {
+   "title": "TPO2 Listen & Reply — hardware store",
+   "lines": [
+    {
+     "v": "W",
+     "t": "Why did the hardware store close early?"
+    }
+   ],
+   "note": "질문 문장만 재구성. 원 음성의 정확한 문장은 화면상 질문과 같다고 가정."
+  },
+  "o-t2-announce-film": {
+   "title": "TPO2 Announcement — film screening",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to an announcement in a classroom."
+    },
+    {
+     "v": "W",
+     "t": "Hey, students! Don't forget about the film screening by the International Club this Saturday. It ties nicely into our discussion about cultural impacts on learning. Take good notes during the screening. In our next class, you'll present your analysis of the film. See you there!"
+    }
+   ]
+  },
+  "o-t2-oysters": {
+   "title": "TPO2 Earth Science Talk — ocean acidification",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in an Earth science class."
+    },
+    {
+     "v": "W",
+     "t": "Since the Industrial Revolution, human activities have caused atmospheric C O 2 levels to increase by about 50 percent. As more carbon dioxide enters the atmosphere, a significant portion is absorbed by the oceans. This triggers a chemical reaction that lowers the water's p H, making it more acidic, a process known as acidification. Such conditions pose a serious threat to marine organisms that rely on calcium carbonate to build their shells and skeletons. Take oysters, for example. These shellfish are especially vulnerable. In more acidic waters, young oysters struggle to form their initial shells, a critical stage in their development. Without strong shells, they're more susceptible to disease, predation, and death, threatening both wild populations and aquaculture industries. Coral reefs are weakened by acidification, and this, too, doesn't just affect the corals themselves. These reefs support entire ecosystems, offering shelter and food to countless marine species. Even fish behavior and survival can be altered, disrupting food chains and impacting communities that depend on fishing for their livelihoods. Tackling this issue means addressing its root cause: carbon emissions. By curbing C O 2 output and safeguarding marine habitats, we can help preserve the delicate balance of life beneath the waves."
+    }
+   ]
+  },
+  "o-t2-cat": {
+   "title": "TPO2 Conversation — feeding the cat",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a conversation."
+    },
+    {
+     "v": "W",
+     "t": "Did you feed the cat this morning? She's been meowing all afternoon."
+    },
+    {
+     "v": "M",
+     "t": "Oh, no! I completely forgot. I was watering the flowers in the garden, and then I got a call from a client."
+    },
+    {
+     "v": "W",
+     "t": "Poor cat! She must be so hungry."
+    },
+    {
+     "v": "M",
+     "t": "And now I've got a conference call coming up, and I need to look over my notes."
+    },
+    {
+     "v": "W",
+     "t": "You focus on that. I'll take care of the cat."
+    }
+   ]
+  },
+  "o-t2-magical": {
+   "title": "TPO2 Literature Talk — magical realism",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in a literature class."
+    },
+    {
+     "v": "M",
+     "t": "Let's talk a little bit about magical realism in literature. Magical realism is a genre that blends magical elements with the real world, presenting fantastical events as normal aspects of everyday life. The critic Matthew Strecher defines it as what happens when a highly detailed, realistic setting is invaded by something too strange to believe. Maybe you've heard about it in the context of Latin American authors like Gabriel García Márquez and Isabel Allende, but we also see it in works by authors outside Latin America like Salman Rushdie and Milan Kundera. The term actually comes from a German and Italian painting style of the 1920s. In a magical realist work, characters might encounter ghosts, levitate, manipulate time, just as they might in a fantasy work. But interestingly, these occurrences are never explained or questioned. They just coexist with reality. The result for readers is a new perspective on reality. Many authors have used this new perspective to address social and political issues, so that the fantastical in a way comments on real-world problems. In García Márquez's works, one purpose is to critique things like colonialism and corruption. Of course, violating conventional narrative techniques requires a reader to have an open mind. So when you read a work like García Márquez's One Hundred Years of Solitude, you're challenged to rethink your perceptions and think about the deeper truths beneath the surface of ordinary life."
+    }
+   ]
+  },
+  "o-t2-social": {
+   "title": "TPO2 Sociology Talk — socialization",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in a sociology class."
+    },
+    {
+     "v": "M",
+     "t": "Today, we're exploring the concept of socialization, which is the process by which individuals learn and adopt the values, norms, and behaviors necessary to participate in their society. When a child is born, from the very moment of birth, socialization begins and continues throughout an individual's life, and it significantly shapes their identity and their roles within the community. There are various agents of socialization, such as family, schools, peers, media, and religion. Family is often considered the primary, the most fundamental agent of socialization, since it's usually the first social environment a child encounters, where they learn basic norms and values. Schools play a significant role in teaching academic skills and social norms through structured education. Peer groups like classmates, friends, and neighbors allow individuals to develop interpersonal skills and, importantly, to explore and shape their identities outside of the family context, beyond the scope of family relationships. The media provides a wide range of information and cultural norms that influence perceptions and behaviors. Religion can instill a sense of morality and community belonging. Each of these agents contributes uniquely to the socialization process and helps individuals navigate and integrate into their society. Understanding socialization is crucial for analyzing how societal structures influence individual behaviors and vice versa."
+    }
+   ]
+  },
+  "o-t3-client": {
+   "title": "TPO3 Reply — contact the client",
+   "lines": [
+    {
+     "v": "W",
+     "t": "Were you able to contact the client?"
+    }
+   ]
+  },
+  "o-t3-art": {
+   "title": "TPO3 Reply — art project",
+   "lines": [
+    {
+     "v": "M",
+     "t": "Can you help me with this art project?"
+    }
+   ]
+  },
+  "o-t3-seminar": {
+   "title": "TPO3 Reply — seminar",
+   "lines": [
+    {
+     "v": "W",
+     "t": "When should we be there for the seminar?"
+    }
+   ]
+  },
+  "o-t3-lunch": {
+   "title": "TPO3 Reply — lunch",
+   "lines": [
+    {
+     "v": "M",
+     "t": "Let's grab lunch at that new place."
+    }
+   ]
+  },
+  "o-t3-never": {
+   "title": "TPO3 Reply — never seen",
+   "lines": [
+    {
+     "v": "W",
+     "t": "I've never seen anything like this before."
+    }
+   ]
+  },
+  "o-t3-exhibition": {
+   "title": "TPO3 Reply — exhibition",
+   "lines": [
+    {
+     "v": "M",
+     "t": "The exhibition starts on Saturday."
+    }
+   ]
+  },
+  "o-t3-lounge": {
+   "title": "TPO3 Reply — employee lounge",
+   "lines": [
+    {
+     "v": "W",
+     "t": "Can you help me set up the employee lounge?"
+    }
+   ]
+  },
+  "o-t3-grading": {
+   "title": "TPO3 Announcement — group project grading",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to the following announcement in a classroom."
+    },
+    {
+     "v": "W",
+     "t": "Hey everyone, quick heads up about how we're going to grade the group projects this semester. Instead of one grade for the whole group, each of you will get your own grade based on what you contribute to the project. This change is because we've noticed that not everyone contributes equally, and I believe this way is fairer to all. If you have questions about this or need more details on how contributions are assessed, please come see me after class."
+    }
+   ]
+  },
+  "o-t3-absurd": {
+   "title": "TPO3 Philosophy Talk — existentialism",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in a philosophy class."
+    },
+    {
+     "v": "M",
+     "t": "Today, we're going to explore the concept of existentialism, a philosophical movement that emerged in the twentieth century. A central concept in existentialism is the absurd, a term popularized by Albert Camus. It describes the conflict between our deep desire for meaning and the indifferent, chaotic nature of the universe. Camus argued that while life may lack inherent purpose, we must still live with integrity and passion, embracing the absurd rather than succumbing to despair. This theme is powerfully explored in Samuel Beckett's play Waiting for Godot. Two characters, Vladimir and Estragon, wait endlessly for someone named Godot, who never arrives. Their repetitive conversations and actions highlight the emptiness and uncertainty of existence. Rather than dramatic expressions of anxiety, the play presents a quieter, more subdued response to the absurd, one marked by endurance and the faint hope that meaning might eventually appear. One anecdote suggests Beckett was inspired by a story about a man actually waiting for someone named Godot who never came. When asked who Godot was, Beckett famously replied, If I knew, I would have said so in the play. This ambiguity is part of what makes the work so powerful. It captures existentialism not through answers but through the act of questioning and enduring."
+    }
+   ]
+  },
+  "o-t4-library": {
+   "title": "TPO4 Reply — library event",
+   "lines": [
+    {
+     "v": "W",
+     "t": "Isn't the library hosting an event today?"
+    }
+   ]
+  },
+  "o-t4-audit": {
+   "title": "TPO4 Reply — audit committee",
+   "lines": [
+    {
+     "v": "M",
+     "t": "Would you like to join the audit committee?"
+    }
+   ]
+  },
+  "o-t4-coffee": {
+   "title": "TPO4 Conversation — coffee shop",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a conversation."
+    },
+    {
+     "v": "M",
+     "t": "Did you hear about the new coffee shop downtown?"
+    },
+    {
+     "v": "W",
+     "t": "My roommate said it was good. Have you been there yet?"
+    },
+    {
+     "v": "M",
+     "t": "No, but I was thinking we could go there for our study group on Saturday, you know, since the library is being renovated and won't be open until next week."
+    },
+    {
+     "v": "W",
+     "t": "That's a good idea! But I can't go to the study group this weekend. My brother is coming to visit and I'm showing him around. Let me know how it is though. I always love to try new coffee shops."
+    },
+    {
+     "v": "M",
+     "t": "Will do."
+    }
+   ]
+  },
+  "o-t4-picnic": {
+   "title": "TPO4 Conversation — company picnic",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a conversation."
+    },
+    {
+     "v": "M",
+     "t": "Have you decided on a venue for the company picnic yet?"
+    },
+    {
+     "v": "W",
+     "t": "Yes, we're going to have it at Lakeside Park. It's perfect for outdoor activities and has plenty of space."
+    },
+    {
+     "v": "M",
+     "t": "Sounds great! What kind of activities are we planning?"
+    },
+    {
+     "v": "W",
+     "t": "We'll have a barbecue, some team games, and maybe a scavenger hunt."
+    },
+    {
+     "v": "M",
+     "t": "I'm looking forward to it!"
+    }
+   ]
+  },
+  "o-t4-photo": {
+   "title": "TPO4 Conversation — photography club",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a conversation."
+    },
+    {
+     "v": "M",
+     "t": "I'm thinking of joining the photography club. Do you know much about it? I'm looking for a place to learn more and meet other photography enthusiasts."
+    },
+    {
+     "v": "W",
+     "t": "Yes, I've been a member for two years. It's a great place for that."
+    },
+    {
+     "v": "M",
+     "t": "That sounds perfect. Do they offer workshops?"
+    },
+    {
+     "v": "W",
+     "t": "Yes, they have workshops every month on different topics, like landscape and portrait photography."
+    },
+    {
+     "v": "M",
+     "t": "I'm definitely interested. I'll sign up right away."
+    }
+   ]
+  },
+  "o-t4-gym": {
+   "title": "TPO4 Conversation — new gym",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a conversation."
+    },
+    {
+     "v": "M",
+     "t": "I'm thinking about joining the new gym that opened downtown. I need to get back to working out on a regular basis."
+    },
+    {
+     "v": "W",
+     "t": "I visited there last week. It's really nice. Lots of equipment, and the staff are helpful. They offer a variety of classes too, like yoga and kickboxing."
+    },
+    {
+     "v": "M",
+     "t": "Ooh, kickboxing sounds interesting. I'll look online and see if there are any spots still available."
+    }
+   ]
+  },
+  "o-t4-leadership": {
+   "title": "TPO4 Business Talk — leadership styles",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in a business class."
+    },
+    {
+     "v": "W",
+     "t": "In a business class, we often discuss the importance of leadership in an organization. Leadership goes beyond just managing a team; it involves inspiring and guiding people towards achieving shared goals. There are various styles of leadership, such as transformational, transactional, and servant leadership. Transformational leaders focus on inspiring and motivating their team by setting a vision and encouraging innovation in search of that goal. Transactional leaders, on the other hand, focus on the exchange between leader and follower, rewarding performance and correcting mistakes. Servant leadership is a third kind. Servant leadership prioritizes the needs of employees and helps them develop and perform to their full potential. Each style has its own strengths and can be effective depending on the context and the team dynamics. Good leaders are also good communicators; they listen actively and provide constructive feedback. Furthermore, a type of intelligence, called emotional intelligence, plays a crucial role in leadership. It involves being aware of and managing one's own emotions, as well as understanding and influencing the emotions of others. Ultimately, the best leaders are those who adapt their style to fit the needs of their team and the situation at hand."
+    }
+   ]
+  },
+  "o-t4-tea": {
+   "title": "TPO4 History Talk — history of tea",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in a history class."
+    },
+    {
+     "v": "W",
+     "t": "Today we're going to talk about a very special beverage. Tea has been consumed for thousands of years, and it's one of the most popular drinks in the world. The story of tea began in ancient China. Legend has it that Emperor Shen Nong discovered tea accidentally when leaves from a wild tea bush fell into his pot of boiling water. Fascinated by the pleasant aroma and taste, he started to promote tea as a medicinal drink. Tea spread from China to Japan around the eighth century, where it became deeply integrated into Japanese culture, including the development of the tea ceremony. By the seventeenth century, tea reached Europe, where it became extremely popular, especially in Britain. The British East India Company played a significant role in importing tea, and tea became a staple of British culture. Today, tea is enjoyed in various forms around the globe, from traditional loose-leaf tea to tea bags and iced tea. Tea culture continues to evolve, with innovations like bubble tea, a tea-based drink that emerged in the eighties and has become trendy, especially with young people."
+    }
+   ]
+  },
+  "o-t4-heat": {
+   "title": "TPO4 Environmental Science Talk — urban heat island",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in an environmental science class."
+    },
+    {
+     "v": "W",
+     "t": "We now turn to the phenomenon of the urban heat island effect. This occurs when urban areas experience higher temperatures than their rural surroundings. The primary causes are, one: buildings, roads, and other human infrastructure that absorb and retain heat; and two: reduced vegetation that would otherwise provide cooling through shade and transpiration. Transpiration is the release of water vapor into the air by plants. One contributing factor is the materials we use in urban construction. Materials like asphalt, concrete, and brick have high thermal mass, meaning they store heat during the day and release it slowly at night. This results in higher nighttime temperatures in cities compared to rural areas. Of course, air-conditioning units and cars also emit heat, and this further exacerbates the temperature difference. There are several consequences to the urban heat island effect. For one thing, it causes residents and businesses to rely more heavily on air-conditioning, which increases energy consumption. Higher temperatures can also worsen air quality by increasing the formation of ground-level ozone, which is a key component of smog. It also affects human health, vulnerable populations in particular. How do we mitigate the urban heat island effect? Increase green spaces in cities; use reflective materials in construction; and implement so-called green roofs, which are just what they sound like: roofs covered with a soil base and vegetation."
+    }
+   ]
+  },
+  "o-t4-industrial": {
+   "title": "TPO4 History Talk — Industrial Revolution",
+   "lines": [
+    {
+     "v": "N",
+     "t": "Listen to a talk in a history class."
+    },
+    {
+     "v": "M",
+     "t": "Today we'll discuss the Industrial Revolution. This was a period of great change that paved the way for the quality of life we enjoy today. The Industrial Revolution started in Great Britain around 1760, it reached the United States by the end of that century and parts of continental Europe early in the nineteenth century, and in all of these places it meant a shift from an agricultural economy to one driven by industrialization. We're talking about moving from manual to machine-based manufacturing and ultimately the rise of the factory system. It also means the increasing use of steam power, new processes for chemical manufacturing and iron production, and the development of machine tools. A key development was the Scotsman James Watt's coal-powered steam engine in 1769, not long after these events were set in motion in Great Britain. The steam engine represented a massive shift in power generation. Until then, factories had been powered by moving water and had to be located by, say, a river or a waterfall. Now they could be located anywhere. Another milestone was a machine called the spinning jenny. The spinning jenny greatly reduced the amount of labor needed to produce textiles and it helped spur the English cotton manufacturing system. This rapid change drove waves of workers from the countryside into overcrowded, unsanitary cities. They faced long hours, low pay, and dangerous conditions, sparking labor movements that would play a central role in the century to come."
+    }
+   ]
+  }
+ },
+ "originals": [
+  {
+   "id": "T2-R1",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Fossils C-Test",
+   "qtype": "C-Test",
+   "skill": "FORM",
+   "skills2": [
+    "WORD"
+   ],
+   "ctest": {
+    "text": "Fossils provide critical evidence for understanding how life forms have evolved over time. One {{}} fossil, Archaeopteryx, was discovered in the late nineteenth century.",
+    "prefix": "fasci",
+    "answer": "fascinating"
+   },
+   "my": "fascilicate",
+   "evidence": "One ___ fossil — 관사 One과 명사 fossil 사이 = 형용사 자리",
+   "trap": "fasci- 로 시작하는 그럴듯한 철자 조합을 만들었을 가능성 (AI 추정)",
+   "diff": "자리가 '명사를 꾸미는 형용사' → fascinating. fascination(명사)도 이 자리에 못 들어감",
+   "rule": "관사 + ___ + 명사 → 형용사(-ing/-al/-ive…)",
+   "causeAI": "형용사 자리 판정 없이 철자를 만들었을 가능성"
+  },
+  {
+   "id": "T2-R2",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Fossils C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "One fascinating fossil, Archaeopteryx, was discovered in the {{}} nineteenth century.",
+    "prefix": "la",
+    "answer": "late"
+   },
+   "my": "las",
+   "evidence": "the ___ nineteenth century — 시기를 꾸미는 고정 표현",
+   "trap": "last를 떠올리다 철자가 끊겼을 가능성 (AI 추정)",
+   "diff": "the late nineteenth century = 19세기 후반 (고정 결합)",
+   "rule": "시기 앞 형용사: early / mid / late + 세기",
+   "causeAI": "시간 표현 collocation 미활용 가능성"
+  },
+  {
+   "id": "T2-R3",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Fossils C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [
+    "FORM"
+   ],
+   "ctest": {
+    "text": "It {{}} back about 150 million years and exhibits a unique set of features.",
+    "prefix": "da",
+    "answer": "dates"
+   },
+   "my": "dawns",
+   "evidence": "It ___ back about 150 million years — '~년 전으로 거슬러 올라간다'",
+   "trap": "da- + 3인칭 -s 형태는 맞췄지만 단어가 dawn (AI 추정)",
+   "diff": "date back (to) = 거슬러 올라가다. dawn은 '동이 트다'로 back과 결합하지 않음",
+   "rule": "빈칸 뒤 부사·전치사(back)와 묶이는 동사를 찾는다",
+   "causeAI": "collocation date back 미활용"
+  },
+  {
+   "id": "T2-R4",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Daily Life — Missing library card",
+   "qtype": "Detail (요청 사항)",
+   "skill": "TARGET",
+   "skills2": [],
+   "passage": "Subject: Missing library card\n\nDear Ms. Robinson,\nYou reported your library card missing yesterday. Please know that it has been located. It was in a book you returned last week. If you have already ordered a replacement card, let us know and we will deactivate your old card.\n\nBest regards,\nDavid Clark",
+   "stem": "What does the library want to know?",
+   "options": [
+    "Whether an order was placed",
+    "Whether a book was returned",
+    "Whether an item was located",
+    "Whether a receipt was kept"
+   ],
+   "my": 2,
+   "correct": 0,
+   "evidence": "If you have already ordered a replacement card, let us know",
+   "trap": "located는 본문에 그대로 있는 단어라 눈에 띔 (AI 추정)",
+   "diff": "located = 도서관이 '알려주는' 사실. 도서관이 '알고 싶은' 것은 교체 카드 주문 여부",
+   "rule": "'want to know' → let us know / please tell us 뒤를 찾는다",
+   "causeAI": "본문의 사실과 질문의 표적(요청 정보) 혼동"
+  },
+  {
+   "id": "T2-R5",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Urban Agriculture",
+   "qtype": "Detail",
+   "skill": "TARGET",
+   "skills2": [],
+   "passage": "One of the main benefits of urban agriculture is its ability to enhance food security. By growing food locally, cities can reduce their dependence on imported produce and ensure a steady supply of fresh fruits and vegetables. Additionally, urban agriculture can contribute to environmental sustainability. Local food production reduces the need for transportation, lowering carbon emissions and minimizing the environmental impact of food distribution.",
+   "stem": "How do urban-agricultural practices contribute to food security?",
+   "options": [
+    "By ensuring that imported produce is sufficiently high in quality",
+    "By supplying fruits and vegetables from local sources",
+    "By ensuring that fresh produce is distributed fairly among urban populations",
+    "By helping to lower carbon emissions from vehicles"
+   ],
+   "my": 3,
+   "correct": 1,
+   "evidence": "By growing food locally, cities can reduce their dependence on imported produce and ensure a steady supply of fresh fruits and vegetables.",
+   "trap": "carbon emissions도 본문에 있는 참인 정보",
+   "diff": "carbon emissions는 'Additionally… environmental sustainability' 인과사슬. 질문의 표적은 food security",
+   "rule": "질문 표적(food security)의 문장 안에서만 답을 찾는다. Additionally 뒤는 다른 이야기",
+   "causeAI": "true-but-irrelevant 선택지"
+  },
+  {
+   "id": "T2-R6",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Photosynthesis",
+   "qtype": "Negative factual (EXCEPT)",
+   "skill": "AUDIT",
+   "skills2": [],
+   "passage": "Moreover, advancements in scientific research have explored ways to enhance photosynthesis in crops to improve food production and carbon sequestration.\n\nThe efficiency of photosynthesis can be influenced by various factors, including light intensity, temperature, and the availability of water and nutrients. … Additionally, genetic engineering is being used to develop plant varieties with improved photosynthetic capabilities, potentially increasing crop yields and resilience to climate change.",
+   "stem": "All of the following are effects of enhancing photosynthesis in plants EXCEPT:",
+   "options": [
+    "More nutrients become available to plants.",
+    "Food production increases.",
+    "More carbon is removed from the atmosphere.",
+    "Plants become more capable of withstanding climate change."
+   ],
+   "my": 3,
+   "correct": 0,
+   "evidence": "The efficiency of photosynthesis can be influenced by … the availability of water and nutrients.",
+   "trap": "withstanding climate change는 resilience to climate change의 바꿔 말하기라 알아보기 어려움 (AI 추정)",
+   "diff": "nutrients는 광합성의 '원인(영향 요인)'이지 '결과'가 아님. A는 방향이 뒤집힘",
+   "rule": "EXCEPT: 각 선택지를 '광합성 강화 → ___' 문장에 넣어 방향을 확인",
+   "causeAI": "인과 방향 검증 실패 (1건 — 반복 여부 미확인)"
+  },
+  {
+   "id": "T2-R7",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Photosynthesis",
+   "qtype": "Author's Purpose",
+   "skill": "ROLE",
+   "skills2": [
+    "AUDIT"
+   ],
+   "passage": "The efficiency of photosynthesis can be influenced by various factors, including light intensity, temperature, and the availability of water and nutrients. Scientists continue to study these factors to better understand how to optimize photosynthesis for agricultural purposes and environmental sustainability. Additionally, genetic engineering is being used to develop plant varieties with improved photosynthetic capabilities, potentially increasing crop yields and resilience to climate change.",
+   "stem": "Why does the author discuss \"genetic engineering\"?",
+   "options": [
+    "To illustrate one of the effects of climate change",
+    "To demonstrate a controversial agricultural practice",
+    "To justify concerns about environmental sustainability",
+    "To explain a way that photosynthesis can be made more efficient"
+   ],
+   "my": 1,
+   "correct": 3,
+   "evidence": "genetic engineering is being used to develop plant varieties with improved photosynthetic capabilities",
+   "trap": "유전공학은 일반적으로 논쟁적이라는 배경지식과 맞아 보임 (AI 추정 — 사용자 사고과정 기록 없음)",
+   "diff": "controversial(논쟁적)에 대한 근거가 지문에 0. 문단 주제(광합성 최적화)의 '방법 예시'",
+   "rule": "Purpose: 언급 대상이 속한 문단의 주제를 먼저 → 그 주제를 위한 예시인가?",
+   "causeAI": "근거 없는 속성(controversial)을 검증하지 않음"
+  },
+  {
+   "id": "T2-R8",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Mushrooms C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "Mushrooms are a fascinating type of fungus that can thrive in diverse environments, including forests, fields, and gardens. They {{}} widely in shape, size, and color.",
+    "prefix": "va",
+    "answer": "vary"
+   },
+   "my": null,
+   "gaps": [
+    "스크린샷상 빈칸이 비어 있음 — 입력값 UNKNOWN (미입력 가능성)"
+   ],
+   "evidence": "They ___ widely in shape, size, and color — 주어 They 뒤 본동사",
+   "trap": "UNKNOWN",
+   "diff": "vary widely in ~ = ~가 매우 다양하다",
+   "rule": "주어 뒤 빈칸 = 본동사 + 'widely'와 결합하는 동사",
+   "causeAI": "판단 불가 (입력값 없음)"
+  },
+  {
+   "id": "T2-R9",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Mushrooms C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "They vary widely in {{}}, size, and color.",
+    "prefix": "sh",
+    "answer": "shape"
+   },
+   "my": "shap",
+   "evidence": "shape, size, and color 병렬 명사",
+   "trap": "철자 끝 e 누락",
+   "diff": "shape",
+   "rule": "완성 후 단어 전체를 한 번 더 읽는다",
+   "causeAI": "철자 실수"
+  },
+  {
+   "id": "T2-R10",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Mushrooms C-Test",
+   "qtype": "C-Test",
+   "skill": "FORM",
+   "skills2": [],
+   "ctest": {
+    "text": "They vary widely in shape, size, and color, {{}} to the richness of ecosystems.",
+    "prefix": "contri",
+    "answer": "contributing"
+   },
+   "my": "contribution",
+   "evidence": "완전한 절 + 콤마 + ___ to — 접속사 없이 붙는 결과 분사구문",
+   "trap": "contribution to ~ 라는 명사 결합이 익숙함 (AI 추정)",
+   "diff": "이미 본동사 vary가 있는 완전한 절 뒤 '콤마 + ___ to' = V-ing 분사구문 (그 결과 ~에 기여하며)",
+   "rule": "완전한 절 + , + ___ → V-ing (분사구문)",
+   "causeAI": "문장 구조(분사구문 자리) 미확인"
+  },
+  {
+   "id": "T2-R11",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Mushrooms C-Test",
+   "qtype": "C-Test",
+   "skill": "FORM",
+   "skills2": [
+    "WORD"
+   ],
+   "ctest": {
+    "text": "They vary widely in shape, size, and color, contributing to the {{}} of ecosystems.",
+    "prefix": "rich",
+    "answer": "richness"
+   },
+   "my": "richment",
+   "evidence": "the ___ of — 관사 + ___ + of = 명사 자리",
+   "trap": "명사 자리는 맞췄지만 -ment를 붙임 (enrichment와 혼동 가능성, AI 추정)",
+   "diff": "형용사 rich의 명사형은 -ness → richness",
+   "rule": "형용사 → 명사: -ness (richness, awareness), 동사 → 명사: -ment (enrichment)",
+   "causeAI": "명사화 접미사 혼동"
+  },
+  {
+   "id": "T2-R12",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Sleep & Memory",
+   "qtype": "Vocabulary",
+   "skill": "WORD",
+   "skills2": [],
+   "passage": "The rapid eye movement (REM) phase of sleep is associated with emotional and procedural memory, while non-REM sleep, especially slow-wave sleep, is linked to declarative memory—the conscious recall of facts and events. This distinction helps explain why certain types of memories are more affected by sleep than others.",
+   "stem": "The word \"distinction\" in the passage is closest in meaning to",
+   "options": [
+    "recognition",
+    "situation",
+    "occurrence",
+    "difference"
+   ],
+   "my": 0,
+   "correct": 3,
+   "evidence": "REM … while non-REM … This distinction",
+   "trap": "distinction에는 '명성·인정(a person of distinction)'이라는 뜻도 있음 (AI 추정)",
+   "diff": "This distinction이 가리키는 것 = 바로 앞 REM vs non-REM 대조 → 차이",
+   "rule": "This + 명사 어휘 문제: 그 명사가 가리키는 앞 문장 내용으로 뜻을 정한다",
+   "causeAI": "문맥 지시 대상 대신 다른 사전 뜻 선택"
+  },
+  {
+   "id": "T2-R13",
+   "test": "TPO2",
+   "sec": "R",
+   "set": "Sleep & Memory",
+   "qtype": "Inference",
+   "skill": "BIND",
+   "skills2": [
+    "AUDIT"
+   ],
+   "passage": "The rapid eye movement (REM) phase of sleep is associated with emotional and procedural memory, while non-REM sleep, especially slow-wave sleep, is linked to declarative memory—the conscious recall of facts and events.",
+   "stem": "Which of the following can be inferred about slow-wave sleep?",
+   "options": [
+    "It involves rapid eye movement.",
+    "It helps with remembering facts and events.",
+    "It is linked to emotional stability.",
+    "It improves the recall of procedures."
+   ],
+   "my": 2,
+   "correct": 1,
+   "evidence": "slow-wave sleep, is linked to declarative memory—the conscious recall of facts and events",
+   "trap": "emotional은 본문에 있음 + linked to도 같은 문장에 있음",
+   "diff": "emotional은 REM의 특징. 게다가 본문은 emotional 'memory'지 'stability'가 아님 (이중 함정)",
+   "rule": "대상별 특징을 짝지어 읽는다: REM → emotional/procedural, slow-wave → facts/events",
+   "causeAI": "다른 대상(REM)의 특징을 연결 + 단어 변형 미검증"
+  },
+  {
+   "id": "T2-L1",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "CATCH",
+   "skills2": [
+    "ACT"
+   ],
+   "audio": "o-t2-reply-hardware",
+   "stem": "Choose the best response.",
+   "options": [
+    "It was fully booked.",
+    "That's a high quality set of tools.",
+    "There was a power outage.",
+    "They do not sell food items."
+   ],
+   "my": 0,
+   "correct": 2,
+   "evidence": "Why … close early? → 이유(사건)를 답해야 함",
+   "trap": "fully booked도 '문을 닫는 이유'처럼 들릴 수 있음. 하지만 철물점은 예약하는 곳이 아님",
+   "diff": "Why 질문 → 원인 사건 (power outage 정전). fully booked는 식당·호텔 상황",
+   "rule": "Why 질문 → 이유가 되는 사건. 장소(hardware store)와 맞는지 확인",
+   "causeAI": "원인 판단 불가 — 음성을 못 들었는지/단어를 몰랐는지 기록 없음",
+   "gaps": [
+    "원 음성 없음: 화면의 질문 문장으로 TTS 재구성"
+   ]
+  },
+  {
+   "id": "T2-L2",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Announcement 2",
+   "qtype": "Inference",
+   "skill": "AUDIT",
+   "skills2": [
+    "TARGET"
+   ],
+   "audio": "o-t2-announce-film",
+   "stem": "What is implied about notes?",
+   "options": [
+    "They are likely to be useful for an assignment.",
+    "They are likely to be analyzed by other students.",
+    "They should be written before a film screening.",
+    "They should be submitted to the International Club."
+   ],
+   "my": 1,
+   "correct": 0,
+   "evidence": "Take good notes during the screening. In our next class, you'll present your analysis of the film.",
+   "trap": "analysis(음성) ↔ analyzed(선택지) 단어 유사 (AI 추정)",
+   "diff": "학생이 '자기' 노트로 분석 발표를 함 → 과제에 유용. 다른 학생이 노트를 분석한다는 말은 없음",
+   "rule": "들은 단어와 같은 단어가 있는 선택지일수록 주어·관계를 다시 확인",
+   "causeAI": "keyword overlap + 주체 변경 미검증"
+  },
+  {
+   "id": "T2-L3",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Earth Science Talk",
+   "qtype": "Detail",
+   "skill": "CATCH",
+   "skills2": [
+    "AUDIT"
+   ],
+   "audio": "o-t2-oysters",
+   "stem": "What does the speaker say about young oysters?",
+   "options": [
+    "They need fully developed shells before being harvested.",
+    "They have a symbiotic relationship with coral reefs.",
+    "They are affected by the salinity of seawater.",
+    "They struggle to form shells in acidic water."
+   ],
+   "my": 2,
+   "correct": 3,
+   "evidence": "In more acidic waters, young oysters struggle to form their initial shells",
+   "trap": "salinity(염도)는 바닷물 맥락에서 과학적으로 그럴듯함",
+   "diff": "강의 전체가 acidity(산성도). salinity는 한 번도 나오지 않음",
+   "rule": "Take X, for example 뒤 문장이 정답 문장. 강의 핵심어(acidic)와 다른 과학 용어는 의심",
+   "causeAI": "직접 제시된 세부정보 미포착"
+  },
+  {
+   "id": "T2-L4",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Conversation 1",
+   "qtype": "Next Action",
+   "skill": "BIND",
+   "skills2": [
+    "CATCH"
+   ],
+   "audio": "o-t2-cat",
+   "stem": "What will the man probably do next?",
+   "options": [
+    "Feed the cat",
+    "Phone a client",
+    "Water the garden",
+    "Prepare for a meeting"
+   ],
+   "my": 0,
+   "correct": 3,
+   "evidence": "M: I've got a conference call coming up, and I need to look over my notes. / W: You focus on that. I'll take care of the cat.",
+   "trap": "고양이 이야기가 대화의 대부분",
+   "diff": "고양이는 '여자'가 맡음 (I'll take care of the cat). 남자 = conference call 준비",
+   "rule": "Next action: 질문의 주체(man)가 말한 '앞으로 할 일'만. I'll…의 화자를 확인",
+   "causeAI": "행동 주체 바꿔치기"
+  },
+  {
+   "id": "T2-L5",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Literature Talk — Magical Realism",
+   "qtype": "Speaker's Purpose",
+   "skill": "ROLE",
+   "skills2": [
+    "TARGET"
+   ],
+   "audio": "o-t2-magical",
+   "stem": "Why does the speaker mention the authors Salman Rushdie and Milan Kundera?",
+   "options": [
+    "To explain the origin of the term \"magical realism\"",
+    "To show that magical realism is not only a Latin American genre",
+    "To give examples of magical realist authors whose work is more realist than magical",
+    "To support the claim that magical realist authors must bring an open mind to their work"
+   ],
+   "my": 0,
+   "correct": 1,
+   "evidence": "…Latin American authors…, but we also see it in works by authors outside Latin America like Salman Rushdie and Milan Kundera.",
+   "trap": "바로 다음 문장이 The term actually comes from… (origin)",
+   "diff": "두 작가는 'but … outside Latin America'의 예시. origin은 다음 문장의 새 정보",
+   "rule": "예시의 목적 = 그 예시가 들어 있는 문장의 주장. 다음 문장 정보와 섞지 않는다",
+   "causeAI": "인접 문장의 사실과 예시 기능 혼동"
+  },
+  {
+   "id": "T2-L6",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Literature Talk — Magical Realism",
+   "qtype": "Detail (구별점)",
+   "skill": "TARGET",
+   "skills2": [
+    "CATCH"
+   ],
+   "audio": "o-t2-magical",
+   "stem": "What distinguishes the fantastical elements in magical realism from those in a purely fantastical work?",
+   "options": [
+    "In magical realism, they are described at length in great detail.",
+    "In magical realism, they have serious social or political consequences.",
+    "In magical realism, they are merely the product of a character's imagination.",
+    "In magical realism, they are never explained or even questioned."
+   ],
+   "my": 1,
+   "correct": 3,
+   "evidence": "just as they might in a fantasy work—but interestingly, these occurrences are never explained or questioned",
+   "trap": "social and political issues도 강의에 실제로 나옴",
+   "diff": "질문 표적 = fantasy와의 '차이'. 'just as … fantasy — but …' 뒤가 차이. social issues는 작가들의 활용 목적",
+   "rule": "distinguish 질문 → 비교 대상이 함께 언급된 문장의 but 뒤",
+   "causeAI": "true-but-irrelevant"
+  },
+  {
+   "id": "T2-L7",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Sociology Talk — Socialization",
+   "qtype": "Detail",
+   "skill": "CATCH",
+   "skills2": [
+    "BIND"
+   ],
+   "audio": "o-t2-social",
+   "stem": "According to the speaker, what is often considered to be the primary agent of socialization?",
+   "options": [
+    "Schools",
+    "Media",
+    "Peer groups",
+    "Family"
+   ],
+   "my": 0,
+   "correct": 3,
+   "evidence": "Family is often considered the primary, the most fundamental agent of socialization",
+   "trap": "Schools play a significant role도 '중요하다'는 신호처럼 들림",
+   "diff": "primary / the most fundamental = Family. School은 significant role",
+   "rule": "the primary / the most + 형용사 = 최상급 신호 → 그 주어를 노트에 ★",
+   "causeAI": "강조 신호 미포착"
+  },
+  {
+   "id": "T2-L8",
+   "test": "TPO2",
+   "sec": "L",
+   "set": "Sociology Talk — Socialization",
+   "qtype": "Detail",
+   "skill": "BIND",
+   "skills2": [],
+   "audio": "o-t2-social",
+   "stem": "According to the speaker, peer groups allow individuals to",
+   "options": [
+    "learn basic norms and values",
+    "learn social norms through structured play",
+    "explore their identities outside of the family context",
+    "gain a sense of morality and community belonging"
+   ],
+   "my": 3,
+   "correct": 2,
+   "evidence": "Peer groups … allow individuals to develop interpersonal skills and, importantly, to explore and shape their identities outside of the family context",
+   "trap": "morality and community belonging은 강의에 실제로 나옴",
+   "diff": "morality/community = Religion의 특징. Peers = identity outside family",
+   "rule": "기관 5개 → 노트 5줄: Family/School/Peers/Media/Religion 각각 특징 2단어",
+   "causeAI": "다른 대상(Religion)의 특징 연결"
+  },
+  {
+   "id": "T3-R1",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Cognition C-Test",
+   "qtype": "C-Test",
+   "skill": "FORM",
+   "skills2": [],
+   "ctest": {
+    "text": "Cognition and consciousness are pivotal subjects in the exploration and study of the human mind. Cognition {{}} the mental mechanisms for acquiring and comprehending knowledge, encompassing perception and decision-making.",
+    "prefix": "invol",
+    "answer": "involves"
+   },
+   "my": "involved",
+   "evidence": "주어 Cognition(단수) 뒤 본동사 자리, 일반적 정의(현재)",
+   "trap": "involved는 흔한 형태라 시각적으로 자연스러움",
+   "diff": "be동사 없이 involved는 수동 불가, 과거 사건도 아님 → 현재 3인칭 단수 involves",
+   "rule": "주어 뒤 첫 동사 자리 = 본동사. 정의·일반 사실 → 현재형, 단수 주어 → -s",
+   "causeAI": "본동사 시제·수일치 미결정"
+  },
+  {
+   "id": "T3-R2",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Cognition C-Test",
+   "qtype": "C-Test",
+   "skill": "FORM",
+   "skills2": [
+    "WORD"
+   ],
+   "ctest": {
+    "text": "Cognition involves the mental mechanisms for acquiring and {{}} knowledge, encompassing perception and decision-making.",
+    "prefix": "compre",
+    "answer": "comprehending"
+   },
+   "my": "compremention",
+   "evidence": "for acquiring and ___ knowledge — and 병렬",
+   "trap": "comprehension(명사)을 떠올렸을 가능성 (AI 추정)",
+   "diff": "and 앞 acquiring(V-ing)과 같은 형태 + 뒤에 목적어 knowledge → comprehending",
+   "rule": "and/or 뒤 빈칸 → 앞쪽과 같은 형태 (병렬)",
+   "causeAI": "병렬 구조 미활용 + 어형 혼동"
+  },
+  {
+   "id": "T3-R3",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Cognition C-Test",
+   "qtype": "C-Test",
+   "skill": "FORM",
+   "skills2": [],
+   "ctest": {
+    "text": "Cognition involves the mental mechanisms for acquiring and comprehending knowledge, {{}} perception and decision-making.",
+    "prefix": "encompas",
+    "answer": "encompassing"
+   },
+   "my": "encompasses",
+   "evidence": "본동사 involves가 이미 있음 + 콤마 뒤 접속사 없음",
+   "trap": "Cognition encompasses perception 만 떼어 보면 의미상 자연스러움",
+   "diff": "접속사 없이 두 번째 본동사 불가 → 분사 encompassing",
+   "rule": "본동사가 이미 있으면 콤마 뒤 빈칸 = V-ing / p.p.",
+   "causeAI": "뜻은 맞지만 자리가 틀린 형태"
+  },
+  {
+   "id": "T3-R4",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Daily Life — urgent queries",
+   "qtype": "Phrase meaning",
+   "skill": "WORD",
+   "skills2": [],
+   "passage": "David Nguyen (2:15 P.M.) I will be out of the office on Thursday but will complete my tasks before then. I'll also be available via e-mail for any urgent queries the team may have.",
+   "stem": "What does the phrase \"urgent queries\" most likely mean in this context?",
+   "options": [
+    "Problems the client may have with the project",
+    "Concerns the client wants addressed",
+    "Complaints team members may have",
+    "Questions the team needs answers to right away"
+   ],
+   "my": 2,
+   "correct": 3,
+   "evidence": "available via e-mail for any urgent queries the team may have",
+   "trap": "업무 상황의 urgent 메시지 = 문제·불만이라는 연상 (AI 추정)",
+   "diff": "query = question/inquiry. 메일로 '답해 줄 수 있다' → 질문",
+   "rule": "단어의 범주(질문 vs 불만 vs 문제)를 먼저 맞춘다",
+   "causeAI": "query 의미 범주 혼동 (어휘를 몰랐다는 기록은 없음)"
+  },
+  {
+   "id": "T3-R5",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "The Science of Sleep",
+   "qtype": "Insert Text",
+   "skill": "ROLE",
+   "skills2": [],
+   "passage": "One of the key functions of sleep is to support cognitive processes. During sleep, the brain processes and consolidates information acquired throughout the day, which enhances learning and problem-solving abilities. Studies have shown that lack of sleep can impair cognitive performance, leading to difficulties in concentration, decision-making, and memory. [■ 내가 고른 위치로 분석됨]\n\nDespite its importance, many people do not get enough sleep due to various factors such as stress, lifestyle choices, and medical conditions. Chronic sleep deprivation is linked to a range of health issues, including obesity, diabetes, cardiovascular diseases, and weakened immune function. [■ 분석상 적합] Therefore, prioritizing good sleep hygiene and addressing sleep disorders are essential for maintaining overall health and well-being.",
+   "stem": "Insert: \"Sticking to a consistent sleep schedule is one way to achieve restful sleep, while cognitive-behavioral therapy may help those with severe issues.\"",
+   "options": [
+    "2문단 끝 (memory 뒤)",
+    "3문단 health issues 뒤, Therefore 앞"
+   ],
+   "my": 0,
+   "correct": 1,
+   "gaps": [
+    "공식 정답 위치가 화면에 표시되지 않음 — 정답은 기존 해설의 분석",
+    "사용자 선택 위치도 해설 기준"
+   ],
+   "evidence": "문제(수면 부족·건강 문제) → [해결책] → Therefore 결론",
+   "trap": "sleep 단어가 반복되어 2문단에도 표면적으로 붙어 보임",
+   "diff": "삽입문의 기능 = 해결책. 2문단은 수면의 '기능' 설명이라 해결책이 올 자리 아님",
+   "rule": "삽입문 기능 태그(해결책) → 해결할 '문제'가 바로 앞에 있는 자리",
+   "causeAI": "담화 기능보다 표면 키워드 연관"
+  },
+  {
+   "id": "T3-R6",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Human Heart C-Test",
+   "qtype": "C-Test",
+   "skill": "FORM",
+   "skills2": [],
+   "ctest": {
+    "text": "The heart works {{}} to keep circulation efficient.",
+    "prefix": "contin",
+    "answer": "continuously"
+   },
+   "my": "continueous",
+   "evidence": "works(자동사) 뒤 = 동사를 꾸미는 부사 자리",
+   "trap": "continuous 철자와 혼합",
+   "diff": "동사 works를 꾸미므로 부사 -ly: continuously",
+   "rule": "동사(+목적어) 뒤 빈칸이 방식·정도 → 부사 -ly",
+   "causeAI": "부사 자리 판정 + 철자 혼동"
+  },
+  {
+   "id": "T3-R7",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Human Heart C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "…ensuring that arteries carry oxygenated blood away from the organs while {{}} return it to the heart.",
+    "prefix": "ve",
+    "answer": "veins"
+   },
+   "my": "vents",
+   "evidence": "arteries … while ___ return it to the heart — 동맥 ↔ 정맥 대조",
+   "trap": "ve- 로 시작하는 익숙한 단어 vents (AI 추정)",
+   "diff": "while이 arteries(동맥)와 대조 → veins(정맥). vent는 환기구",
+   "rule": "while/whereas 대조 → 짝 개념(동맥↔정맥)을 떠올린다",
+   "causeAI": "어휘 쌍 미활용"
+  },
+  {
+   "id": "T3-R8",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Human Heart C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "The heart works continuously to keep circulation efficient, ensuring that arteries {{}} oxygenated blood away from the organs.",
+    "prefix": "ca",
+    "answer": "carry"
+   },
+   "my": "catch",
+   "evidence": "___ oxygenated blood away from — 운반",
+   "trap": "catch도 ca- 로 시작하는 동사라 문법적으로는 들어감",
+   "diff": "blood + away from → 운반 = carry. catch blood는 의미가 안 됨",
+   "rule": "동사 빈칸: 목적어 + 방향 부사(away from)와 의미가 맞는지 검증",
+   "causeAI": "collocation 검증 누락"
+  },
+  {
+   "id": "T3-R9",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Traffic Psychology",
+   "qtype": "Author's Purpose",
+   "skill": "ROLE",
+   "skills2": [
+    "AUDIT"
+   ],
+   "passage": "Studies by traffic psychologists show that varying stress levels among drivers contribute to inconsistent driving patterns. Stressful events, like being late for work or facing a tight schedule, can cause drivers to make erratic decisions, impacting traffic flow. Drivers tend to react differently to traffic signals depending on their psychological state. A calm driver is likely to maintain a steady speed, while a stressed driver may frequently change lanes or speed up abruptly.",
+   "stem": "Why does the author mention a \"calm driver\" and a \"stressed driver\"?",
+   "options": [
+    "To illustrate the impact of varying states of mind on reactions to traffic signals",
+    "To suggest that calm drivers should be willing to take more risks than they typically do",
+    "To argue that stressful driving leads to unnecessarily hazardous road conditions",
+    "To suggest that calmness and stressfulness are both caused by increasing problems with the oversight of traffic patterns"
+   ],
+   "my": 2,
+   "correct": 0,
+   "evidence": "Drivers tend to react differently to traffic signals depending on their psychological state.",
+   "trap": "stressed driver의 급차선 변경이 '위험'으로 연상됨",
+   "diff": "두 운전자 모두를 설명하는 건 A. C는 stressed만 + 본문에 없는 '위험한 도로' 결론",
+   "rule": "예시 바로 앞의 일반 진술 = 목적. 예시보다 큰 결론 금지",
+   "causeAI": "한 단계 더 나간 결론 선택"
+  },
+  {
+   "id": "T3-R10",
+   "test": "TPO3",
+   "sec": "R",
+   "set": "Traffic Psychology",
+   "qtype": "Insert Text",
+   "skill": "ROLE",
+   "skills2": [],
+   "passage": "Traffic flow is often analyzed through mathematical models, but human psychology plays a significant role in driving behavior. ■A Drivers' perceptions of time and stress levels can influence traffic conditions. ■B Impatience in congested areas often leads to aggressive driving, worsening traffic jams. Interestingly, phantom traffic jams occur without any apparent cause. ■C These are triggered by small disruptions, such as a single driver braking suddenly, leading to a ripple effect. ■D",
+   "stem": "Insert: \"In short, the motorist can inadvertently create delays for other drivers and contribute to broader traffic problems.\"",
+   "options": [
+    "A",
+    "B",
+    "C",
+    "D"
+   ],
+   "my": null,
+   "correct": 3,
+   "gaps": [
+    "사용자 선택 위치 UNKNOWN"
+   ],
+   "evidence": "a single driver braking suddenly, leading to a ripple effect → In short, the motorist…",
+   "trap": "UNKNOWN",
+   "diff": "In short = 바로 앞 내용 요약. the motorist = a single driver, delays for others = ripple effect",
+   "rule": "In short / This + 명사 → 받아 줄 내용이 바로 앞에 있는 자리",
+   "causeAI": "판단 불가 (선택 위치 없음)"
+  },
+  {
+   "id": "T3-L1",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t3-client",
+   "stem": "Choose the best response.",
+   "options": [
+    "No, it wasn't.",
+    "Finally, after multiple tries.",
+    "Yes, later this afternoon.",
+    "You've got a good point."
+   ],
+   "my": 2,
+   "correct": 1,
+   "evidence": "Were you able to…? = 이미 시도했는가(과거 결과)",
+   "trap": "Yes로 시작해서 긍정 답처럼 들림",
+   "diff": "later this afternoon = 미래 계획. 과거 결과 질문과 시간축 불일치",
+   "rule": "Were you able…? → 과거 결과로 답하는 응답",
+   "causeAI": "시간축 불일치"
+  },
+  {
+   "id": "T3-L2",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t3-art",
+   "stem": "Choose the best response.",
+   "options": [
+    "Yes, it was me.",
+    "You bet.",
+    "I appreciate the offer.",
+    "No, you're right."
+   ],
+   "my": 2,
+   "correct": 1,
+   "evidence": "Can you help me…? = 요청",
+   "trap": "I appreciate the offer도 자연스러운 영어",
+   "diff": "요청을 받은 사람 → 수락/거절. I appreciate the offer는 '제안을 받은' 사람의 말 (역할 반대)",
+   "rule": "Can you help me…? → You bet / Sure / Sorry, I can't",
+   "causeAI": "발화 기능(요청↔제안) 혼동"
+  },
+  {
+   "id": "T3-L3",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t3-seminar",
+   "stem": "Choose the best response.",
+   "options": [
+    "We still have a couple of hours.",
+    "In the main hall.",
+    "Long after.",
+    "Next speaker."
+   ],
+   "my": 2,
+   "correct": 0,
+   "evidence": "When should we be there? = 언제 도착해야 하나",
+   "trap": "Long after도 시간 표현처럼 들림",
+   "diff": "Long after는 기준점 없이 응답이 안 됨. 정답은 지금 기준 남은 시간",
+   "rule": "When → 시점 또는 남은 시간. 시간 단어만 있다고 답이 아님",
+   "causeAI": "시간 응답 형식 판단 실패"
+  },
+  {
+   "id": "T3-L4",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t3-lunch",
+   "stem": "Choose the best response.",
+   "options": [
+    "Do you know a good place?",
+    "Sure, here you go.",
+    "Sounds perfect.",
+    "Yes, we do."
+   ],
+   "my": 0,
+   "correct": 2,
+   "evidence": "Let's… = 제안, 장소(that new place)는 이미 정해짐",
+   "trap": "lunch·place 같은 주제어가 있는 응답",
+   "diff": "제안 → 수락/거절. 장소는 이미 that new place로 지정",
+   "rule": "Let's… → Sounds good / I'd love to / Maybe another time",
+   "causeAI": "주제어 일치 함정"
+  },
+  {
+   "id": "T3-L5",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t3-never",
+   "stem": "Choose the best response.",
+   "options": [
+    "Never mind.",
+    "Yes, before it's too late.",
+    "Same here.",
+    "Same to you."
+   ],
+   "my": 0,
+   "correct": 2,
+   "evidence": "I've never seen anything like this = 감상(놀람)",
+   "trap": "never가 들려서 Never mind와 소리가 연결됨 (AI 추정)",
+   "diff": "Same here = 나도 그래(동감). Never mind = 신경 쓰지 마/됐어. Same to you = 인사 돌려주기",
+   "rule": "감상·경험 → 동감/반응",
+   "causeAI": "반응 표현 의미 구별 + 소리 겹침"
+  },
+  {
+   "id": "T3-L6",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t3-exhibition",
+   "stem": "Choose the best response.",
+   "options": [
+    "I'm sorry I missed it.",
+    "Oh, is it that soon?",
+    "I really don't know.",
+    "I hope we do."
+   ],
+   "my": 0,
+   "correct": 1,
+   "evidence": "starts on Saturday = 아직 시작 전 (미래)",
+   "trap": "exhibition에 대한 자연스러운 감정 표현",
+   "diff": "missed it = 이미 지난 일. 미래 행사에 과거 반응",
+   "rule": "소식 → 시간축 일치하는 반응 (미래 → that soon? / can't wait)",
+   "causeAI": "시간축 불일치"
+  },
+  {
+   "id": "T3-L7",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Announcement",
+   "qtype": "Detail (변화)",
+   "skill": "TARGET",
+   "skills2": [
+    "CATCH"
+   ],
+   "audio": "o-t3-grading",
+   "stem": "What significant change has been made to the grading of group projects?",
+   "options": [
+    "Group grades for projects",
+    "Requirement for equal contributions",
+    "Individual grades based on contributions",
+    "Required meetings with the professor"
+   ],
+   "my": 0,
+   "correct": 2,
+   "evidence": "Instead of one grade for the whole group, each of you will get your own grade based on what you contribute",
+   "trap": "group grade는 음성에 실제로 나옴",
+   "diff": "Instead of A, B → A = 옛 방식, B = 바뀐 것. 질문은 change",
+   "rule": "change 질문 + instead of → 뒤쪽(B)",
+   "causeAI": "old/new 구분 실패"
+  },
+  {
+   "id": "T3-L8",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Philosophy Talk — Existentialism",
+   "qtype": "Detail (정의)",
+   "skill": "CATCH",
+   "skills2": [
+    "AUDIT"
+   ],
+   "audio": "o-t3-absurd",
+   "stem": "How does the speaker describe the absurd in the context of existentialism?",
+   "options": [
+    "The silence between characters in a play",
+    "The rejection of traditional values",
+    "The conflict between meaning and chaos",
+    "The tendency to overthink life's purpose"
+   ],
+   "my": 1,
+   "correct": 2,
+   "evidence": "It describes the conflict between our deep desire for meaning and the indifferent, chaotic nature of the universe.",
+   "trap": "rejection of traditional values는 실존주의와 연상되는 추상 표현",
+   "diff": "정답은 정의 문장의 거의 그대로 바꿔 말하기 (meaning + chaos + conflict)",
+   "rule": "describes / refers to / is defined as → 정의 문장을 노트에 2~3단어",
+   "causeAI": "정의 신호 미포착 (배경지식 사용 여부는 기록 없음)"
+  },
+  {
+   "id": "T3-L9",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t3-lounge",
+   "stem": "Choose the best response.",
+   "options": [
+    "We provide it.",
+    "Sorry, I can't.",
+    "Exactly.",
+    "It's in the corner."
+   ],
+   "my": 2,
+   "correct": 1,
+   "evidence": "Can you help me…? = 요청",
+   "trap": "Exactly는 긍정처럼 들림",
+   "diff": "Exactly = 상대 '주장'에 동의. 요청에는 수락/거절",
+   "rule": "요청 → 수락/거절 (T3-L2와 같은 패턴 재발)",
+   "causeAI": "발화 기능 혼동"
+  },
+  {
+   "id": "T3-L10",
+   "test": "TPO3",
+   "sec": "L",
+   "set": "Philosophy Talk — Existentialism",
+   "qtype": "UNKNOWN",
+   "skill": "UNKNOWN",
+   "skills2": [],
+   "stem": "UNKNOWN (Q4 탭이 빨간색으로 표시됨)",
+   "my": null,
+   "correct": null,
+   "gaps": [
+    "질문·선택지·정답·내 답 모두 기록 없음 — 분석에서 제외"
+   ],
+   "evidence": "",
+   "trap": "",
+   "diff": "",
+   "rule": "",
+   "causeAI": "분석 불가"
+  },
+  {
+   "id": "T4-R1",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "Prehistoric Food C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "Archaeologists study remains such as animal bones, plant {{}}, and culinary tools to understand what ancient people ate and how they acquired their food.",
+    "prefix": "resi",
+    "answer": "residue"
+   },
+   "my": "resident",
+   "evidence": "remains such as animal bones, plant ___, and culinary tools — 고고학 '잔존물' 목록",
+   "trap": "resi- 로 시작하는 가장 익숙한 단어 (AI 추정)",
+   "diff": "plant resident = 식물 거주자(?!). 목록은 유물·잔해 → residue(잔여물)",
+   "rule": "완성한 단어를 앞 단어와 붙여 '구'로 번역해 본다",
+   "causeAI": "형태 유사어 + 구 의미 미검증"
+  },
+  {
+   "id": "T4-R2",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "Prehistoric Food C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "Archaeologists study remains such as animal bones, plant residue, and {{}} tools to understand what ancient people ate.",
+    "prefix": "culi",
+    "answer": "culinary"
+   },
+   "my": null,
+   "gaps": [
+    "빈칸이 비어 있음 — 입력값 UNKNOWN"
+   ],
+   "evidence": "___ tools to understand what ancient people ate — 음식 관련 도구",
+   "trap": "UNKNOWN",
+   "diff": "culinary = 요리의. culinary tools = 조리 도구",
+   "rule": "명사 앞 형용사 + 문장 주제(food)와 연결",
+   "causeAI": "단어 복원 실패 (몰랐는지는 기록 없음)"
+  },
+  {
+   "id": "T4-R3",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "Deserts C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "Deserts are known for their hot and dry conditions. They {{}} very little rainfall, which makes it hard for living things to survive.",
+    "prefix": "rec",
+    "answer": "receive"
+   },
+   "my": null,
+   "gaps": [
+    "빈칸이 비어 있음 — 입력값 UNKNOWN"
+   ],
+   "evidence": "They ___ very little rainfall — 주어 뒤 본동사 + rainfall 목적어",
+   "trap": "UNKNOWN",
+   "diff": "receive rainfall = 비가 내리다 (강수량을 받다)",
+   "rule": "주어 뒤 본동사 + 목적어(rainfall)와 결합하는 동사",
+   "causeAI": "철자/결합 복원 실패 (원인 불명)"
+  },
+  {
+   "id": "T4-R4",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "Deserts C-Test",
+   "qtype": "C-Test",
+   "skill": "WORD",
+   "skills2": [],
+   "ctest": {
+    "text": "They receive very little rainfall, which makes it hard for living {{}} to survive.",
+    "prefix": "thi",
+    "answer": "things"
+   },
+   "my": null,
+   "gaps": [
+    "빈칸이 비어 있음 — 입력값 UNKNOWN"
+   ],
+   "evidence": "hard for living ___ to survive — for + 명사(복수) + to V",
+   "trap": "UNKNOWN",
+   "diff": "living things = 생명체",
+   "rule": "for + ___ + to V → 의미상 주어 명사",
+   "causeAI": "고정 표현 복원 실패 (원인 불명)"
+  },
+  {
+   "id": "T4-R5",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "Daily Life — Product Launch",
+   "qtype": "Inference (수신자)",
+   "skill": "AUDIT",
+   "skills2": [
+    "BIND"
+   ],
+   "passage": "Subject: kick-off\n\nDear Ms. Garcia,\nAt Ultrasmart Wearables, we are excited to announce the launch of our new product line on next Monday. Please join us for the kick-off event which will be held from 10:00 A.M. to 6:00 P.M. at the Innovation Center, 45 Oak Road. The program will feature product demonstrations, guest speakers, and two Q&A sessions with panel participants. Complimentary refreshments will be provided. All retailers attending the event will have the opportunity to purchase a bulk shipment of our GQX smart watches at a 20 percent discount, so don't miss out.\nPlease RSVP by Friday.\nDaniel Lee, Ultrasmart Wearables",
+   "stem": "Who most likely is Ms. Garcia?",
+   "options": [
+    "A person who wears a recently purchased smartwatch",
+    "A person who sells smartwatches",
+    "A guest speaker at an event",
+    "A member of a support team"
+   ],
+   "my": 0,
+   "correct": 1,
+   "evidence": "All retailers attending the event will have the opportunity to purchase a bulk shipment",
+   "trap": "메일 전체가 스마트워치 이야기",
+   "diff": "recently purchased·wears에 대한 근거 0. 초대 대상 = retailers(소매업자) + bulk shipment(대량 구매)",
+   "rule": "Who most likely: 수신자에게 '제공되는 것'(대량 할인 구매)이 수신자의 역할을 알려준다",
+   "causeAI": "근거 없는 요소(recently purchased) 미검증"
+  },
+  {
+   "id": "T4-R6",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "The Impact of Glaciers",
+   "qtype": "Vocabulary",
+   "skill": "WORD",
+   "skills2": [],
+   "passage": "Scientists are actively studying glaciers to predict future changes and develop strategies to mitigate the impact that melting glaciers could have on the environment. Despite these efforts, the future of glaciers remains uncertain.",
+   "stem": "The word \"mitigate\" in the passage is closest in meaning to",
+   "options": [
+    "lessen",
+    "eliminate",
+    "understand",
+    "judge"
+   ],
+   "my": 1,
+   "correct": 0,
+   "evidence": "strategies to mitigate the impact … Despite these efforts, the future … remains uncertain",
+   "trap": "둘 다 '나쁜 영향에 대처'하는 방향",
+   "diff": "강도: mitigate = 줄이다(부분). eliminate = 완전히 없애다. 뒤 문장 'remains uncertain'도 완전 제거와 맞지 않음",
+   "rule": "비슷한 방향의 선택지 → 강도(전부/일부) 축으로 가른다",
+   "causeAI": "의미 방향은 맞고 강도를 놓침"
+  },
+  {
+   "id": "T4-R7",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "The Impact of Glaciers",
+   "qtype": "Author's Purpose",
+   "skill": "ROLE",
+   "skills2": [
+    "AUDIT"
+   ],
+   "passage": "The melting of glaciers also affects local ecosystems. Fresh water released from glaciers feeds rivers, impacting fish habitats and agriculture. In regions where glaciers are the primary water source, their decline can lead to severe water shortages.",
+   "stem": "Why does the author mention fish habitats?",
+   "options": [
+    "To highlight the importance of rivers fed by glaciers",
+    "To explain how the process of glacier formation affects fish species",
+    "To identify an ecosystem that has benefited from changes in glaciers",
+    "To suggest that fish habitats are not as impacted by changes in glaciers as agricultural sites are"
+   ],
+   "my": 1,
+   "correct": 0,
+   "evidence": "Fresh water released from glaciers feeds rivers, impacting fish habitats and agriculture.",
+   "trap": "glacier와 fish가 둘 다 들어 있는 선택지",
+   "diff": "본문은 '녹은 물 → 강 → 서식지'. 선택지는 glacier 'formation(형성)' — 과정이 바뀜",
+   "rule": "Purpose: 예시가 받쳐주는 문장(빙하가 강을 먹여 살림)을 찾고, 선택지의 과정 단어를 검증",
+   "causeAI": "소재 일치에 끌림 + formation 미검증"
+  },
+  {
+   "id": "T4-R8",
+   "test": "TPO4",
+   "sec": "R",
+   "set": "The Impact of Glaciers",
+   "qtype": "Insert Text",
+   "skill": "ROLE",
+   "skills2": [],
+   "passage": "The impact of glaciers on Earth's climate has come into sharp focus in recent decades. As global temperatures rise, glaciers are melting rapidly, which is reducing their reflective capacity and contributing to a rise in sea levels. ■A The melting of glaciers also affects local ecosystems. ■B Fresh water released from glaciers feeds rivers, impacting fish habitats and agriculture. ■C In regions where glaciers are the primary water source, their decline can lead to severe water shortages. ■D",
+   "stem": "Insert: \"This dynamic process is crucial for maintaining the balance of freshwater ecosystems.\"",
+   "options": [
+    "A",
+    "B",
+    "C",
+    "D"
+   ],
+   "my": null,
+   "correct": 2,
+   "gaps": [
+    "사용자 선택 위치 UNKNOWN"
+   ],
+   "evidence": "Fresh water released from glaciers feeds rivers … → This dynamic process",
+   "trap": "UNKNOWN",
+   "diff": "This dynamic process = 바로 앞 '담수가 강을 채우는 과정'. freshwater ecosystems도 연결",
+   "rule": "This + 명사 → 그 명사가 가리킬 내용이 직전 문장에 있어야 한다",
+   "causeAI": "지시 대상 미확인 (선택 위치 없음)"
+  },
+  {
+   "id": "T4-L1",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t4-library",
+   "stem": "Choose the best response.",
+   "options": [
+    "Sure, why not?",
+    "No problem!",
+    "I've already reserved my seat.",
+    "Our books are due tomorrow."
+   ],
+   "my": 0,
+   "correct": 2,
+   "evidence": "Isn't …? = 사실 확인(그렇지 않아?)",
+   "trap": "Sure, why not?도 긍정이라 자연스러워 보임",
+   "diff": "Sure, why not? = 제안·초대 수락. 사실 확인에는 그 사실을 전제로 한 답",
+   "rule": "Isn't/Didn't …? → 사실 확인 → 사실을 인정·부정하거나 그 사실을 전제로 답",
+   "causeAI": "사실 확인을 제안으로 분류"
+  },
+  {
+   "id": "T4-L2",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Conversation — coffee shop",
+   "qtype": "Inference",
+   "skill": "AUDIT",
+   "skills2": [],
+   "audio": "o-t4-coffee",
+   "stem": "What can be inferred about the study group mentioned by the speakers?",
+   "options": [
+    "It usually meets at the library.",
+    "It is meeting for the first time.",
+    "It does not meet on Saturdays.",
+    "The man is not a member."
+   ],
+   "my": 1,
+   "correct": 0,
+   "evidence": "we could go there for our study group on Saturday, … since the library is being renovated",
+   "trap": "새 카페 = 새로운 시작이라는 연상",
+   "diff": "'our study group' + 도서관 공사 때문에 장소 변경 → 원래 도서관에서 모임. 'first time' 근거 없음",
+   "rule": "Inference: 근거 문장 하나로 설명되는 최소한의 결론만",
+   "causeAI": "과잉 추론"
+  },
+  {
+   "id": "T4-L3",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Conversation — company picnic",
+   "qtype": "Detail (장소)",
+   "skill": "CATCH",
+   "skills2": [],
+   "audio": "o-t4-picnic",
+   "stem": "Where will the company picnic be held?",
+   "options": [
+    "Near the beach",
+    "On an island in a river",
+    "At a park",
+    "In the company parking lot"
+   ],
+   "my": 1,
+   "correct": 2,
+   "evidence": "we're going to have it at Lakeside Park",
+   "trap": "Lakeside(호숫가) → 물 관련 장소 연상 (AI 추정)",
+   "diff": "Lakeside Park → 핵심은 Park",
+   "rule": "장소 이름은 마지막 단어(Park/Hall/Center)가 유형",
+   "causeAI": "장소명 포착 실패 (원인 미확인)"
+  },
+  {
+   "id": "T4-L4",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Conversation — photography club",
+   "qtype": "Purpose",
+   "skill": "CATCH",
+   "skills2": [
+    "AUDIT"
+   ],
+   "audio": "o-t4-photo",
+   "stem": "Why does the man want to join a photography club?",
+   "options": [
+    "To sell his photos",
+    "To learn more",
+    "To buy equipment",
+    "To travel and take photos"
+   ],
+   "my": 3,
+   "correct": 1,
+   "evidence": "I'm looking for a place to learn more and meet other photography enthusiasts.",
+   "trap": "사진 ↔ 여행 연상, landscape photography",
+   "diff": "목적 신호 I'm looking for… 바로 뒤 = learn more. travel은 언급 없음",
+   "rule": "Why join? → I'm looking for / I want to / I'm hoping to 뒤",
+   "causeAI": "초반 목적 신호 미포착"
+  },
+  {
+   "id": "T4-L5",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Business Talk — Leadership",
+   "qtype": "Detail",
+   "skill": "BIND",
+   "skills2": [],
+   "audio": "o-t4-leadership",
+   "stem": "According to the talk, what do transformational leaders focus on?",
+   "options": [
+    "Correcting mistakes",
+    "Rewarding performance",
+    "Providing an inspirational vision",
+    "Prioritizing employee needs"
+   ],
+   "my": 0,
+   "correct": 2,
+   "evidence": "Transformational leaders focus on inspiring and motivating their team by setting a vision",
+   "trap": "Correcting mistakes는 강의에 실제로 나옴",
+   "diff": "correcting mistakes = Transactional. Transformational = vision·inspire",
+   "rule": "유형 3개 → 노트 3줄. 특징을 이름 옆에",
+   "causeAI": "다른 유형의 특징 연결"
+  },
+  {
+   "id": "T4-L6",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Business Talk — Leadership",
+   "qtype": "Detail",
+   "skill": "BIND",
+   "skills2": [],
+   "audio": "o-t4-leadership",
+   "stem": "Which leadership style cares about the employees the most?",
+   "options": [
+    "Transformational",
+    "Transactional",
+    "Servant",
+    "Emotional"
+   ],
+   "my": 1,
+   "correct": 2,
+   "evidence": "Servant leadership prioritizes the needs of employees",
+   "trap": "transactional도 leader-follower 관계를 말함",
+   "diff": "prioritizes the needs of employees = Servant",
+   "rule": "질문의 핵심어(cares about employees)를 노트의 특징 줄에서 찾고 그 줄의 이름을 고른다",
+   "causeAI": "유형-특징 결합 실패"
+  },
+  {
+   "id": "T4-L7",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "History Talk — Tea",
+   "qtype": "Detail",
+   "skill": "CATCH",
+   "skills2": [
+    "AUDIT"
+   ],
+   "audio": "o-t4-tea",
+   "stem": "What does a legend say about tea?",
+   "options": [
+    "Tea was discovered by chance.",
+    "Tea was originally developed by two Chinese doctors.",
+    "Drinking tea helped an ordinary person become an emperor.",
+    "Drinking tea was not originally pleasant."
+   ],
+   "my": 1,
+   "correct": 0,
+   "evidence": "Legend has it that Emperor Shen Nong discovered tea accidentally",
+   "trap": "medicinal drink → 의사 연상 (AI 추정)",
+   "diff": "accidentally = by chance. 의사 두 명은 언급 없음",
+   "rule": "Legend has it that… 뒤 문장이 전설 내용. How(accidentally)까지 잡는다",
+   "causeAI": "직접 정보 미포착 + 근거 없는 요소"
+  },
+  {
+   "id": "T4-L8",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "History Talk — Tea",
+   "qtype": "Detail",
+   "skill": "BIND",
+   "skills2": [],
+   "audio": "o-t4-tea",
+   "stem": "How did the British East India Company contribute to the history of tea?",
+   "options": [
+    "It promoted tea as a medicinal drink.",
+    "It introduced the Japanese tea ceremony to Britain.",
+    "It was responsible for importing tea into Europe.",
+    "It created the first tea bags."
+   ],
+   "my": 3,
+   "correct": 2,
+   "evidence": "The British East India Company played a significant role in importing tea",
+   "trap": "tea bags도 강의 후반에 나옴",
+   "diff": "tea bags는 '오늘날의 형태' 목록. 동인도회사 = importing",
+   "rule": "역사 강의: 시기 · 장소 · 주체 · 한 일을 한 줄로",
+   "causeAI": "주체-역할 결합 실패"
+  },
+  {
+   "id": "T4-L9",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "History Talk — Tea",
+   "qtype": "Inference",
+   "skill": "TARGET",
+   "skills2": [
+    "CATCH"
+   ],
+   "audio": "o-t4-tea",
+   "stem": "What does the speaker indicate about innovations in tea culture?",
+   "options": [
+    "They have decreased the price of tea.",
+    "They combine different kinds of tea.",
+    "They have increased the popularity of tea among some groups.",
+    "Some of them took about eighty years to develop."
+   ],
+   "my": 1,
+   "correct": 2,
+   "evidence": "innovations like bubble tea … has become trendy, especially with young people",
+   "trap": "bubble tea → 여러 차를 섞는다는 상식 연상 (AI 추정)",
+   "diff": "질문 = 혁신에 대해 '화자가 말한 것' → 결과(젊은 층에 유행). 섞는다는 말은 없음",
+   "rule": "indicate 질문 → 화자가 실제로 붙인 평가(trendy, especially with…)를 찾는다",
+   "causeAI": "질문 표적(화자의 진술) 대신 배경 연상"
+  },
+  {
+   "id": "T4-L10",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Listen & Reply",
+   "qtype": "Listen & Reply",
+   "skill": "ACT",
+   "skills2": [],
+   "audio": "o-t4-audit",
+   "stem": "Choose the best response.",
+   "options": [
+    "Sure, I'll organize it.",
+    "No, I'll vote later.",
+    "Is it committee work?",
+    "I'm a bit stretched right now."
+   ],
+   "my": 2,
+   "correct": 3,
+   "evidence": "Would you like to join…? = 초대·제안",
+   "trap": "committee라는 같은 단어가 들어간 응답",
+   "diff": "참여 의사를 물음 → 수락/거절. I'm a bit stretched = 여유가 없다(간접 거절)",
+   "rule": "Would you like to…? → 수락/거절/조건. 같은 단어 반복 응답은 의심",
+   "causeAI": "be stretched 표현 + 기능 판단 (어느 쪽인지 미확인)"
+  },
+  {
+   "id": "T4-L11",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Conversation — gym",
+   "qtype": "Next Action",
+   "skill": "CATCH",
+   "skills2": [],
+   "audio": "o-t4-gym",
+   "stem": "What will the man most likely do next?",
+   "options": [
+    "Ask about a policy",
+    "Make a phone call",
+    "Check a website",
+    "Hire a personal trainer"
+   ],
+   "my": 1,
+   "correct": 2,
+   "evidence": "I'll look online and see if there are any spots still available.",
+   "trap": "자리 확인 = 전화도 가능한 상식적 행동",
+   "diff": "look online = 웹사이트 확인",
+   "rule": "Next action → 마지막 I'll… 문장의 동사",
+   "causeAI": "마지막 계획 문장 미포착"
+  },
+  {
+   "id": "T4-L12",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Env. Science Talk — Urban Heat Island",
+   "qtype": "Main Idea",
+   "skill": "TARGET",
+   "skills2": [],
+   "audio": "o-t4-heat",
+   "stem": "What is the main topic of the talk?",
+   "options": [
+    "The costs of urban living to the overall environment",
+    "The phenomenon in which cities experience higher temperatures than rural areas",
+    "The evolution of plant life in urban ecosystems",
+    "The risks climate change poses to city energy systems"
+   ],
+   "my": 3,
+   "correct": 1,
+   "evidence": "We now turn to the phenomenon of the urban heat island effect. This occurs when urban areas experience higher temperatures than their rural surroundings.",
+   "trap": "energy consumption은 '결과' 부분에 실제로 나옴",
+   "diff": "main topic = 첫 문장의 'We now turn to…' + 정의. energy는 결과 중 하나",
+   "rule": "Main idea: 도입의 We now turn to / Today we'll + 강의 전체를 덮는가 확인",
+   "causeAI": "세부 결과를 주제로 선택"
+  },
+  {
+   "id": "T4-L13",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "Env. Science Talk — Urban Heat Island",
+   "qtype": "Inference",
+   "skill": "BIND",
+   "skills2": [],
+   "audio": "o-t4-heat",
+   "stem": "What does the speaker suggest is true about green roofs?",
+   "options": [
+    "They cause residents to increase their energy consumption.",
+    "They are best when built with materials like asphalt, concrete, and brick.",
+    "They store heat during the day and release it at night.",
+    "They contribute to a cooling effect in cities."
+   ],
+   "my": 2,
+   "correct": 3,
+   "evidence": "How do we mitigate the urban heat island effect? … implement so-called green roofs",
+   "trap": "store heat … release it at night는 강의에 실제로 나옴",
+   "diff": "store/release heat = asphalt·concrete(원인). green roofs = 해결책(냉각)",
+   "rule": "대상마다 '원인인가 해결책인가'도 함께 표시",
+   "causeAI": "다른 대상(건축 재료)의 특징 연결"
+  },
+  {
+   "id": "T4-L14",
+   "test": "TPO4",
+   "sec": "L",
+   "set": "History Talk — Industrial Revolution",
+   "qtype": "Detail (연도)",
+   "skill": "BIND",
+   "skills2": [
+    "CATCH"
+   ],
+   "audio": "o-t4-industrial",
+   "stem": "What is the significance of the year 1760 to the Industrial Revolution?",
+   "options": [
+    "The greatest milestones of the Industrial Revolution occurred in 1760.",
+    "The Industrial Revolution began in Great Britain around 1760.",
+    "The Industrial Revolution reached Continental Europe around 1760.",
+    "The year 1760 marks the beginning of the labor movement in Europe."
+   ],
+   "my": 0,
+   "correct": 1,
+   "evidence": "The Industrial Revolution started in Great Britain around 1760",
+   "trap": "milestone(spinning jenny)과 1769 증기기관이 이어서 나옴",
+   "diff": "1760 = 시작(started). 1769 = Watt 증기기관. milestone은 다른 사건",
+   "rule": "숫자는 반드시 사건과 쌍으로: 1760-시작, 1769-증기기관",
+   "causeAI": "연도-사건 결합 실패"
+  }
+ ]
+}
