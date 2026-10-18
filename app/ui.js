@@ -176,6 +176,7 @@
       h('ul', { class: 'skills' }, table.map(r => h('li', { onclick: () => go('#/skill/' + r.skill.id) },
         h('span', { class: 'sname' }, r.skill.name), chip(r.st.state), dots(r.st.recent))))));
 
+    if (Store.lastError) main.append(h('p', { class: 'notice' }, '이 브라우저에 기록을 저장하지 못하고 있습니다 (사생활 보호 모드 등). 설정 → 내보내기로 백업하세요. ', Store.lastError));
     if (D.attempts.length >= 20 && (!D.lastBackup || now() - D.lastBackup > 7 * E.DAY)) {
       main.append(h('p', { class: 'notice' }, '학습 기록을 7일 넘게 백업하지 않았어요. ', h('a', { href: '#/settings' }, '내보내기')));
     }
@@ -454,11 +455,31 @@
     main.append(h('button', { class: 'primary', onclick: next }, '다음'));
   }
 
+  // In-page form instead of prompt(): the artifact viewer blocks browser dialogs.
   function flagLink(it) {
-    return h('button', { class: 'link small muted', onclick: e => {
-      const why = prompt('이 문제의 문제점 (정답이 둘, 근거 부족 등)');
-      if (why) { D.flags[it.id] = why; save(); e.target.textContent = '신고됨 — 이 문항은 지표에서 제외됩니다'; }
-    } }, D.flags[it.id] ? '신고됨' : '문제 오류 신고');
+    if (D.flags[it.id]) return h('p', { class: 'small muted' }, '신고됨 — 이 문항은 지표에서 제외됩니다');
+    const wrap = h('div', { class: 'flag' });
+    const open = h('button', { class: 'link small muted', onclick: () => {
+      const inp = h('input', { id: 'flag-' + it.id, placeholder: '문제점 (정답이 둘, 근거 부족 등)' });
+      open.replaceWith(h('div', { class: 'row' }, inp, h('button', { class: 'ghost', onclick: () => {
+        if (!inp.value.trim()) { inp.focus(); return; }
+        D.flags[it.id] = inp.value.trim(); save();
+        wrap.replaceChildren(h('p', { class: 'small muted' }, '신고됨 — 이 문항은 지표에서 제외됩니다'));
+      } }, '신고')));
+      inp.focus();
+    } }, '문제 오류 신고');
+    wrap.append(open);
+    return wrap;
+  }
+
+  // Two-step button instead of confirm(): first press arms it, second press acts.
+  function confirmButton(label, armedLabel, cls, onConfirm) {
+    let armed = false;
+    const b = h('button', { class: cls, onclick: () => {
+      if (!armed) { armed = true; b.textContent = armedLabel; b.classList.add('armed'); setTimeout(() => { if (armed) { armed = false; b.textContent = label; b.classList.remove('armed'); } }, 6000); return; }
+      onConfirm();
+    } }, label);
+    return b;
   }
 
   // Scaffold steps (guided only): slot · choice · tag · pick · match · act
@@ -801,15 +822,19 @@
 
   // ---------- SETTINGS ----------
   function viewSettings(main) {
-    const date = h('input', { type: 'date', value: D.settings.examDate || '' });
-    const mins = h('input', { type: 'number', min: 15, max: 120, step: 5, value: D.settings.minutes });
-    const file = h('input', { type: 'file', accept: 'application/json', style: 'display:none', onchange: async e => {
-      const f = e.target.files[0]; if (!f) return;
+    const date = h('input', { id: 'set-date', type: 'date', value: D.settings.examDate || '' });
+    const mins = h('input', { id: 'set-mins', type: 'number', min: 15, max: 120, step: 5, value: D.settings.minutes });
+    const msg = h('p', { class: 'small', role: 'status' });
+    const box = h('textarea', { id: 'data-box', class: 'databox', rows: 5, placeholder: '내보낸 기록(JSON)을 여기에 붙여넣거나, 파일을 선택하세요.' });
+    const offerImport = text => {
       try {
-        const d = Store.parseImport(await f.text());
-        if (!confirm(`가져오기: 시도 ${d.attempts.length}건. 현재 기록(${D.attempts.length}건)을 대체합니다. 계속할까요?`)) return;
-        D = d; save(); render();
-      } catch (err) { alert('가져오기 실패: ' + err.message); }
+        const d = Store.parseImport(text);
+        msg.replaceChildren(`가져올 기록: 시도 ${d.attempts.length}건. 현재 기록(${D.attempts.length}건)을 대체합니다. `,
+          confirmButton('가져오기 실행', '한 번 더 누르면 대체됩니다', 'ghost', () => { D = d; save(); render(); }));
+      } catch (err) { msg.textContent = '가져오기 실패: ' + err.message + ' — 이 앱의 "내보내기"로 만든 JSON인지 확인하세요.'; }
+    };
+    const file = h('input', { id: 'data-file', type: 'file', accept: 'application/json', hidden: true, onchange: async e => {
+      const f = e.target.files[0]; if (f) offerImport(await f.text());
     } });
     main.append(h('h1', null, '설정'),
       h('section', { class: 'card' },
@@ -821,21 +846,35 @@
           save(); go('#/');
         } }, '저장')),
       h('section', { class: 'card' }, h('h2', null, '데이터'),
-        h('p', { class: 'small muted' }, `학습 기록은 이 브라우저에 자동 저장됩니다 (시도 ${D.attempts.length}건). 브라우저를 바꾸거나 기기를 옮길 때는 내보내기 → 가져오기.`),
+        h('p', { class: 'small muted' }, `학습 기록은 이 브라우저에만 저장됩니다 (시도 ${D.attempts.length}건). 다른 기기·브라우저로 옮기거나 백업할 때는 내보내기한 내용을 복사해 두었다가 거기서 가져오기에 붙여넣으세요.`),
         h('div', { class: 'row' },
-          h('button', { class: 'ghost', onclick: () => {
-            const a = h('a', { href: URL.createObjectURL(Store.exportBlob(D)), download: `toefl-coach-${E.dayStr(now())}.json` });
-            document.body.append(a); a.click(); a.remove(); D.lastBackup = now(); save(); render();
-          } }, '내보내기 (JSON)'),
-          h('button', { class: 'ghost', onclick: () => file.click() }, '가져오기'), file),
+          h('button', { class: 'ghost', onclick: async () => {
+            const json = JSON.stringify(Object.assign({ exportedAt: new Date().toISOString(), app: 'toefl-coach' }, D));
+            box.value = json;
+            try {
+              await navigator.clipboard.writeText(json);
+              msg.textContent = '기록을 클립보드에 복사했습니다. 메모 앱 등에 붙여넣어 보관하세요.';
+            } catch (e) {
+              box.focus(); box.select();
+              msg.textContent = '아래 칸의 내용을 전체 선택해 복사해 두세요.';
+            }
+            // Locally the file download also works; inside the artifact viewer it is ignored.
+            try {
+              const a = h('a', { href: URL.createObjectURL(Store.exportBlob(D)), download: `toefl-coach-${E.dayStr(now())}.json` });
+              document.body.append(a); a.click(); a.remove();
+            } catch (e) { /* download blocked */ }
+            D.lastBackup = now(); save();
+          } }, '내보내기 (복사)'),
+          h('button', { class: 'ghost', onclick: () => box.value.trim() ? offerImport(box.value) : (msg.textContent = '먼저 아래 칸에 내보낸 기록을 붙여넣으세요.') }, '붙여넣은 기록 가져오기'),
+          h('button', { class: 'ghost', onclick: () => file.click() }, '파일에서 가져오기'), file),
+        box, msg,
         D.lastBackup ? h('p', { class: 'small muted' }, '마지막 내보내기: ' + new Date(D.lastBackup).toLocaleString()) : null),
       h('section', { class: 'card' }, h('h2', null, '오늘 계획 다시 만들기'),
         h('p', { class: 'small muted' }, '진행 중인 오늘 세션을 버리고 현재 기록으로 다시 계획합니다. 이미 푼 기록은 유지됩니다.'),
         h('button', { class: 'ghost', onclick: () => { D.session = null; save(); go('#/'); } }, '다시 계획')),
       h('section', { class: 'card' }, h('h2', null, '초기화'),
-        h('button', { class: 'danger', onclick: () => {
-          if (confirm('모든 학습 기록을 지웁니다. 먼저 내보내기를 권장합니다. 계속할까요?') && confirm('정말 지울까요? 되돌릴 수 없습니다.')) { D = Store.blank(); save(); go('#/'); }
-        } }, '모든 기록 지우기')),
+        h('p', { class: 'small muted' }, '모든 학습 기록을 지웁니다. 되돌릴 수 없으니 먼저 내보내기를 하세요.'),
+        confirmButton('모든 기록 지우기', '한 번 더 누르면 모두 지워집니다', 'danger', () => { D = Store.blank(); save(); go('#/'); })),
       h('p', { class: 'small muted' }, `콘텐츠 빌드: ${C.builtAt} · 원본 오답 ${C.originals.length} · 새 문제 ${C.items.length} · 음원 ${Object.keys(C.audio).length}`));
   }
 

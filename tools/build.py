@@ -342,6 +342,18 @@ def segment_for(cues, evidence):
     return [max(0, cues[a]["start"] - 0.15), cues[b]["end"] + 0.25]
 
 
+ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="app/styles.css">
+<div id="app"></div>
+<script src="app/content.js"></script>
+<script src="app/engine.js"></script>
+<script src="app/store.js"></script>
+<script src="app/ui.js"></script>
+"""
+
+
 # ---------------------------------------------------------------- main
 def main():
     args = set(sys.argv[1:])
@@ -411,6 +423,9 @@ def main():
         f = APP / m.group(1)
         return f'app/{m.group(1)}?v={hashlib.sha1(f.read_bytes()).hexdigest()[:8]}' if f.exists() else m.group(0)
     index.write_text(re.sub(r'app/([\w.]+\.(?:js|css))(?:\?v=\w+)?', stamp, html), encoding="utf-8")
+    # Page for the claude.ai Artifact viewer: it wraps the file in its own document skeleton,
+    # so only title/meta/style/body content go here. Supporting files are published next to it.
+    (ROOT / "artifact.html").write_text(ARTIFACT_PAGE, encoding="utf-8")
     segs = sum(1 for it in items for q in it.get("qs", []) if q.get("seg")) + sum(1 for o in originals if o.get("seg"))
     print(f"bundle: app/content.js ({len(js)//1024} KB), audio sets: {len(audio_meta)}, replay segments: {segs}")
 

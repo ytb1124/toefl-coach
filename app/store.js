@@ -39,7 +39,7 @@
     return blank();
   }
 
-  let warned = false;
+  let warned = false; // the artifact viewer blocks alert(); the UI shows Store.lastError instead
   function save(d) {
     try {
       const prev = read(DAILY);
@@ -51,7 +51,8 @@
       localStorage.setItem(KEY, JSON.stringify(d));
       return true;
     } catch (e) {
-      if (!warned) { warned = true; alert('저장에 실패했습니다. 설정 → 내보내기로 백업해 주세요.\n' + e.message); }
+      if (!warned) { warned = true; console.error('toefl-coach: save failed', e); }
+      window.Store.lastError = e.message;
       return false;
     }
   }
