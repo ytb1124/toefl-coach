@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sync harness</title>
+<link rel="stylesheet" href="../app/styles.css">
+<!-- Test only: send jsonbin requests to tests/jsonbin_mock.py on :8899 -->
+<script>
+  const realFetch = window.fetch.bind(window);
+  window.fetch = (url, opts) => realFetch(String(url).replace('https://api.jsonbin.io', 'http://127.0.0.1:8899'), opts);
+</script>
+</head>
+<body>
+<div id="app"></div>
+<script src="../app/content.js"></script>
+<script src="../app/engine.js"></script>
+<script src="../app/sync.js"></script>
+<script src="../app/store.js"></script>
+<script src="../app/vocab.js"></script>
+<script src="../app/ui.js"></script>
+</body>
+</html>

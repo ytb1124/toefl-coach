@@ -194,7 +194,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 /* sync label, toast */
 .brandbox { display: flex; flex-direction: column; line-height: 1.2; }
 .sync { font-size: .7rem; color: var(--muted); }
-.sync-cloud { color: var(--good); }
+.sync-cloud, .sync-jsonbin { color: var(--good); }
+h3 { font-size: .95rem; margin: 16px 0 6px; }
+#sync-key { margin-bottom: 8px; }
 .sync-err { color: var(--bad); }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20;
   background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: .9rem; max-width: calc(100% - 32px); }

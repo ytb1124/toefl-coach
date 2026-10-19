@@ -116,7 +116,62 @@
   // ---------- sync status ----------
   function syncLabel() {
     const st = window.Sync ? Sync.status() : { mode: 'local', label: '이 기기에만 저장' };
-    return h('span', { class: 'sync sync-' + st.mode + (st.error ? ' sync-err' : ''), id: 'sync-label', title: st.mode === 'cloud' ? 'claude.ai 계정에 저장되어 어느 기기에서 열어도 이어집니다' : 'claude.ai에서 열면 모든 기기와 동기화됩니다' }, st.label);
+    const title = st.mode === 'cloud' ? 'claude.ai 계정에 저장되어 어느 기기에서 열어도 이어집니다' : st.mode === 'jsonbin' ? 'jsonbin에 저장되어 동기화 코드를 넣은 모든 기기에서 이어집니다' : '설정 → 기기 동기화에서 연결할 수 있습니다';
+    return h('a', { href: '#/settings', class: 'sync sync-' + st.mode + (st.error ? ' sync-err' : ''), id: 'sync-label', title }, st.label);
+  }
+
+  // ---------- device sync settings (jsonbin, outside claude.ai) ----------
+  function copyButton(getText, label) {
+    return h('button', { class: 'ghost', onclick: async e => {
+      const b = e.currentTarget;
+      try { await navigator.clipboard.writeText(getText()); b.textContent = '복사됨'; } catch (err) { b.textContent = '아래 칸을 길게 눌러 복사하세요'; }
+    } }, label);
+  }
+  function syncCard() {
+    const J = window.Sync && Sync.jsonbin;
+    if (!J) return null;
+    const st = Sync.status();
+    if (st.mode === 'cloud') return h('section', { class: 'card' }, h('h2', null, '기기 동기화'),
+      h('p', { class: 'small muted' }, 'claude.ai 계정에 저장되어, claude.ai에 로그인된 모든 기기에서 이어집니다. 따로 설정할 것이 없습니다.'));
+    const msg = h('p', { class: 'small', role: 'status' });
+    if (J.configured()) {
+      const code = J.code();
+      return h('section', { class: 'card' }, h('h2', null, '기기 동기화', h('span', { class: 'muted small' }, 'jsonbin')),
+        h('p', { class: 'small' }, '상태: ', h('b', null, st.label), st.error ? h('span', { class: 'warn' }, ' · ' + st.error) : null),
+        h('p', { class: 'small muted' }, '다른 기기에서는 이 페이지의 설정 → 기기 동기화에 아래 동기화 코드를 한 번 붙여넣으면 같은 기록으로 이어집니다. 코드에는 jsonbin 키가 들어 있으니 다른 사람에게 보내지 마세요.'),
+        h('details', null, h('summary', null, '동기화 코드 보기'), h('textarea', { id: 'sync-code-out', class: 'databox', rows: 3, readonly: true }, code), copyButton(() => code, '코드 복사')),
+        h('div', { class: 'row' },
+          h('button', { class: 'ghost', onclick: () => Sync.flush().then(() => { msg.textContent = Sync.status().error ? '저장 실패: ' + Sync.status().error : '저장했습니다.'; }) }, '지금 저장'),
+          confirmButton('이 기기 연결 해제', '한 번 더 누르면 이 기기만 연결이 끊깁니다 (기록은 남음)', 'link small', () => { J.disconnect(); location.reload(); })),
+        msg);
+    }
+    const codeIn = h('textarea', { id: 'sync-code-in', class: 'databox', rows: 3, placeholder: 'TCSYNC1.…' });
+    const keyIn = h('input', { id: 'sync-key', type: 'password', autocomplete: 'off', placeholder: 'jsonbin X-Master-Key' });
+    const created = h('div');
+    return h('section', { class: 'card' }, h('h2', null, '기기 동기화'),
+      h('p', { class: 'small muted' }, '지금은 이 브라우저에만 저장됩니다. jsonbin.io를 연결하면 휴대폰·다른 컴퓨터에서도 같은 기록으로 이어집니다. 기기마다 한 번만 하면 됩니다.'),
+      h('h3', null, '다른 기기에서 이미 설정했다면'),
+      codeIn,
+      h('p', { class: 'warn small' }, '연결하면 이 기기에 있던 기록은 공유 기록으로 대체됩니다.'),
+      h('button', { class: 'ghost', onclick: e => {
+        const b = e.currentTarget; b.disabled = true; msg.textContent = '확인하는 중…';
+        J.connectWithCode(codeIn.value).then(() => location.reload()).catch(err => { b.disabled = false; msg.textContent = '연결 실패: ' + err.message; });
+      } }, '동기화 코드로 연결'),
+      h('h3', null, '처음 설정하는 기기라면'),
+      h('p', { class: 'small muted' }, 'jsonbin.io에 로그인 → API Keys에서 X-Master-Key를 복사해 넣으세요. 이 기기의 지금 기록으로 저장소를 만들고, 다른 기기에 넣을 동기화 코드를 보여 줍니다.'),
+      keyIn,
+      h('button', { class: 'ghost', onclick: e => {
+        const b = e.currentTarget; b.disabled = true; msg.textContent = '저장소를 만드는 중…';
+        J.createWithKey(keyIn.value).then(code => {
+          msg.textContent = '';
+          keyIn.value = '';
+          created.replaceChildren(h('div', { class: 'fb good' },
+            h('p', null, h('b', null, '연결했습니다.'), ' 다른 기기에서는 설정 → 기기 동기화에 이 코드를 한 번 붙여넣으세요.'),
+            h('textarea', { id: 'sync-code-new', class: 'databox', rows: 3, readonly: true }, code),
+            h('div', { class: 'row' }, copyButton(() => code, '코드 복사'), h('button', { class: 'primary', onclick: () => location.reload() }, '완료'))));
+        }).catch(err => { b.disabled = false; msg.textContent = '만들기 실패: ' + err.message; });
+      } }, '저장소 만들고 연결'),
+      created, msg);
   }
 
   // ---------- toast (the viewer blocks alert()) ----------
@@ -945,6 +1000,7 @@
           if (D.session && !D.session.done && D.session.cursor === 0) D.session = null;
           save(); go('#/');
         } }, '저장')),
+      syncCard(),
       h('section', { class: 'card' }, h('h2', null, '데이터'),
         h('p', { class: 'small muted' }, `학습 기록은 이 브라우저에만 저장됩니다 (시도 ${D.attempts.length}건). 다른 기기·브라우저로 옮기거나 백업할 때는 내보내기한 내용을 복사해 두었다가 거기서 가져오기에 붙여넣으세요.`),
         h('div', { class: 'row' },
