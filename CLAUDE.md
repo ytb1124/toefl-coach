@@ -66,6 +66,11 @@ node --test tests/engine.test.js
 - `python3 tools/intake.py report <ID>` 출력(Markdown)을 바탕으로 채팅에 리포트를 준다: 성적, 핵심 한 줄, 능력별 발견(재발/새 패턴), 오답 표, 다음 훈련.
 - 앱을 새로고침하면 반영된다고 알린다: 새 오답은 원본 확인 단계로 오늘 훈련에 들어가고, **개선됨/유지됨 상태였던 능력에서 실전 오답이 나오면 자동으로 "재발"이 되어 다시 집중 대상**이 된다. 'TPO' 탭에서 회차별 비교를 볼 수 있다.
 
+## 배포
+- `main`에 푸시하면 GitHub Pages(https://taebin.link/toefl-coach/)가 자동 갱신된다. 저장소는 공개 — 키·토큰 등 비밀 값을 커밋하지 않는다 (jsonbin 키는 각 기기 브라우저에만 저장).
+- claude.ai 버전은 `artifact.html` + app/* + audio/*를 Artifact로 다시 게시해야 갱신된다 (capabilities: db, user).
+- 동기화 시험: `python3 tests/jsonbin_mock.py 8899` 후 `tests/sync-harness.html`을 localhost와 127.0.0.1 두 주소로 열어 두 기기처럼 확인.
+
 ## 원칙
 - 확인된 사실 / AI 추정 / 기록 없음을 섞지 않는다. 기록에 없는 정보를 만들지 않는다.
 - 학습 기록(브라우저 localStorage)은 건드리지 않는다. 데이터 변경은 `content/`로만.
