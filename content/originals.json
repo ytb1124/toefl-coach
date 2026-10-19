@@ -51,13 +51,16 @@
     23,
     33
    ],
-   "listening": null,
+   "listening": [
+    29,
+    45
+   ],
    "ctest": [
     14,
     20
    ],
    "errors": 20,
-   "note": "Listening 전체 분모 확인 불가. 사용자가 당일 4/6 언급(영역 불명확).",
+   "note": "Listening 29/45는 사용자가 10-20에 알려 준 점수. 리스닝 오답 16개 중 캡처로 기록된 것은 10개(나머지 6개는 문항 기록 없음).",
    "report": {
     "headline": "Listen & Reply 오답 7개에서 발화 기능(요청·제안·사실확인)과 시간축 불일치가 반복. Insert Text 2/2 오답.",
     "findings": [

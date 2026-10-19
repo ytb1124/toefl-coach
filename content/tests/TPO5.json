@@ -8,11 +8,11 @@
   "test": {
     "id": "TPO5",
     "date": "2026-10-17",
-    "reading": null,
-    "listening": null,
+    "reading": [36, 48],
+    "listening": [35, 45],
     "ctest": [21, 30],
     "errors": 22,
-    "note": "출처: tpo오답/tpo5 캡처 16장 + tpo5.rtf. 날짜는 tpo5.rtf(10/17) 기준. Reading·Listening 전체 분모는 화면에 없음 — 캡처된 세트 합계만 Reading 26/38(C-Test 21/30, Email 2/3, Marine Mammals 3/5), Listening 9/19. C-Test 2·3의 정답 대부분은 화면에 표시되지 않아 문맥 추정(각 항목 gaps). Writing Build a Sentence 오답 2개(boutique specializing…, The one where I usually go…)는 앱이 R/L만 지원해 오답 목록에서 제외 — 같은 '주어+긴 수식어+주동사' 구조가 R1(cities … have)과 연결됨."
+    "note": "출처: tpo오답/tpo5 캡처 16장 + tpo5.rtf. 날짜는 tpo5.rtf(10/17) 기준. Reading 36/48·Listening 35/45는 사용자가 10-20에 알려 준 점수 (오답 12·10개 = 기록된 오답 수와 일치). C-Test 2·3의 정답 대부분은 화면에 표시되지 않아 문맥 추정(각 항목 gaps). Writing Build a Sentence 오답 2개(boutique specializing…, The one where I usually go…)는 앱이 R/L만 지원해 오답 목록에서 제외 — 같은 '주어+긴 수식어+주동사' 구조가 R1(cities … have)과 연결됨."
   },
   "report": {
     "headline": "C-Test 9개 오답이 가장 큰 손실: 빈칸 자리(동사 수·명사·부사·목적격)보다 그럴듯한 철자를 먼저 만듦. Listening은 쉬운 공지·대화에서 직접 나온 신호를 놓침.",
