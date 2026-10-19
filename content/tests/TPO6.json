@@ -1,0 +1,328 @@
+{
+  "_help": {
+    "test": "reading/listening/ctest = [정답, 전체] — 화면에서 분모를 확인할 수 없으면 null. errors = originals 개수와 같아야 함.",
+    "report": "headline 한 줄 / findings: 능력별 발견 (skill + text, recurrence: 'repeat'|'new'|'improved') / next: 다음 훈련 초점. 확인된 사실과 추정을 구분.",
+    "originals": "content/originals.json 과 같은 형식. id = '<TEST>-R1' / '<TEST>-L1'. 모르는 값은 null + gaps[]. evidence 는 지문/스크립트 원문 그대로.",
+    "audioSets": "리스닝 오답은 스크린샷의 스크립트로 음원 세트를 만든다. id = 'o-<test>-<topic>'. 화자: N 내레이터, W/M 여·남, W2/M2 두 번째 여·남."
+  },
+  "test": {
+    "id": "TPO6",
+    "date": "2026-10-19",
+    "reading": [40, 48],
+    "listening": [24, 35],
+    "ctest": [26, 30],
+    "errors": 19,
+    "note": "출처: tpo오답/tpo6 캡처 18장 + tpo6.rtf. 실제 시험 시간 조건(사용자 진술). Drama C-Test 'were'와 Economics C-Test 'that'은 사용자가 맞게 입력했으나 프로그램 오류로 오답 처리 → 정답으로 정정·제외. Insert Text(R8) 정답 위치는 화면에 없음. 사용자 진술: 리스닝을 들으면 너무 졸림."
+  },
+  "report": {
+    "headline": "Listening 손실이 가장 큼(24/35): 강의 속 다른 대상의 특징을 섞고(따개비 먹이·Hughes), 들리지 않은 내용을 덧붙인 선택지를 고름. Life Sciences 강의 0/4.",
+    "findings": [
+      {"skill": "BIND", "recurrence": "repeat", "text": "firefly↔anglerfish(R), barnacles↔그 먹이, Hughes↔Krigwa 연극 — 같은 지문 안 다른 대상의 진짜 특징을 연결. Reading·Listening 양쪽에서 재발."},
+      {"skill": "AUDIT", "recurrence": "repeat", "text": "응답 시간 측정, 먹이가 더 필요, I'll see if → 시간 없음, current software lacks task 알림 — 언급되지 않은 결과·과잉 추론."},
+      {"skill": "TARGET", "recurrence": "repeat", "text": "Main Idea 3개 오답: 읽기 과제(세부)·group identity(마지막 부분)·보호 행동 — 일부를 전체 주제로."},
+      {"skill": "ROLE", "recurrence": "repeat", "text": "pollination(상리공생의 예), painter(즉흥연주 비유) — 예시의 '내용'을 고르고 '기능'을 놓침. Insert Text도 오답."},
+      {"skill": "WORD", "recurrence": "repeat", "text": "C-Test serve·medium·reduce(입력값 미확인), catalyzes→visualizes(지문 뒤 visualizing에 끌림)."}
+    ],
+    "next": "강의는 대상별 한 줄 노트(A: 특징 / B: 특징), 선택지마다 '들은 문장 있음?' 체크. 졸음 — 리스닝은 컨디션 좋은 시간에 먼저."
+  },
+  "audioSets": {
+    "o-t6-guest": {
+      "title": "TPO6 Announcement — guest lecture",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {"v": "N", "t": "Listen to an announcement by an instructor in a classroom."},
+        {"v": "M", "t": "I'd like to announce that our guest, Professor Alissa Shevchuk from the History Department, has moved her lecture up from the eleventh to the fourth. This means she'll be joining us in class next Wednesday. Please click on the link in your syllabus to read Professor Shevchuk's article on nineteenth-century European nationalism in preparation for the discussion. Visit my office hours or email me by Monday if there are any aspects of the article that you'd like Professor Shevchuk to address in detail."}
+      ]
+    },
+    "o-t6-linton": {
+      "title": "TPO6 Announcement — Georgia Linton",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {"v": "N", "t": "Listen to an announcement on a university radio station."},
+        {"v": "W", "t": "Attention everyone. Due to unforeseen circumstances, the appearance of Georgia Linton has been postponed. The event will now take place next Tuesday at seven p.m. in the same location. Come hear her read from her widely acclaimed collection of poems called Seasons That Never Spoke. We apologize for any inconvenience this may cause and appreciate your understanding. If you have any questions, please contact the head of the English Department."}
+      ]
+    },
+    "o-t6-conformity": {
+      "title": "TPO6 Social Sciences Talk — social conformity",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {"v": "N", "t": "Listen to a talk on a social sciences podcast."},
+        {"v": "W", "t": "In everyday life, people often find themselves adjusting their thoughts or actions based on what others around them are doing. This tendency to align with group behavior is called social conformity and has been a fascinating subject for researchers in psychology. One classic study from the 1950s, led by psychologist Solomon Asch, explored how individuals respond when their own perceptions differ from those of a group. In the experiment, participants were shown a set of lines and asked to identify which one matched a reference line in length. What the real participants weren't told was that others in their group were actually actors who intentionally gave the same incorrect answers. Surprisingly, many participants chose to go along with the group's answer, even when it was clearly wrong—highlighting how group influence can sometimes override personal judgment. While this can lead to questionable decisions, the tendency to align with others is hard-wired into human behavior for a good reason. In many social contexts, it can foster a sense of unity and shared understanding. It helps people feel connected and reinforces group identity. Now let's talk about why this has been of critical importance to people throughout the history of humanity."}
+      ]
+    },
+    "o-t6-commute": {
+      "title": "TPO6 Conversation — commuting and moving",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {"v": "N", "t": "Listen to a conversation."},
+        {"v": "M", "t": "I've had it with this commute. I don't mind riding the train, but I hate having to get up at five a.m. every day."},
+        {"v": "W", "t": "Why don't you find an apartment closer to work?"},
+        {"v": "M", "t": "I've actually checked rental listings online. There are some good options a few blocks from the office, but I'm not sure about this neighborhood. It seems like a pretty dull place to live."},
+        {"v": "W", "t": "You know, Mark's lived here for years. Ask him what he thinks of it."},
+        {"v": "M", "t": "That's not a bad idea. I'll see if he has time to chat after the client meeting this afternoon."}
+      ]
+    },
+    "o-t6-organisms": {
+      "title": "TPO6 Life Sciences Talk — relationships between organisms",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {"v": "N", "t": "Listen to a talk on a life sciences podcast."},
+        {"v": "W", "t": "In nature, organisms interact in various ways. Long-term interactions between two different species can be mutualistic, commensalistic, or parasitic. A mutualistic relationship is when it's beneficial for both species. A classic case is the relationship between bees and flowers. Bees collect nectar from flowers for food. As they do so, the bees inadvertently help flowers pollinate. Pollination is the process of transferring plants' reproductive material—the pollen—from plant to plant, which is essential for plant reproduction. Commensalism involves one species benefiting, while the other is neither helped nor harmed. An example is when a type of small sea animal, called a barnacle, attaches itself to whales. The barnacles benefit from this in several ways, such as by catching a ride to places in the ocean where food is abundant. You see, whales feed on microorganisms called plankton by filtering them out of the water. And so do barnacles, which reach plankton-rich areas while being attached to the whale. The barnacles benefit from their relationship with the whale, while the whale remains unaffected. Parasitism occurs when one species benefits at the expense of the other. An example is the relationship between mammals and the insects we call ticks. Ticks feed on a mammal's blood. The blood loss can be significant for the mammal and could potentially cause anemia. Anemia is when the blood has a reduced capacity for carrying oxygen and can cause fatigue and weakness."}
+      ]
+    },
+    "o-t6-harlem": {
+      "title": "TPO6 History Talk — Harlem Renaissance",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님 (화면 오타 knows → known 으로 읽음)",
+      "lines": [
+        {"v": "N", "t": "Listen to a talk on a history podcast."},
+        {"v": "W", "t": "In the 1920s, the cultural phenomenon known as the Harlem Renaissance transformed the New York neighborhood of Harlem into a cultural epicenter. It sparked a wave of innovation in music, literature, and theater. One of the most exciting developments was the rise of jazz music. Jazz musicians like Louis Armstrong brought improvisation to the forefront—transforming simple melodies into spontaneous, expressive performances. It was like watching a painter create a masterpiece in real time, each note a brushstroke of emotion and skill. Literature also flourished. Poet Langston Hughes became a defining voice of the era. His poetry often echoed the rhythms of jazz—he wrote in short, rhythmic lines that felt musical even when read aloud. Theater saw a surge of grassroots creativity. The Krigwa Players, founded in Harlem in 1925, were a pioneering theater group that performed original one-act plays by emerging playwrights. The Krigwa Players staged productions in community centers and libraries to reach local audiences who might not have access to formal theaters. These venues allowed them to keep costs low, foster community involvement, and ensure that theater remained a shared, inclusive experience—rooted in everyday life."}
+      ]
+    }
+  },
+  "originals": [
+    {
+      "id": "TPO6-R1", "test": "TPO6", "sec": "R", "set": "Drama and Theater C-Test", "qtype": "C-Test",
+      "skill": "WORD", "skills2": [],
+      "ctest": {"text": "Drama and theater have been integral parts of human culture for millennia. They {{}} as a medium for storytelling, expression, and entertainment.", "prefix": "se", "answer": "serve"},
+      "my": null,
+      "evidence": "They se___ as a med___ for storytelling — collocation: serve as (~의 역할을 하다)",
+      "trap": "기록 없음 — 빈칸 두 개가 연속(se___ as a med___)이라 서로 단서가 되지 못했을 가능성 (AI 추정)",
+      "diff": "주어 They + ___ + as a + 명사 → serve as. 뒤 빈칸 medium과 함께 'serve as a medium(매개체 역할을 하다)' 한 덩어리",
+      "rule": "빈칸 뒤 as a + 명사 → serve as / act as / function as 중 prefix에 맞는 것",
+      "causeAI": "serve as 표현 인출 실패 가능 (입력값 미확인)",
+      "gaps": ["화면에 입력 글자가 보이지 않음(빨간 밑줄만) — 미입력인지 표시 오류인지 기록 없음"]
+    },
+    {
+      "id": "TPO6-R2", "test": "TPO6", "sec": "R", "set": "Drama and Theater C-Test", "qtype": "C-Test",
+      "skill": "WORD", "skills2": [],
+      "ctest": {"text": "They serve as a {{}} for storytelling, expression, and entertainment.", "prefix": "med", "answer": "medium"},
+      "my": null,
+      "evidence": "as a med___ for storytelling, expression, and entertainment — a + 명사 자리",
+      "trap": "기록 없음 — med-로 시작하는 단어(media, medical…)가 여럿이라 혼동 가능 (AI 추정)",
+      "diff": "a ___ for storytelling → 단수 명사 medium(매개체). media는 복수라 a와 못 씀",
+      "rule": "관사 a + ___ → 단수 명사. med- → medium(단수) / media(복수)",
+      "causeAI": "medium 의미·철자 인출 문제 가능 (입력값 미확인)",
+      "gaps": ["화면에 입력 글자가 보이지 않음(빨간 밑줄만) — 미입력인지 표시 오류인지 기록 없음"]
+    },
+    {
+      "id": "TPO6-R3", "test": "TPO6", "sec": "R", "set": "Economics C-Test", "qtype": "C-Test",
+      "skill": "FORM", "skills2": [],
+      "ctest": {"text": "Economists create models to understand how economic processes work and predict future trends. {{}} examine the ways that policies impact markets and the distribution of wealth.", "prefix": "Th", "answer": "They"},
+      "my": "This",
+      "evidence": "Economists create models … Th___ examine the ways — 앞 문장 주어 Economists(복수), 동사 examine(복수형)",
+      "trap": "Th- 뒤 This가 가장 먼저 떠오름 (AI 추정)",
+      "diff": "examine에 -s가 없음 → 복수 주어. 앞 문장의 Economists를 받는 They",
+      "rule": "대명사 빈칸 → 뒤 동사의 수(-s 유무) + 앞 문장 주어를 둘 다 확인",
+      "causeAI": "동사 수와 앞 문장 지시 대상 확인 생략"
+    },
+    {
+      "id": "TPO6-R4", "test": "TPO6", "sec": "R", "set": "Aquatic Habitats C-Test", "qtype": "C-Test",
+      "skill": "WORD", "skills2": [],
+      "ctest": {"text": "Fish have developed numerous adaptations to survive in different environments. Streamlined bodies that {{}} water resistance are one example.", "prefix": "red", "answer": "reduce"},
+      "my": null,
+      "evidence": "Streamlined bodies that red___ water resistance — 해설: reduce 动词，说明'流线型身体'的功能是'减少水阻力' (동사, 유선형 몸이 물의 저항을 줄이는 기능)",
+      "trap": "기록 없음",
+      "diff": "that 뒤 동사 자리 + 목적어 water resistance → reduce(줄이다). 유선형 몸의 기능 = 저항 감소",
+      "rule": "구조-기능 문장(bodies that ___ resistance) → 기능 동사(reduce/increase) 중 문맥 방향으로",
+      "causeAI": "reduce resistance 표현 인출 실패 가능 (입력값 미확인)",
+      "gaps": ["화면에 입력 글자가 보이지 않음(빨간 밑줄만) — 미입력인지 표시 오류인지 기록 없음"]
+    },
+    {
+      "id": "TPO6-R5", "test": "TPO6", "sec": "R", "set": "Daily Life — Software Update Email", "qtype": "Inference",
+      "skill": "AUDIT", "skills2": ["TARGET"],
+      "passage": "Subject: Upcoming enhancements to project management software\n\nDear Mr. Tanaka,\n\nI hope this message finds you well. I'm writing to inform you of upcoming updates to our project management software, scheduled to go live next Thursday. These enhancements are designed to improve user experience.\n\nKey improvements include\n– Customizable dashboards for personalized project views and streamlined task tracking\n– A redesigned, more intuitive user interface for easier navigation\n– Addition of collaboration tools, including real-time editing and integrated messaging, to support seamless teamwork\n\nPlease note that a scheduled system downtime will occur from 2:00 A.M. to 4:00 A.M. (local time) on Thursday to implement these changes. We recommend informing your team and adjusting any time-sensitive activities accordingly. If you have any questions or need support during the transition, our team is ready to assist.\n\nRegards,\nLisa Chen",
+      "stem": "It can be inferred that the current software lacks which of the following?",
+      "options": ["The ability to track tasks different team members are assigned to perform", "The ability for team members to contact one another within the same system", "A user interface for navigation", "A way to inform users of tasks"],
+      "my": 3, "correct": 1,
+      "evidence": "Addition of collaboration tools, including real-time editing and integrated messaging",
+      "trap": "task tracking이 메일에 나옴 → task 관련 기능이 없다고 연결. 하지만 tracking은 개선(streamlined)일 뿐",
+      "diff": "lacks = 지금 없음 → 'Addition of'(새로 추가)되는 기능 = integrated messaging(시스템 내 연락). streamlined/redesigned는 이미 있는 것을 개선",
+      "rule": "'lacks' 추론 → Addition/new 표시된 기능만 후보. improved/redesigned는 이미 존재",
+      "causeAI": "개선(기존)과 추가(신규)를 구분하지 않고 관련 단어로 선택"
+    },
+    {
+      "id": "TPO6-R6", "test": "TPO6", "sec": "R", "set": "Bioluminescent Organisms", "qtype": "Detail",
+      "skill": "BIND", "skills2": [],
+      "passage": "Bioluminescence is a fascinating phenomenon, whereby living organisms produce light through chemical reactions. This ability is found in a wide variety of species, including certain bacteria, fungi, insects, and marine animals. The light produced can serve several purposes, such as attracting mates, deterring predators, or luring prey.\n\nOne of the most well-known bioluminescent organisms is the firefly, which uses light to communicate with potential mates. However, bioluminescence is most common in the marine environment. For example, the anglerfish has a bioluminescent lure that it uses to attract prey in the deep ocean. Similarly, some species of squid and jellyfish exhibit bioluminescence to escape predators by confusing or startling them.",
+      "stem": "What purpose does bioluminescence serve for fireflies?",
+      "options": ["It frightens predators.", "It aids in reproduction.", "It lures prey.", "It helps them escape from danger."],
+      "my": 2, "correct": 1,
+      "evidence": "the firefly, which uses light to communicate with potential mates",
+      "trap": "luring prey가 지문에 실제로 있음 — anglerfish의 목적",
+      "diff": "firefly = mates(짝) → reproduction. prey = anglerfish, predators = squid·jellyfish",
+      "rule": "목적이 여럿 나열된 지문 → 생물별로 한 줄씩 짝지어 두고 질문 생물의 줄만 본다",
+      "causeAI": "다른 생물(anglerfish)의 목적을 firefly에 연결 — TPO6 L8(barnacles)과 같은 구조"
+    },
+    {
+      "id": "TPO6-R7", "test": "TPO6", "sec": "R", "set": "Bioluminescent Organisms", "qtype": "Vocabulary",
+      "skill": "WORD", "skills2": ["BIND"],
+      "passage": "The enzyme luciferase, which catalyzes the light-producing reaction involved in bioluminescence, is being used in medical imaging and other applications where visualizing biological processes is important.",
+      "stem": "The word \"catalyzes\" in the passage is closest in meaning to",
+      "options": ["initiates", "prevents", "visualizes", "follows"],
+      "my": 2, "correct": 0,
+      "evidence": "The enzyme luciferase, which catalyzes the light-producing reaction",
+      "trap": "같은 문장 뒤에 visualizing이 나옴 — 표면 일치 (AI 추정)",
+      "diff": "enzyme(효소)이 reaction(반응)을 catalyze = 일으키다/촉진하다 → initiates. visualize(시각화)는 이미징 응용의 설명",
+      "rule": "Vocabulary 선택지가 같은 문장에 그대로 보이면 함정부터 의심 — 주어·목적어(enzyme→reaction) 관계로 의미를 정한다",
+      "causeAI": "문맥 근처 단어와의 표면 일치로 선택",
+      "gaps": ["catalyze ≈ initiate는 정확한 동의어가 아님(촉진 vs 개시) — 프로그램 정답을 따름"]
+    },
+    {
+      "id": "TPO6-R8", "test": "TPO6", "sec": "R", "set": "Bioluminescent Organisms", "qtype": "Insert Text",
+      "skill": "ROLE", "skills2": [],
+      "passage": "Researchers are studying the chemical reactions that produce bioluminescence to develop new technologies. [■1] The enzyme luciferase, which catalyzes the light-producing reaction involved in bioluminescence, is being used in medical imaging and other applications where visualizing biological processes is important. [■2] This enzyme's ability to produce light without requiring external energy sources makes it extremely useful in scientific research. [■3] The study of bioluminescence not only advances our understanding of natural phenomena but also paves the way for innovative applications in various fields. [■4]",
+      "stem": "Insert: \"Some believe bioluminescence could be used to monitor water pollution or the health of crop plants.\"",
+      "options": ["■1 (new technologies 뒤, The enzyme luciferase 앞)", "■2 (medical imaging 문장 뒤)", "■3 (scientific research 뒤, 결론 문장 앞)", "■4 (마지막)"],
+      "my": 0, "correct": 2,
+      "evidence": "The enzyme luciferase … This enzyme's ability — ■1에 넣으면 '신기술 연구 → 효소' 흐름이 끊김",
+      "trap": "new technologies 바로 뒤라 '활용 가능성' 문장이 붙어 보임",
+      "diff": "■2/■1 뒤는 The enzyme luciferase → This enzyme으로 강하게 이어짐. 환경·농업 응용 가능성은 효소 설명이 끝난 뒤, 'various fields' 결론 앞(■3)",
+      "rule": "삽입 전 This/These/The 같은 지시어 연결을 먼저 표시하고, 그 사슬을 끊는 자리는 제외",
+      "causeAI": "지시어(This enzyme) 연결 대신 주제 키워드 근접성으로 위치 선택",
+      "gaps": ["공식 정답 위치가 화면에 표시되지 않음 — ■3은 이전 AI 해설의 문맥 분석", "■ 번호는 화면의 네 칸을 앞에서부터 센 것"]
+    },
+    {
+      "id": "TPO6-L1", "test": "TPO6", "sec": "L", "set": "Announcement — guest lecture", "qtype": "Main Idea",
+      "skill": "TARGET", "skills2": [],
+      "audio": "o-t6-guest",
+      "stem": "What is the speaker mainly discussing?",
+      "options": ["A new course offered by the History Department", "Preparations for a guest lecture", "Changes to the assigned reading", "How students should submit a written assignment"],
+      "my": 2, "correct": 1,
+      "evidence": "has moved her lecture up from the eleventh to the fourth",
+      "trap": "read … article 지시가 실제로 나옴 — 하지만 '변경'된 것은 강연 날짜이고, 읽기는 준비 활동",
+      "diff": "공지 전체 = 초청 강연(날짜 변경 + 논문 읽기 + 질문 미리 보내기) 준비. 읽기 과제가 '바뀌었다'는 말은 없음",
+      "rule": "Main Idea → 세부 지시 2~3개를 묶는 상위 명사(guest lecture)를 고른다",
+      "causeAI": "세부 활동(읽기)을 공지의 주제로 선택 + changes를 강연 일정에서 가져옴"
+    },
+    {
+      "id": "TPO6-L2", "test": "TPO6", "sec": "L", "set": "Announcement — Georgia Linton", "qtype": "Detail (인물)",
+      "skill": "CATCH", "skills2": ["AUDIT"],
+      "audio": "o-t6-linton",
+      "stem": "Who is Georgia Linton?",
+      "options": ["An elected official", "A university professor", "A famous poet", "A radio announcer"],
+      "my": 1, "correct": 2,
+      "evidence": "Come hear her read from her widely acclaimed collection of poems called Seasons That Never Spoke.",
+      "trap": "university radio station, English Department → 교수로 연상. 교수라는 말은 없음",
+      "diff": "widely acclaimed(널리 호평받는) collection of poems → famous poet",
+      "rule": "인물 질문 → 그 사람이 '하는 일' 동사+명사(read from her … poems)를 잡는다. 배경(대학)으로 추측하지 않는다",
+      "causeAI": "직접 나온 신호(poems, widely acclaimed) 포착 실패 + 배경 추측"
+    },
+    {
+      "id": "TPO6-L3", "test": "TPO6", "sec": "L", "set": "Social Sciences Talk — social conformity", "qtype": "Main Idea",
+      "skill": "TARGET", "skills2": ["AUDIT"],
+      "audio": "o-t6-conformity",
+      "stem": "What is the main topic of the talk?",
+      "options": ["The origins and effects of misinformation in online environments", "The relationship between creativity and conformity", "Evidence for and effects of social influence", "The formation and development of group identity in multicultural societies"],
+      "my": 3, "correct": 2,
+      "evidence": "It helps people feel connected and reinforces group identity.",
+      "trap": "group identity가 강의 끝부분에 실제로 나옴 — 가장 최근에 들은 말",
+      "diff": "강의 = Asch 실험(증거) + 동조의 효과(판단 무시·유대감). group identity는 효과 하나, multicultural societies는 근거 0",
+      "rule": "Main Idea → 강의 전체 구조(정의 → 실험 → 효과)를 덮는 선택지. 마지막 문장 단어만 있는 선택지는 일부",
+      "causeAI": "마지막 부분을 전체 주제로 + 근거 없는 요소(multicultural) 미검증"
+    },
+    {
+      "id": "TPO6-L4", "test": "TPO6", "sec": "L", "set": "Social Sciences Talk — social conformity", "qtype": "Detail",
+      "skill": "AUDIT", "skills2": ["CATCH"],
+      "audio": "o-t6-conformity",
+      "stem": "In Solomon Asch's study, what important aspect of the experiment was unknown to the participants?",
+      "options": ["That the other group members were told to respond incorrectly", "That the experiment was actually testing memory", "That the time it took them to give a response would be measured", "That the lines were not all at the same distance from the participants"],
+      "my": 2, "correct": 0,
+      "evidence": "What the real participants weren't told was that others in their group were actually actors who intentionally gave the same incorrect answers.",
+      "trap": "심리 실험에서 흔한 '반응 시간 측정' — 상식적으로 그럴듯함",
+      "diff": "unknown = weren't told 문장 그대로: 다른 사람들은 일부러 오답을 말하는 연기자. 시간 측정은 언급 0",
+      "rule": "질문 키워드(unknown)의 동의어(weren't told)가 나온 문장이 답. 상식으로 채운 선택지는 '들었나?' 확인",
+      "causeAI": "들은 내용 대신 실험 상식으로 선택 (청취 실패인지는 기록 없음)"
+    },
+    {
+      "id": "TPO6-L5", "test": "TPO6", "sec": "L", "set": "Conversation — commuting and moving", "qtype": "Inference",
+      "skill": "AUDIT", "skills2": ["TARGET"],
+      "audio": "o-t6-commute",
+      "stem": "What does the woman suggest about Mark?",
+      "options": ["He does not have time to chat today.", "He recently moved to a new apartment.", "He drives to work every day with a friend.", "He will have an opinion about the neighborhood."],
+      "my": 0, "correct": 3,
+      "evidence": "You know, Mark's lived here for years. Ask him what he thinks of it.",
+      "trap": "time to chat이 남자의 마지막 말에 나옴",
+      "diff": "질문 = 여자의 암시. 여자: 오래 살았으니 물어봐라 → 의견이 있을 것. 'I'll see if he has time'은 남자 말이고, 시간이 없다는 확정도 아님",
+      "rule": "'What does the woman suggest' → 여자 발화만 본다. I'll see if… = 가능성 확인이지 부정이 아님",
+      "causeAI": "다른 화자의 말 + 가능성을 확정으로 과잉 추론"
+    },
+    {
+      "id": "TPO6-L6", "test": "TPO6", "sec": "L", "set": "Life Sciences Talk — relationships between organisms", "qtype": "Main Idea",
+      "skill": "TARGET", "skills2": [],
+      "audio": "o-t6-organisms",
+      "stem": "What is the main topic of the talk?",
+      "options": ["How organisms protect themselves from other organisms", "How environmental changes affect animals' feeding and reproduction", "Benefits of studying species in their natural environment", "Types of relationships between living organisms"],
+      "my": 0, "correct": 3,
+      "evidence": "Long-term interactions between two different species can be mutualistic, commensalistic, or parasitic.",
+      "trap": "기생(at the expense of)·피해 이야기가 나와 '방어'로 연상 (AI 추정)",
+      "diff": "도입에서 세 가지 분류(mutualistic / commensalistic / parasitic)를 제시 → 강의 = 관계의 종류. 보호 행동은 언급 0",
+      "rule": "도입에서 '~ can be A, B, or C' 분류가 나오면 그 분류 자체가 Main Idea",
+      "causeAI": "도입부 분류 신호를 놓침 (이 강의 0/4 — 졸음 여부는 기록 없음)"
+    },
+    {
+      "id": "TPO6-L7", "test": "TPO6", "sec": "L", "set": "Life Sciences Talk — relationships between organisms", "qtype": "Speaker's Purpose",
+      "skill": "ROLE", "skills2": [],
+      "audio": "o-t6-organisms",
+      "stem": "Why does the speaker discuss plant pollination?",
+      "options": ["To introduce new research on how plants reproduce", "To explain how both organisms can benefit from their interaction", "To contrast various methods of pollination in plants", "To identify a similarity between mutualistic and parasitic relationships"],
+      "my": 2, "correct": 1,
+      "evidence": "A mutualistic relationship is when it's beneficial for both species. A classic case is the relationship between bees and flowers.",
+      "trap": "pollination이 선택지에 그대로 들어 있음 — 예시의 '내용'",
+      "diff": "pollination = 상리공생(둘 다 이익)의 classic case. 여러 수분 방법 비교는 없음",
+      "rule": "Why discuss X → X 바로 앞 개념(A classic case is…)이 무엇의 예인지로 답한다",
+      "causeAI": "예시의 기능 대신 예시 단어로 선택"
+    },
+    {
+      "id": "TPO6-L8", "test": "TPO6", "sec": "L", "set": "Life Sciences Talk — relationships between organisms", "qtype": "Detail",
+      "skill": "BIND", "skills2": ["CATCH"],
+      "audio": "o-t6-organisms",
+      "stem": "What does the speaker point out about barnacles' food?",
+      "options": ["It is the same as whales' food.", "It is most plentiful in oxygen-rich areas of the ocean.", "It requires a long time to be filtered out of the water.", "It is often found attached to whales."],
+      "my": 3, "correct": 0,
+      "evidence": "whales feed on microorganisms called plankton by filtering them out of the water. And so do barnacles",
+      "trap": "attached to whales가 실제로 나옴 — 하지만 고래에 붙는 건 따개비 자신",
+      "diff": "And so do barnacles = 따개비도 플랑크톤을 먹는다 → 고래 먹이와 같음. 붙어 있는 것은 먹이가 아니라 따개비",
+      "rule": "'X's food'처럼 소유 대상 질문 → 주인(따개비)과 대상(먹이)을 분리. And so do + 주어 = 앞 문장 동사 반복",
+      "causeAI": "따개비의 특징을 따개비 먹이에 연결 — R6(firefly↔anglerfish)과 같은 구조"
+    },
+    {
+      "id": "TPO6-L9", "test": "TPO6", "sec": "L", "set": "Life Sciences Talk — relationships between organisms", "qtype": "Detail (결과)",
+      "skill": "AUDIT", "skills2": ["CATCH"],
+      "audio": "o-t6-organisms",
+      "stem": "What possible effect of ticks on mammals is mentioned by the speaker?",
+      "options": ["The mammal may start feeling tired and weak", "The mammal may need more food to survive.", "The mammal may experience mild skin irritation.", "Harmful microorganisms may enter the mammal's blood."],
+      "my": 1, "correct": 0,
+      "evidence": "Anemia is when the blood has a reduced capacity for carrying oxygen and can cause fatigue and weakness.",
+      "trap": "피를 잃으면 먹이가 더 필요하다 — 상식적 추론",
+      "diff": "강의 인과: 진드기 → 혈액 손실 → 빈혈 → 피로·쇠약(fatigue and weakness). 먹이 증가는 언급 0",
+      "rule": "'mentioned' 질문 → 인과 사슬의 마지막 고리를 들은 그대로. 상식 결과는 버린다",
+      "causeAI": "들은 인과 대신 상식으로 결과를 만듦"
+    },
+    {
+      "id": "TPO6-L10", "test": "TPO6", "sec": "L", "set": "History Talk — Harlem Renaissance", "qtype": "Speaker's Purpose",
+      "skill": "ROLE", "skills2": ["AUDIT"],
+      "audio": "o-t6-harlem",
+      "stem": "Why does the speaker mention a painter creating a masterpiece in real time?",
+      "options": ["To illustrate how jazz musicians improvised during performances", "To suggest that jazz musicians often worked together with painters", "To highlight how quickly jazz music gained popularity", "To show how painters influenced jazz musicians' style"],
+      "my": 1, "correct": 0,
+      "evidence": "brought improvisation to the forefront—transforming simple melodies into spontaneous, expressive performances. It was like watching a painter create a masterpiece in real time",
+      "trap": "화가와 재즈 음악가가 같은 문장에 등장 → 실제 협업으로 읽음",
+      "diff": "It was like… = 비유. 즉흥연주(improvisation)를 '실시간으로 그림 그리기'에 빗댐. 협업 사실은 없음",
+      "rule": "It was like / just as / imagine → 비유 신호. 목적 = 바로 앞 개념을 설명(illustrate)",
+      "causeAI": "비유를 실제 관계로 해석"
+    },
+    {
+      "id": "TPO6-L11", "test": "TPO6", "sec": "L", "set": "History Talk — Harlem Renaissance", "qtype": "Detail",
+      "skill": "BIND", "skills2": [],
+      "audio": "o-t6-harlem",
+      "stem": "What does the speaker say about some poems of Langston Hughes?",
+      "options": ["They have inspired theatrical performances.", "They sound like jazz music when read.", "They praise the music of Louis Armstrong.", "They were written with the help of a musician."],
+      "my": 0, "correct": 1,
+      "evidence": "His poetry often echoed the rhythms of jazz—he wrote in short, rhythmic lines that felt musical even when read aloud.",
+      "trap": "강의 뒤쪽에 theater(Krigwa Players)가 나옴",
+      "diff": "Hughes = 재즈 리듬 시(felt musical when read aloud). 연극은 Krigwa Players의 이야기",
+      "rule": "음악·문학·연극처럼 분야별 인물이 나오면 '인물: 특징' 한 줄씩 — 다른 줄의 단어가 섞인 선택지 제거",
+      "causeAI": "다른 분야(연극)의 특징을 Hughes에 연결"
+    }
+  ]
+}

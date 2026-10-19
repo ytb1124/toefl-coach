@@ -6,7 +6,10 @@ const path = require('path');
 const E = require('../app/engine.js');
 
 const src = fs.readFileSync(path.join(__dirname, '../app/content.js'), 'utf8');
-const C = JSON.parse(src.slice(src.indexOf('{'), src.lastIndexOf('}') + 1));
+const ALL = JSON.parse(src.slice(src.indexOf('{'), src.lastIndexOf('}') + 1));
+// Fixed fixture: the TPO2–4 baseline, so these engine tests don't shift every time a new mock test is added.
+const BASE = new Set(['TPO2', 'TPO3', 'TPO4']);
+const C = Object.assign({}, ALL, { tests: ALL.tests.filter(t => BASE.has(t.id)), originals: ALL.originals.filter(o => BASE.has(o.test)) });
 const T0 = new Date(2026, 9, 18, 9).getTime(); // 2026-10-18
 const day = n => T0 + n * E.DAY;
 const blank = () => ({ settings: { examDate: '2026-10-26', minutes: 40 }, attempts: [], flags: {} });
