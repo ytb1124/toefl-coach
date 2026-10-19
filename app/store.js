@@ -27,8 +27,11 @@
     return d;
   }
 
+  // The main record goes through Sync (claude.ai storage that follows the learner across devices);
+  // the daily safety copy stays in this browser only.
+  const backend = key => (key === KEY && window.Sync) ? window.Sync : localStorage;
   function read(key) {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+    try { const raw = backend(key).getItem(key); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
   }
 
   function load() {
@@ -45,10 +48,10 @@
       const prev = read(DAILY);
       const today = new Date().toDateString();
       if (!prev || prev.day !== today) {
-        const cur = localStorage.getItem(KEY);
+        const cur = backend(KEY).getItem(KEY);
         if (cur) localStorage.setItem(DAILY, JSON.stringify({ day: today, data: JSON.parse(cur) }));
       }
-      localStorage.setItem(KEY, JSON.stringify(d));
+      backend(KEY).setItem(KEY, JSON.stringify(d));
       return true;
     } catch (e) {
       if (!warned) { warned = true; console.error('toefl-coach: save failed', e); }

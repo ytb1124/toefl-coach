@@ -3,7 +3,7 @@
   'use strict';
   const C = window.CONTENT;
   const E = window.Engine;
-  let D = Store.load();
+  let D = Store.blank(); // replaced by the synced record once Sync is ready (see boot at the bottom)
   const app = document.getElementById('app');
   const SKILL = Object.fromEntries(C.skills.map(s => [s.id, s]));
   const ITEM = Object.fromEntries(C.items.map(i => [i.id, i]));
@@ -94,6 +94,7 @@
     const [, view, arg] = (location.hash || '#/').split('/');
     app.innerHTML = '';
     window.scrollTo(0, 0);
+    if (view !== 'vocab' && V) { V.deactivate(); vocabMode = 'home'; }
     if (view === 'session') return viewSession();
     app.append(nav(view || ''));
     const main = h('main', { class: 'page' });
@@ -103,12 +104,111 @@
     else if (view === 'orig') viewOriginal(main, arg);
     else if (view === 'settings') viewSettings(main);
     else if (view === 'tests') viewTests(main);
+    else if (view === 'vocab') viewVocab(main);
     else viewToday(main);
   }
   function nav(cur) {
     const link = (hash, label, key) => h('a', { href: hash, class: cur === key ? 'on' : '' }, label);
-    return h('header', { class: 'nav' }, h('span', { class: 'brand' }, 'TOEFL 교정 코치'),
-      h('nav', null, link('#/', '오늘', ''), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
+    return h('header', { class: 'nav' }, h('div', { class: 'brandbox' }, h('span', { class: 'brand' }, 'TOEFL 교정 코치'), syncLabel()),
+      h('nav', null, link('#/', '오늘', ''), link('#/vocab', '단어', 'vocab'), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
+  }
+
+  // ---------- sync status ----------
+  function syncLabel() {
+    const st = window.Sync ? Sync.status() : { mode: 'local', label: '이 기기에만 저장' };
+    return h('span', { class: 'sync sync-' + st.mode + (st.error ? ' sync-err' : ''), id: 'sync-label', title: st.mode === 'cloud' ? 'claude.ai 계정에 저장되어 어느 기기에서 열어도 이어집니다' : 'claude.ai에서 열면 모든 기기와 동기화됩니다' }, st.label);
+  }
+
+  // ---------- toast (the viewer blocks alert()) ----------
+  const toastBox = h('div', { class: 'toast', role: 'status', hidden: true });
+  document.body.append(toastBox);
+  let toastTimer = null;
+  function toast(msg) { toastBox.textContent = msg; toastBox.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastBox.hidden = true; }, 4000); }
+
+  // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
+  let V = null, vocabMode = 'home';
+  const vocabStage = h('div', { class: 'vocab-stage' });
+  function vocabApp() {
+    if (!V && window.VocabApp) {
+      V = VocabApp.create(vocabStage, window.Sync || localStorage, {
+        home: () => { vocabMode = 'home'; if (V && (location.hash || '').startsWith('#/vocab')) render(); },
+        toast,
+        changed: () => {},
+      });
+    }
+    return V;
+  }
+  function vocabFlow(startFn) { if (startFn()) { vocabMode = 'flow'; render(); } }
+
+  function viewVocab(main) {
+    const api = vocabApp();
+    if (!api) { main.append(h('p', { class: 'notice' }, '단어 모듈을 불러오지 못했습니다. 새로고침해 주세요.')); return; }
+    if (vocabMode === 'flow') {
+      main.classList.add('vocab-flow');
+      main.append(h('button', { class: 'link small', onclick: () => { api.deactivate(); vocabMode = 'home'; render(); } }, '← 세트 목록 (진행 상황은 저장됩니다)'), vocabStage);
+      return;
+    }
+    main.append(h('h1', null, '단어 암기'),
+      h('p', { class: 'muted small' }, `원본 단어장(${api.wordCount().toLocaleString()}개)의 '오늘 암기 시작'과 같은 방식으로 복습 단어를 30개씩 암기합니다: 먼저 의미 연결 → 6개 묶음 → 간격을 둔 철자 회상 → 최종 재시험.`));
+    if (!api.hasData()) { main.append(vocabImportCard(api, true)); return; }
+
+    const r = api.resumable();
+    if (r) {
+      main.append(h('section', { class: 'card hero' },
+        h('h2', null, r.chunk ? `세트 ${r.chunk.index + 1} 진행 중` : '진행 중인 암기'),
+        h('p', { class: 'muted small' }, `오늘 완료 ${r.done} / ${r.total}개 · 저장된 곳부터 이어집니다.`),
+        h('button', { class: 'primary', onclick: () => vocabFlow(() => api.resume()) }, '이어서 하기'),
+        confirmButton('진행 중인 세트 그만두기', '한 번 더 누르면 진행 상태를 버립니다 (단어별 기록은 남음)', 'link small', () => { api.discardSession(); render(); })));
+    }
+
+    const plan = api.plan();
+    if (!plan) {
+      const counts = api.reviewCounts(), mode = api.bestReviewMode(), n = counts[mode];
+      main.append(h('section', { class: 'card' + (r ? '' : ' hero') },
+        h('h2', null, `복습 단어 ${n.toLocaleString()}개`),
+        h('p', { class: 'muted small' }, `단어장에서 '찍음'(거의 모름)으로 분류되고 아직 마스터하지 않은 단어입니다. 교재 순서로 고정해 30개씩 ${Math.ceil(n / 30)}세트로 나눕니다. (기준 형식: ${mode})`),
+        n ? h('button', { class: 'primary', onclick: () => { api.createPlan(mode); render(); } }, `30개씩 ${Math.ceil(n / 30)}세트로 나누기`)
+          : h('p', { class: 'notice' }, '복습 단어가 없습니다. 가져온 기록에 찍음으로 분류된 단어가 있는지 확인하세요.')));
+    } else {
+      const total = api.chunkCount(plan), done = Object.keys(plan.done).length, next = api.nextChunkIndex(plan);
+      const sec = h('section', { class: 'card' + (r ? '' : ' hero') },
+        h('h2', null, '복습 단어 30개씩', h('span', { class: 'muted small' }, `${done} / ${total}세트 완료`)),
+        h('div', { class: 'meter' }, h('div', { style: `width:${total ? 100 * done / total : 0}%` })),
+        h('p', { class: 'muted small' }, `고정된 복습 단어 ${plan.words.length.toLocaleString()}개 · 세트를 끝내면 날짜가 기록됩니다. 아무 세트나 눌러 다시 할 수 있어요.`));
+      if (!r && next != null) sec.append(h('button', { class: 'primary', onclick: () => vocabFlow(() => api.start(next)) }, `세트 ${next + 1} 암기 시작 (${api.chunkWords(next).length}개)`));
+      if (next == null) sec.append(h('p', { class: 'rule' }, '모든 세트를 한 번씩 끝냈습니다. 세트를 눌러 다시 복습할 수 있습니다.'));
+      const grid = h('div', { class: 'setgrid' });
+      for (let i = 0; i < total; i++) {
+        const d = plan.done[i];
+        grid.append(h('button', { class: 'setb' + (d ? ' done' : '') + (i === next ? ' next' : ''), title: api.chunkWords(i).map(w => w.en).join(', '),
+          onclick: () => vocabFlow(() => api.start(i)) }, h('b', null, `세트 ${i + 1}`), h('span', null, d ? d.slice(5).replace('-', '/') + ' 완료' : `${api.chunkWords(i).length}개`)));
+      }
+      sec.append(grid);
+      if (next != null) sec.append(h('details', null, h('summary', null, `세트 ${next + 1} 단어 미리 보기`),
+        h('ul', { class: 'wordlist' }, api.chunkWords(next).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko))))));
+      const counts = api.reviewCounts();
+      sec.append(confirmButton(`세트 다시 나누기 (현재 복습 단어 ${counts[plan.sourceQuizMode] || 0}개 기준)`, '한 번 더 누르면 완료 표시가 지워지고 새로 나눕니다', 'link small',
+        () => { api.resetPlan(); api.createPlan(plan.sourceQuizMode); render(); }));
+      main.append(sec);
+    }
+    main.append(h('details', { class: 'card' }, h('summary', null, '단어장 기록 다시 가져오기'), vocabImportCard(api, false)));
+  }
+
+  function vocabImportCard(api, first) {
+    const box = h('textarea', { id: 'vocab-import', class: 'databox', rows: 5, placeholder: '기존 단어장의 "내보내기 코드 생성"으로 만든 코드를 여기에 붙여넣으세요.' });
+    const msg = h('p', { class: 'small', role: 'status' });
+    const run = () => {
+      const code = box.value.trim();
+      if (!code) { msg.textContent = '먼저 코드를 붙여넣으세요.'; return; }
+      if (!api.importCode(code)) { msg.textContent = '코드를 읽지 못했습니다. 코드가 처음부터 끝까지 빠짐없이 붙여넣어졌는지 확인하세요 (끝이 조금만 잘려도 읽을 수 없습니다).'; return; }
+      toast('단어 기록을 가져왔습니다.'); render();
+    };
+    return h('section', { class: first ? 'card hero' : '' },
+      first ? h('h2', null, '기존 단어장 기록 가져오기') : null,
+      h('p', { class: 'muted small' }, '기존 단어장(taebin.link/toefl-voca)의 홈에서 "내보내기 코드 생성"을 누르고 나온 코드를 통째로 복사해 붙여넣으세요. 찍음/애매/마스터 분류와 단어별 학습 기록이 그대로 옮겨지고, 이후에는 claude.ai에 저장되어 어느 기기에서 열어도 이어집니다.'),
+      !first ? h('p', { class: 'warn small' }, '가져오면 지금 이 앱의 단어 기록을 대체합니다.') : null,
+      box, msg,
+      first ? h('button', { class: 'primary', onclick: run }, '가져오기') : confirmButton('가져오기 (대체)', '한 번 더 누르면 대체합니다', 'ghost', run));
   }
 
   // ---------- TODAY ----------
@@ -878,5 +978,17 @@
       h('p', { class: 'small muted' }, `콘텐츠 빌드: ${C.builtAt} · 원본 오답 ${C.originals.length} · 새 문제 ${C.items.length} · 음원 ${Object.keys(C.audio).length}`));
   }
 
-  render();
+  // ---------- boot: wait for the synced record (claude.ai) before the first real render ----------
+  app.append(h('main', { class: 'page' }, h('p', { class: 'muted' }, '기록을 불러오는 중…')));
+  const boot = () => { D = Store.load(); render(); };
+  if (window.Sync) {
+    Sync.ready.then(boot);
+    Sync.onChange((what, key) => {
+      if (what === 'status') { const el = document.getElementById('sync-label'); if (el) el.replaceWith(syncLabel()); return; }
+      if (what !== 'remote') return;
+      const view = (location.hash || '#/').split('/')[1];
+      if (key === 'toeflcoach.v1' && view !== 'session') { D = Store.load(); render(); }
+      if (key.startsWith('toefl-vocab') && vocabMode !== 'flow') { if (V) V.deactivate(); V = null; if (view === 'vocab') render(); }
+    });
+  } else boot();
 })();
