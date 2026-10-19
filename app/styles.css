@@ -91,8 +91,17 @@ textarea { resize: vertical; margin-top: 8px; }
 .opt.wrong, .tagb.wrong, .word.wrong { border-color: var(--bad); background: var(--bad-bg); }
 .ctest { font-size: 1.08rem; line-height: 2.1; }
 .ctest b { font-weight: 600; }
-.blank { display: inline-block; width: 9em; padding: 2px 6px; margin: 0 2px; border: 0; border-bottom: 2px solid var(--accent); border-radius: 0; background: transparent; font-size: 1.05rem; }
-.gap { color: var(--muted); letter-spacing: 2px; }
+/* C-Test blank: prefix + one cell per missing letter (exact count, typed in place) */
+.cw { display: inline-flex; align-items: baseline; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 600; }
+.cw-slots { display: inline-flex; align-items: baseline; gap: .24ch; margin-left: .1ch; }
+.cw-slot { appearance: none; -webkit-appearance: none; box-sizing: content-box; flex: 0 0 1ch; width: 1ch; min-width: 0; height: 1.3em; margin: 0; padding: 0;
+  border: 0; border-bottom: 2px solid var(--accent); border-radius: 0; background: transparent; color: var(--ink);
+  font: inherit; font-size: max(16px, 1em); line-height: 1.3; text-align: center; caret-color: var(--accent); }
+.cw-slot:focus { outline: 0; background: var(--sel); box-shadow: 0 3px 0 var(--accent); }
+.cw-slot:disabled { opacity: 1; -webkit-text-fill-color: currentColor; }
+.cw.ok, .cw.ok .cw-slot { color: var(--good); border-color: var(--good); }
+.cw.bad, .cw.bad .cw-slot { color: var(--bad); border-color: var(--bad); }
+.cw.bad .cw-slot { background: var(--bad-bg); }
 .conf { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
 .tagb { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); font-size: .86rem; }
 .tagrow { padding: 10px 0; border-top: 1px solid var(--line); }

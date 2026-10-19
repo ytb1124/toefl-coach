@@ -465,11 +465,13 @@
     let answer = null;
     const t0 = now();
     const check = h('button', { class: 'primary', disabled: true }, '확인');
+    let blank = null;
     if (o.ctest) {
       const [a, b] = o.ctest.text.split('{{}}');
-      const inp = h('input', { class: 'blank', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', placeholder: '…', oninput: e => { answer = e.target.value; check.disabled = !answer.trim(); } });
-      box.append(h('p', { class: 'ctest' }, a, h('b', null, o.ctest.prefix), inp, b));
-      setTimeout(() => inp.focus(), 50);
+      blank = letterBlank(o.ctest.prefix, o.ctest.answer, { readOnly: !live,
+        onChange: v => { answer = v; check.disabled = !v; }, onEnter: () => { if (!check.disabled) check.click(); } });
+      box.append(h('p', { class: 'ctest' }, a, blank.el, b));
+      if (live) setTimeout(() => blank.focus(), 50);
     } else {
       box.append(h('p', { class: 'stem' }, o.stem));
       box.append(h('div', { class: 'opts' }, o.options.map((t, i) => h('button', { class: 'opt', onclick: e => {
@@ -482,6 +484,7 @@
       const rec = logAttempt({ ref: o.id, skill: o.skill, tier: 'original', correct, answer, ms: now() - t0 });
       check.remove();
       box.querySelectorAll('input,.opt').forEach(x => x.disabled = true);
+      if (blank) blank.mark(correct);
       if (!o.ctest) box.querySelectorAll('.opt').forEach((x, i) => { if (i === o.correct) x.classList.add('right'); else if (i === answer) x.classList.add('wrong'); });
       const holdBack = !correct && !!o.audio;
       box.append(originalFeedback(o, { answer, correct }, myVal, holdBack));
@@ -648,7 +651,7 @@
     };
     if (it.kind === 'ctest' && it.ctest) {
       const [a, b] = it.ctest.text.split('{{}}');
-      wrap.append(h('p', { class: 'ctest' }, a, h('b', null, it.ctest.prefix), h('span', { class: 'gap' }, '____'), b));
+      wrap.append(h('p', { class: 'ctest' }, a, letterBlank(it.ctest.prefix, it.ctest.answer, { readOnly: true }).el, b));
     }
     if (it.kind === 'insert') wrap.append(h('div', { class: 'insert-s' }, it.insert), h('div', { class: 'passage' }, para(it.passage.replace(/■[A-D]/g, m => '[' + m.slice(1) + ']'))));
     const single = (prompt, options, answer) => {
@@ -732,22 +735,68 @@
     return D.attempts.filter(a => a.skill === skill && a.trap === key && !a.correct).length;
   }
 
+  // C-Test blank as on the real test: the prefix, then one underlined cell per missing letter.
+  // Typing fills cells left to right; Backspace steps back; arrows move; pasting fills from the caret.
+  // Returns { el, value(), focus(), disable(), mark(ok) }; value() is the typed completion (prefix excluded).
+  function letterBlank(prefix, answer, { onChange, onEnter, readOnly } = {}) {
+    const n = Math.max(1, answer.length - prefix.length);
+    const cells = Array.from({ length: n }, (_, j) => h('input', {
+      class: 'cw-slot', type: 'text', inputmode: 'text', autocomplete: 'off', autocapitalize: 'none', autocorrect: 'off',
+      spellcheck: 'false', 'aria-label': `${prefix}, ${j + 1}번째 글자`, disabled: !!readOnly }));
+    const value = () => cells.map(c => c.value).join('');
+    const changed = () => onChange && onChange(value());
+    cells.forEach((c, k) => {
+      c.addEventListener('input', () => {
+        // Usually one letter; a burst (autocomplete, mobile keyboard) spills into the following cells.
+        const typed = c.value.replace(/[^a-z]/gi, '');
+        const prev = c._prev || '';
+        const letters = typed.length > 1 && prev && typed.startsWith(prev) ? typed.slice(prev.length) : typed;
+        let j = k;
+        for (const ch of [...letters].slice(0, n - k)) { cells[j].value = ch; j++; }
+        if (!letters) c.value = '';
+        changed();
+        if (letters) (cells[j] || cells[n - 1]).focus();
+      });
+      c.addEventListener('beforeinput', () => { c._prev = c.value; });
+      c.addEventListener('focus', () => c.select());
+      c.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !c.value && k > 0) { e.preventDefault(); cells[k - 1].value = ''; cells[k - 1].focus(); changed(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); cells[k - 1]?.focus(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); cells[k + 1]?.focus(); }
+        else if (e.key === 'Enter') { e.preventDefault(); onEnter && onEnter(); }
+      });
+      c.addEventListener('paste', e => {
+        e.preventDefault();
+        let text = (e.clipboardData.getData('text') || '').trim().replace(/[^a-z]/gi, ''); let pos = k;
+        if (text.toLowerCase().startsWith(prefix.toLowerCase()) && text.length === answer.length) { text = text.slice(prefix.length); pos = 0; }
+        [...text].slice(0, n - pos).forEach((ch, j) => { cells[pos + j].value = ch; });
+        changed(); cells[Math.min(n - 1, pos + text.length)].focus();
+      });
+    });
+    const el = h('span', { class: 'cw' }, h('span', { class: 'cw-pre' }, prefix), h('span', { class: 'cw-slots' }, cells));
+    return {
+      el, value,
+      focus: () => (cells.find(c => !c.value) || cells[n - 1]).focus(),
+      disable: () => cells.forEach(c => { c.disabled = true; }),
+      mark: ok => el.classList.add(ok ? 'ok' : 'bad'),
+    };
+  }
+
   function renderCtest(box, it, step, sub) {
     const exam = step.tier !== 'guided';
     const [a, b] = it.ctest.text.split('{{}}');
     let val = ''; let conf = null; const t0 = now();
     const check = h('button', { class: 'primary', disabled: true }, '확인');
     const upd = () => { check.disabled = !val.trim() || conf == null; };
-    const inp = h('input', { class: 'blank', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', placeholder: '…', oninput: e => { val = e.target.value; upd(); },
-      onkeydown: e => { if (e.key === 'Enter' && !check.disabled) check.click(); } });
-    box.append(h('p', { class: 'ctest' }, a, h('b', null, it.ctest.prefix), inp, b));
+    const blank = letterBlank(it.ctest.prefix, it.ctest.answer, { onChange: v => { val = v; upd(); }, onEnter: () => { if (!check.disabled) check.click(); } });
+    box.append(h('p', { class: 'ctest' }, a, blank.el, b));
     if (!exam && it.hint && it.skill !== 'FORM') box.append(h('button', { class: 'link small', onclick: e => { sub.hinted = true; e.target.replaceWith(h('p', { class: 'hint' }, it.hint)); } }, '힌트'));
     box.append(confRow(v => { conf = v; upd(); }), check);
-    setTimeout(() => inp.focus(), 50);
+    setTimeout(() => blank.focus(), 50);
     check.onclick = () => {
       const correct = E.checkTyped(val, it.ctest.prefix, it.ctest.answer);
       const rec = logAttempt({ item: it.id, q: 0, ref: it.id + '#0', skill: it.skill, tier: step.tier, correct, conf, hinted: sub.hinted, answer: val, ms: now() - t0 });
-      inp.disabled = true; check.remove(); box.querySelector('.conf').remove();
+      blank.disable(); blank.mark(correct); check.remove(); box.querySelector('.conf').remove();
       box.append(h('div', { class: 'fb ' + (correct ? 'good' : 'bad') },
         h('p', null, correct ? '✓ 정답 ' : '✗ ', h('b', null, it.ctest.answer), correct ? '' : `  (내 답: ${it.ctest.prefix}${val.trim().replace(new RegExp('^' + it.ctest.prefix, 'i'), '')})`),
         h('p', null, it.explain || ''),
