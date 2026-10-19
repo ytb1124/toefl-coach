@@ -55,12 +55,13 @@
     {
       "id": "ROLE",
       "name": "문장·예시의 역할 판정",
-      "area": "R",
-      "gain": 1.0,
+      "area": "RL",
+      "gain": 1.5,
       "oneLine": "예시나 삽입문이 '무슨 말을 하는가'보다 '글에서 무슨 일을 하는가'를 먼저 본다.",
       "move": [
         "기능을 붙인다: 예시 / 요약(In short) / 결과(Therefore) / 해결책 / 대조(However) / 지시(This + 명사).",
-        "Purpose: 예시 바로 앞의 일반 진술을 찾는다. 예시는 그 진술을 보여주려고 있다.",
+        "Purpose (Why does the author/speaker mention X?): 예시 바로 앞의 일반 진술·개념을 찾는다. 예시는 그 개념을 보여주려고 있다.",
+        "Listening: It's like / Imagine / just as = 비유 신호 → 실제 관계(협업·역사)가 아니라 바로 앞 개념의 설명(illustrate).",
         "Insert: 지시어·연결어가 가리킬 내용이 바로 앞 문장에 실제로 있는 자리를 고른다."
       ],
       "warning": "기능 먼저: 예시는 바로 앞 주장을, 연결어·지시어(In short, This ~)는 바로 앞 문장을 받는다."

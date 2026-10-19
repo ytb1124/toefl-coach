@@ -303,7 +303,7 @@ priority(s) = evidence(s) × need(s) × gain(s) × stateFactor(s)
 evidence = Σ_오답 [ (주 1.0 | 부 0.5) × 최근성(TPO4 1.0, TPO3 0.85, TPO2 0.7) × (내 답 UNKNOWN이면 0.5) ]
            + 0.5 × (등장 회차 수 − 1)                     // 재발성
 need     = 1 − p,  p = (Transfer·Delayed 최근 8개 정답 + 1) / (개수 + 2)   // 데이터 적을 때 0.5 출발
-gain     = 단기 개선 가능성 [가정]: FORM 1.2, ACT 1.1, TARGET 1.2, AUDIT 1.2, ROLE 1.0, BIND 1.0, CATCH 0.9, WORD 0.6
+gain     = 단기 개선 가능성 [가정]: FORM 1.2, ACT 1.1, TARGET 1.2, AUDIT 1.2, ROLE 1.5 (TPO6에서 리스닝 Purpose 오답 확인 후 상향, 10-19), BIND 1.0, CATCH 0.9, WORD 0.6
 stateFactor = 새로움 1.0 · 훈련 중 1.0 · 검증 중 0.9 · 개선됨 0.3 · 유지됨 0.15 · 재발 1.5
 ```
 - 오답 *개수*만 쓰지 않는 이유: 분모가 다른 유형(ACT는 분모 미상)을 개수로 비교하면 왜곡 → `need`가 새 문제 실적으로 곧바로 교정한다.

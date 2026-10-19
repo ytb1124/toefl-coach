@@ -173,3 +173,11 @@ test('metrics count my recurrence verdicts and listening stuck points', () => {
   assert.strictEqual(m.stuck.memory, 1); assert.strictEqual(m.stuck.sound, 1);
   assert.strictEqual(m.reheard.still, 1); assert.strictEqual(m.recur.same, 1); assert.strictEqual(m.recur.rulefail, 1);
 });
+
+test('transfer picks alternate sections, starting where the latest real errors were', () => {
+  const items = ['r1', 'r2', 'l1', 'l2'].map(id => ({ id, skill: 'ROLE', tier: 'transfer', qa: 'pass', audio: id[0] === 'l' ? 'a' : undefined }));
+  const base = { tests: [{ id: 'X1', date: '2026-10-01' }, { id: 'X2', date: '2026-10-05' }], items };
+  const pick = originals => E.pickItems(Object.assign({}, base, { originals }), blank(), 'ROLE', 'transfer', 4, new Set()).map(x => x.item.id);
+  assert.deepStrictEqual(pick([{ test: 'X1', sec: 'R', skill: 'ROLE' }, { test: 'X2', sec: 'L', skill: 'ROLE' }]), ['l1', 'r1', 'l2', 'r2']);
+  assert.deepStrictEqual(pick([{ test: 'X2', sec: 'R', skill: 'ROLE' }]), ['r1', 'l1', 'r2', 'l2']);
+});

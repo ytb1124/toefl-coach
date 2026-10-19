@@ -152,11 +152,31 @@
     return m;
   }
 
+  // Section ('R' | 'L') where this skill's errors in the most recent mock test that had any were concentrated.
+  function latestSection(content, skillId) {
+    const dates = testDates(content.tests || []);
+    const origs = (content.originals || []).filter(o => o.skill === skillId && dates[o.test]);
+    if (!origs.length) return 'R';
+    const last = origs.reduce((m, o) => (dates[o.test] > m ? dates[o.test] : m), '');
+    const recent = origs.filter(o => dates[o.test] === last);
+    return recent.filter(o => o.sec === 'L').length > recent.length / 2 ? 'L' : 'R';
+  }
+
+  // Alternate reading / listening items, starting with `first`, so a skill tested in both sections
+  // isn't drilled only in whichever section happens to come first in the item files.
+  function interleaveBySection(items, first) {
+    const L = items.filter(i => i.audio); const R = items.filter(i => !i.audio);
+    const [a, b] = first === 'L' ? [L, R] : [R, L];
+    const out = [];
+    for (let k = 0; k < Math.max(a.length, b.length); k++) { if (a[k]) out.push(a[k]); if (b[k]) out.push(b[k]); }
+    return out;
+  }
+
   function pickItems(content, data, skillId, tier, n, exclude) {
     const flagged = data.flags || {};
     const pool = content.items.filter(i => i.skill === skillId && i.tier === tier && i.qa === 'pass' && !flagged[i.id] && !exclude.has(i.id));
     const seen = seenItems(data, tier === 'guided' ? ['guided'] : MASTERY_TIERS.concat(['repeat']));
-    const fresh = pool.filter(i => !seen.has(i.id));
+    const fresh = interleaveBySection(pool.filter(i => !seen.has(i.id)), latestSection(content, skillId));
     const out = fresh.slice(0, n).map(i => ({ item: i, repeat: false }));
     if (out.length < n && tier === 'guided') {
       // Guided items may be reused (they only scaffold, never count for mastery).
