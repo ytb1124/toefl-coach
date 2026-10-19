@@ -221,15 +221,16 @@
       const counts = api.reviewCounts(), mode = api.bestReviewMode(), n = counts[mode];
       main.append(h('section', { class: 'card' + (r ? '' : ' hero') },
         h('h2', null, `복습 단어 ${n.toLocaleString()}개`),
-        h('p', { class: 'muted small' }, `단어장에서 '찍음'(거의 모름)으로 분류되고 아직 마스터하지 않은 단어입니다. 교재 순서로 고정해 30개씩 ${Math.ceil(n / 30)}세트로 나눕니다. (기준 형식: ${mode})`),
-        n ? h('button', { class: 'primary', onclick: () => { api.createPlan(mode); render(); } }, `30개씩 ${Math.ceil(n / 30)}세트로 나누기`)
+        h('p', { class: 'muted small' }, `단어장에서 '찍음'(거의 모름)으로 분류되고 아직 마스터하지 않은 단어입니다. 교재 순서로 30개씩 ${Math.ceil(n / 30)}세트로 나눕니다. (기준 형식: ${mode})`),
+        n ? h('p', { class: 'warn small' }, `한 번 나누면 이 ${n.toLocaleString()}개로 영구 고정됩니다. 이후 단어가 더해지거나 빠지지 않고, 다시 나눌 수도 없습니다.`) : null,
+        n ? confirmButton(`이 ${n.toLocaleString()}개로 고정하고 30개씩 ${Math.ceil(n / 30)}세트로 나누기`, '한 번 더 누르면 고정합니다 (되돌릴 수 없음)', 'primary', () => { api.createPlan(mode); render(); })
           : h('p', { class: 'notice' }, '복습 단어가 없습니다. 가져온 기록에 찍음으로 분류된 단어가 있는지 확인하세요.')));
     } else {
       const total = api.chunkCount(plan), done = Object.keys(plan.done).length, next = api.nextChunkIndex(plan);
       const sec = h('section', { class: 'card' + (r ? '' : ' hero') },
-        h('h2', null, '복습 단어 30개씩', h('span', { class: 'muted small' }, `${done} / ${total}세트 완료`)),
+        h('h2', null, `고정 단어 ${plan.words.length.toLocaleString()}개 · ${total}세트`, h('span', { class: 'muted small' }, `${done} / ${total}세트 완료`)),
         h('div', { class: 'meter' }, h('div', { style: `width:${total ? 100 * done / total : 0}%` })),
-        h('p', { class: 'muted small' }, `고정된 복습 단어 ${plan.words.length.toLocaleString()}개 · 세트를 끝내면 날짜가 기록됩니다. 아무 세트나 눌러 다시 할 수 있어요.`));
+        h('p', { class: 'muted small' }, `이 ${plan.words.length.toLocaleString()}개는 영구 고정되어 더해지거나 빠지지 않습니다 (${E.dayStr(plan.createdAt).replace(/-/g, '.')} 고정). 세트를 끝내면 날짜가 기록되고, 아무 세트나 눌러 다시 할 수 있어요.`));
       if (!r && next != null) sec.append(h('button', { class: 'primary', onclick: () => vocabFlow(() => api.start(next)) }, `세트 ${next + 1} 암기 시작 (${api.chunkWords(next).length}개)`));
       if (next == null) sec.append(h('p', { class: 'rule' }, '모든 세트를 한 번씩 끝냈습니다. 세트를 눌러 다시 복습할 수 있습니다.'));
       const grid = h('div', { class: 'setgrid' });
@@ -241,9 +242,6 @@
       sec.append(grid);
       if (next != null) sec.append(h('details', null, h('summary', null, `세트 ${next + 1} 단어 미리 보기`),
         h('ul', { class: 'wordlist' }, api.chunkWords(next).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko))))));
-      const counts = api.reviewCounts();
-      sec.append(confirmButton(`세트 다시 나누기 (현재 복습 단어 ${counts[plan.sourceQuizMode] || 0}개 기준)`, '한 번 더 누르면 완료 표시가 지워지고 새로 나눕니다', 'link small',
-        () => { api.resetPlan(); api.createPlan(plan.sourceQuizMode); render(); }));
       main.append(sec);
     }
     main.append(h('details', { class: 'card' }, h('summary', null, '단어장 기록 다시 가져오기'), vocabImportCard(api, false)));

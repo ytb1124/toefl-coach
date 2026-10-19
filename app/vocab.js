@@ -2200,10 +2200,14 @@ function bestReviewMode() {
   const c = reviewCounts();
   return c.flash ? 'flash' : QUIZ_MODES.slice().sort((a, b) => c[b] - c[a])[0];
 }
+// 세트 목록은 한 번만 만들고 영구 고정한다: 이미 있으면 절대 다시 만들지 않는다.
+// 이후 단어가 마스터되거나 새로 찍음으로 분류돼도 세트의 단어는 바뀌지 않는다.
 function createChunkPlan(qMode = bestReviewMode()) {
+  const existing = loadChunkPlan();
+  if (existing) return existing;
   const words = reviewWordsFor(qMode);
   if (!words.length) return null;
-  const plan = { createdAt: Date.now(), sourceQuizMode: qMode, size: CHUNK_SIZE, words: words.map(w => w.en), done: {}, last: null };
+  const plan = { createdAt: Date.now(), locked: true, sourceQuizMode: qMode, size: CHUNK_SIZE, words: words.map(w => w.en), done: {}, last: null };
   saveChunkPlan(plan);
   return plan;
 }
@@ -2286,7 +2290,6 @@ const __api = {
   reviewCounts, bestReviewMode,
   plan: loadChunkPlan,
   createPlan: createChunkPlan,
-  resetPlan() { localStorage.removeItem(CHUNK_PLAN_KEY); },
   chunkCount, nextChunkIndex,
   chunkWords(i) { const p = loadChunkPlan(); return p ? chunkWords(p, i).map(w => ({ en: w.en, ko: getCoreMeaning(w) })) : []; },
   start: startChunkSession,
