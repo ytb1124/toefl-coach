@@ -105,12 +105,13 @@
     else if (view === 'settings') viewSettings(main);
     else if (view === 'tests') viewTests(main);
     else if (view === 'vocab') viewVocab(main);
+    else if (view === 'sw') swApp().view(main, (location.hash || '').split('/').slice(2), render);
     else viewToday(main);
   }
   function nav(cur) {
     const link = (hash, label, key) => h('a', { href: hash, class: cur === key ? 'on' : '' }, label);
     return h('header', { class: 'nav' }, h('div', { class: 'brandbox' }, h('span', { class: 'brand' }, 'TOEFL 교정 코치'), syncLabel()),
-      h('nav', null, link('#/', '오늘', ''), link('#/vocab', '단어', 'vocab'), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
+      h('nav', null, link('#/', '오늘', ''), link('#/vocab', '단어', 'vocab'), link('#/sw', '말하기·쓰기', 'sw'), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
   }
 
   // ---------- sync status ----------
@@ -179,6 +180,10 @@
   document.body.append(toastBox);
   let toastTimer = null;
   function toast(msg) { toastBox.textContent = msg; toastBox.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastBox.hidden = true; }, 4000); }
+
+  // ---------- SPEAKING·WRITING: separate part with its own record 'toefl-sw-v1' (app/sw.js) ----------
+  let SW = null;
+  const swApp = () => SW || (SW = SWApp.create({ h, toast, go, storage: window.Sync || localStorage }));
 
   // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
   let V = null, vocabMode = 'home';
@@ -1090,7 +1095,8 @@
       if (what === 'status') { const el = document.getElementById('sync-label'); if (el) el.replaceWith(syncLabel()); return; }
       if (what !== 'remote') return;
       const view = (location.hash || '#/').split('/')[1];
-      if (key === 'toeflcoach.v1' && view !== 'session') { D = Store.load(); render(); }
+      if (key === 'toeflcoach.v1' && view !== 'session') { D = Store.load(); if (view !== 'sw') render(); }
+      if (key.startsWith('toefl-sw') && view === 'sw' && !swApp().busy()) render();
       if (key.startsWith('toefl-vocab') && vocabMode !== 'flow') { if (V) V.deactivate(); V = null; if (view === 'vocab') render(); }
     });
   } else boot();

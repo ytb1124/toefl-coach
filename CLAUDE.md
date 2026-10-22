@@ -66,6 +66,11 @@ node --test tests/engine.test.js
 - `python3 tools/intake.py report <ID>` 출력(Markdown)을 바탕으로 채팅에 리포트를 준다: 성적, 핵심 한 줄, 능력별 발견(재발/새 패턴), 오답 표, 다음 훈련.
 - 앱을 새로고침하면 반영된다고 알린다: 새 오답은 원본 확인 단계로 오늘 훈련에 들어가고, **개선됨/유지됨 상태였던 능력에서 실전 오답이 나오면 자동으로 "재발"이 되어 다시 집중 대상**이 된다. 'TPO' 탭에서 회차별 비교를 볼 수 있다.
 
+## 스피킹·라이팅 파트
+- 코드 `app/sw.js`(UI)·`app/swcore.js`(순수 로직, `tests/swcore.test.js`), 콘텐츠 `content/sw.json`, 기록 키 `toefl-sw-v1` (오늘 훈련·단어 기록과 분리).
+- 튜터 피드백을 새로 받으면 `grammar`에 `src: "튜터 M/D"`로 원문 그대로 추가한다. AI가 만든 문장·문제는 `AI 변형`/`AI 재구성`으로 구분한다.
+- `lr`·`interview` 문장은 빌드가 음원(`audio/SW-*.mp3`)으로 만든다.
+
 ## 배포
 - `main`에 푸시하면 GitHub Pages(https://taebin.link/toefl-coach/)가 자동 갱신된다. 저장소는 공개 — 키·토큰 등 비밀 값을 커밋하지 않는다 (jsonbin 키는 각 기기 브라우저에만 저장).
 - claude.ai 버전은 `artifact.html` + app/* + audio/*를 Artifact로 다시 게시해야 갱신된다 (capabilities: db, user).
