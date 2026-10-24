@@ -1,0 +1,145 @@
+{
+  "_note": "TPO7 오답 패턴용 Transfer 문제 (AI 작성, 원본 문장·정답 재사용 없음). 초점: Listen & Reply 기능·시간 종류·제한어(next/your)·조동사 일치, 공지의 제출물·세션별 주제·근거 없는 주체, C-Test 명사 자리, 대비로 뜻 찾기.",
+  "audioSets": {
+    "ac-t23": {"lines": [{"v": "M", "t": "Do you want to call it a day?"}]},
+    "ac-t24": {"lines": [{"v": "W", "t": "When does your shift start tomorrow?"}]},
+    "ac-t25": {"lines": [{"v": "M2", "t": "Is the first bus to the airport already gone?"}]},
+    "ac-t26": {"lines": [{"v": "W2", "t": "Have you finished the lab report?"}]},
+    "ac-t27": {"lines": [{"v": "M", "t": "Could you give me a hand moving these chairs?"}]},
+    "ac-t28": {"lines": [{"v": "W", "t": "I think we should move the team meeting to Friday."}]},
+    "ac-t29": {"lines": [{"v": "M2", "t": "How long is the drive to the conference center?"}]},
+    "ac-t30": {"lines": [{"v": "W2", "t": "Are you coming to the review session tonight?"}]},
+    "t7-poster": {
+      "title": "TPO7 Transfer — poster session",
+      "lines": [
+        {"v": "N", "t": "Listen to an announcement in a classroom."},
+        {"v": "W", "t": "Next Thursday, each of you will display a research poster in the main hall. Visitors from other departments will walk around and ask you about your methods. Your poster must fit on a single board, so do not print anything larger than one meter wide. Your final grade for the poster will come from me, based on the rubric I posted online."}
+      ]
+    },
+    "t7-fieldtrip": {
+      "title": "TPO7 Transfer — museum field trip",
+      "lines": [
+        {"v": "N", "t": "Listen to an announcement in a classroom."},
+        {"v": "M", "t": "For our museum field trip on Saturday, you'll spend the morning sketching three objects from the ancient pottery collection. After lunch, the museum's curator will hold a workshop on how archaeologists restore broken pottery. By the following Friday, please hand in a two-page reflection that compares two of the objects you sketched."}
+      ]
+    },
+    "t7-ride": {
+      "title": "TPO7 Transfer — ride to the concert",
+      "lines": [
+        {"v": "N", "t": "Listen to a conversation."},
+        {"v": "M", "t": "Are you still going to the concert downtown on Sunday?"},
+        {"v": "W", "t": "I'd love to, but my car is in the repair shop until next week, and the buses don't run late on Sundays."},
+        {"v": "M", "t": "I can drive you. I'm going anyway."},
+        {"v": "W", "t": "Really? That would be great. I was worried I'd have to miss it."}
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "AC-T23", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t23",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["Sure, I'm getting tired anyway.", "The deadline is next Monday.", "I called him yesterday.", "It was a long day yesterday."],
+        "answer": 0,
+        "why": ["✓ 제안(오늘 끝낼까?)에 수락", "업무 주제는 같지만 지금 끝낼지에 대한 답 아님", "call 단어 함정 — 전화 이야기", "day 단어 함정 + 시간축(어제)"]}]
+    },
+    {
+      "id": "AC-T24", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t24",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["It ends at six.", "Not until ten, luckily.", "It's an eight-hour shift.", "I worked yesterday too."],
+        "answer": 1,
+        "why": ["시작이 아니라 끝나는 시각 — 시간 종류 불일치", "✓ 시작 시각", "소요 시간 — 시간 종류 불일치", "시간축(어제) 불일치"]}]
+    },
+    {
+      "id": "AC-T25", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t25",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["My bus leaves at noon.", "The airport is very busy.", "It left about ten minutes ago.", "I'll take a taxi next time."],
+        "answer": 2,
+        "why": ["'내' 버스 — 첫 버스라는 보장 없음 (제한어 first)", "airport 단어 함정", "✓ 첫 버스가 떠났는지에 대한 직접 답", "next time — 질문은 지금 상태"]}]
+    },
+    {
+      "id": "AC-T26", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t26",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["No, I'm not.", "Almost — just the conclusion left.", "Yes, I will.", "The lab is on the third floor."],
+        "answer": 1,
+        "why": ["Have you…? 에 be동사로 답함 — 조동사 불일치", "✓ 완료 여부에 답함", "Have you…? 에 will — 시간축 불일치", "lab 단어 함정"]}]
+    },
+    {
+      "id": "AC-T27", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t27",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["Yes, if you have any extra ones.", "Sure, where do they need to go?", "The chairs are new.", "I moved last year."],
+        "answer": 1,
+        "why": ["Yes 함정 — extra ones가 가리킬 대상·조건이 요청과 안 맞음", "✓ 도움 수락 + 구체화", "chairs 단어 함정 — 사실 진술", "move 단어 함정 — 이사"]}]
+    },
+    {
+      "id": "AC-T28", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t28",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["Ship the boxes on Friday.", "The meeting room is booked.", "Friday works better for me too.", "I met the team last week."],
+        "answer": 2,
+        "why": ["Friday는 같지만 배송이라는 새 대상", "room — 회의 날짜 변경에 대한 반응이 아님", "✓ 일정 변경 제안에 동의", "meet 단어 함정 + 과거"]}]
+    },
+    {
+      "id": "AC-T29", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t29",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["It starts at nine.", "About forty minutes without traffic.", "It's on Main Street.", "I drove there last year."],
+        "answer": 1,
+        "why": ["시작 시각 — How long(소요 시간)과 종류 불일치", "✓ 소요 시간", "장소 — 질문 종류 불일치", "drive 단어 함정 + 과거"]}]
+    },
+    {
+      "id": "AC-T30", "skill": "ACT", "tier": "transfer", "kind": "reply", "audio": "ac-t30",
+      "qs": [{"prompt": "Choose the best response.",
+        "options": ["I am if I finish my essay.", "No, I haven't reviewed it.", "Yes, it was very helpful.", "The session room is small."],
+        "answer": 0,
+        "why": ["✓ Are you…? → I am + 조건", "review 단어 함정 + 완료형 — 조동사 불일치", "과거 — 오늘 밤 참석 여부와 시간축 불일치", "session 단어 함정"]}]
+    },
+    {
+      "id": "AU-T7-1", "skill": "AUDIT", "tier": "transfer", "kind": "listen", "audio": "t7-poster",
+      "qs": [{"prompt": "What can be inferred about the posters?",
+        "options": ["They will be graded by visitors.", "They have a size limit.", "They must be finished by Monday.", "They will be displayed online."],
+        "answer": 1,
+        "why": ["✗ visitors는 질문만 함. 채점은 강사(from me)", "✓ one meter wide", "✗ 기한 언급 없음 (발표는 Thursday)", "✗ online은 rubric 위치"],
+        "evidence": "do not print anything larger than one meter wide"}]
+    },
+    {
+      "id": "TG-T7-1", "skill": "TARGET", "tier": "transfer", "kind": "listen", "audio": "t7-fieldtrip",
+      "qs": [
+        {"prompt": "What must students submit by the following Friday?",
+          "options": ["Three sketches of pottery", "A written comparison of two objects", "Notes from the curator's workshop", "A restored piece of pottery"],
+          "answer": 1,
+          "why": ["✗ 스케치는 토요일 활동(과정)", "✓ two-page reflection that compares two of the objects", "✗ 워크숍은 들은 활동, 제출물 아님", "✗ restore는 워크숍 주제"],
+          "evidence": "please hand in a two-page reflection that compares two of the objects you sketched"},
+        {"prompt": "What will the afternoon workshop be about?",
+          "options": ["How to sketch ancient objects", "The history of the museum", "Repairing damaged pottery", "Choosing objects for the reflection"],
+          "answer": 2,
+          "why": ["✗ 스케치는 오전 활동", "✗ 언급 없음", "✓ restore broken pottery ≈ repairing damaged pottery", "✗ 과제 이야기와 세션 주제 혼동"],
+          "evidence": "the museum's curator will hold a workshop on how archaeologists restore broken pottery"}
+      ]
+    },
+    {
+      "id": "AU-T7-2", "skill": "AUDIT", "tier": "transfer", "kind": "listen", "audio": "t7-ride",
+      "qs": [{"prompt": "Why was the woman worried she might miss the concert?",
+        "options": ["She had to work on Sunday.", "She didn't have a way to get there.", "The tickets were sold out.", "She didn't know where it was."],
+        "answer": 1,
+        "why": ["✗ 일정 문제 언급 없음 — 흔한 이유를 덧붙임", "✓ 차 수리 + 버스 없음 → 교통수단 없음", "✗ 표 이야기 없음", "✗ downtown이라고 이미 알고 있음"],
+        "evidence": "my car is in the repair shop until next week, and the buses don't run late on Sundays"}]
+    },
+    {
+      "id": "W-T17", "skill": "WORD", "tier": "transfer", "kind": "mc",
+      "passage": "Early maps showed coastlines as fixed lines, yet geologists now know that shores are remarkably fluid, shifting with every storm and season.",
+      "qs": [{"prompt": "The word \"fluid\" in the passage is closest in meaning to",
+        "options": ["changeable", "unclear", "wet", "dangerous"],
+        "answer": 0,
+        "why": ["✓ fixed ↔ fluid 대비 + shifting", "'헷갈리는' 쪽 의미 — 대비 관계와 맞지 않음", "물과 관련된 표면 뜻 함정", "storm에서 연상한 평가"],
+        "evidence": "coastlines as fixed lines, yet geologists now know that shores are remarkably fluid, shifting with every storm and season"}]
+    },
+    {
+      "id": "F-T19", "skill": "FORM", "tier": "transfer", "kind": "ctest",
+      "ctest": {"text": "The city adopted a cautious {{}} to the new tax, testing it in one district first.", "prefix": "stra", "answer": "strategy", "slot": 0},
+      "explain": "a + 형용사(cautious) + ___ → 명사 자리. strain·strange(형용사)가 아니라 strategy"
+    },
+    {
+      "id": "W-T18", "skill": "WORD", "tier": "transfer", "kind": "ctest",
+      "ctest": {"text": "Reflexes are automatic reactions to sudden {{}} such as heat, noise, or pain.", "prefix": "sig", "answer": "signals"},
+      "explain": "such as heat, noise, pain 앞 → 이들을 묶는 복수 명사. sig- → signals (sign·significant 아님)"
+    }
+  ]
+}
