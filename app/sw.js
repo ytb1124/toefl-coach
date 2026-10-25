@@ -573,7 +573,7 @@
           const n = d.log.filter(l => l.kind === kind && l.pid === p.id).length;
           const title = kind === 'em' ? `To ${p.to} · ${p.subject}` : p.prof.text.split(/(?<=[.?])\s/).filter(s => /\?/.test(s))[0] || p.prof.text.slice(0, 80);
           return h('a', { class: 'card listrow', href: `#/sw/${kind}/${p.id}` }, h('div', null, h('b', null, title)),
-            h('div', { class: 'small muted' }, srcChip(p.src), p.date ? ` 수업 ${p.date}` : '', p.tutor ? ' · 튜터 교정본 있음' : p.mine ? ' · 당시 내 글 있음' : '', n ? ` · ${n}번 씀` : ''));
+            h('div', { class: 'small muted' }, srcChip(p.src), p.date ? ` 수업 ${p.date}` : '', p.tutor ? ' · 튜터 교정본 있음' : p.fix ? ' · AI 교정본 있음' : p.mine ? ' · 당시 내 글 있음' : '', n ? ` · ${n}번 씀` : ''));
         }));
     }
     function promptBlock(kind, p) {
@@ -631,6 +631,9 @@
           copyBtn(() => `[${kind === 'em' ? 'TOEFL Email' : 'TOEFL Academic Discussion'}] ${p.id}\n\n${kind === 'em' ? p.scenario + '\nTasks:\n- ' + p.tasks.join('\n- ') : p.prof.name + ': ' + p.prof.text}\n\n--- My answer (${K.wordCount(ta.value)} words) ---\n${ta.value}`, '튜터·Claude에게 보낼 글 복사')));
       if (p.tutor) put(card, h('details', { class: 'card inner' }, h('summary', null, '그때 튜터가 고친 곳 (당시 내 글 → 튜터 교정본)'),
         h('p', { class: 'small muted' }, '빨강 = 튜터가 뺀 것, 초록 = 튜터가 넣은 것'), textDiff(p.mine, p.tutor)));
+      else if (p.fix) put(card, h('details', { class: 'card inner' }, h('summary', null, '그때 내 글 → AI 교정본 (튜터 확인 없음)'),
+        h('p', { class: 'small muted' }, '빨강 = 뺀 것, 초록 = 넣은 것'), textDiff(p.mine, p.fix),
+        h('p', { class: 'small muted' }, '당시 내 글의 반복 오류 검사 결과:'), flagList(K.scan(p.mine, S.scan, kind))));
       else if (p.mine) put(card, h('details', { class: 'card inner' }, h('summary', null, '그때 내가 쓴 글 (PDF에 튜터 교정본 없음)'), h('pre', { class: 'essaytext' }, p.mine),
         h('p', { class: 'small muted' }, '내 반복 오류 검사 결과:'), flagList(K.scan(p.mine, S.scan, kind))));
       put(card, h('button', { class: 'primary', onclick: () => { save(d => { delete d.drafts[wr.key]; }); wr = null; go('#/sw/' + kind); } }, '끝내기 (초안 지우기)'),
