@@ -1,0 +1,850 @@
+{
+  "_help": {
+    "test": "reading/listening/ctest = [정답, 전체] — 화면에서 분모를 확인할 수 없으면 null. errors = originals 개수와 같아야 함.",
+    "report": "headline 한 줄 / findings: 능력별 발견 (skill + text, recurrence: 'repeat'|'new'|'improved') / next: 다음 훈련 초점. 확인된 사실과 추정을 구분.",
+    "originals": "content/originals.json 과 같은 형식. id = '<TEST>-R1' / '<TEST>-L1'. 모르는 값은 null + gaps[]. evidence 는 지문/스크립트 원문 그대로.",
+    "audioSets": "리스닝 오답은 스크린샷의 스크립트로 음원 세트를 만든다. id = 'o-<test>-<topic>'. 화자: N 내레이터, W/M 여·남, W2/M2 두 번째 여·남."
+  },
+  "test": {
+    "id": "TPO8",
+    "date": "2026-10-29",
+    "reading": [
+      38,
+      49
+    ],
+    "listening": [
+      23,
+      35
+    ],
+    "ctest": [
+      21,
+      30
+    ],
+    "errors": 23,
+    "note": "출처: tpo오답/2026-10-29_TPO8 캡처 17장 + 진단 보고서(사용자 공유 10-29). 날짜는 기록 공유일 — 실제 풀이 날짜는 기록 없음. Reading 38/49·Listening 23/35는 사용자 점수(사용자가 Reading 전체를 38/49로 정정). 세트별: C-Test 9/10·6/10·6/10, Read in Daily Life 1/2, Academic Reading 4/5, Listen & Reply 6/8 + 별도 1문항 오답, Announcement 1/2, Corporate governance 2/4, Housewarming 1/2, Karaoke 1/2, Coral reefs 3/4, Crowdfunding 1/4. 캡처에 없는 Reading 12·Listening 8문항은 총점에서 산출(전부 정답). 사용자 진술: '뒤로갈수록 졸려죽는줄알았어' — 마지막 Crowdfunding 1/4와의 인과는 미확인. 오답 선택 이유·모르는 단어에 대한 사용자 진술은 없음. 시험까지 약 3일(사용자 진술)."
+  },
+  "report": {
+    "headline": "Reading 오답 11개 중 9개가 C-Test(21/30): 빈칸 자리(복수 명사·현재형·명사·분사·형용사 보어·전치사 뒤 명사)를 확인하지 않고 철자가 비슷한 단어로 채움. Listening은 강의에 실제로 나온 정보지만 질문이 가리킨 대상이 아닌 것(옛 주방, 은행, 모금 목표, 세부 장단점)을 골랐고, 마지막 Crowdfunding 지문에서 4문제 중 3개를 틀림.",
+    "findings": [
+      {
+        "skill": "FORM",
+        "recurrence": "repeat",
+        "text": "C-Test 자리 오류 6개: economic ___ work → processed(동사 앞 복수 명사 자리), dating ___ → used(일반 사실 현재형), DNA ___ from → analized(명사 자리), Often ___ a 'language' → consistent(분사), might be ___ to → hav(형용사 보어), with ___ alone → would(전치사 뒤 명사). TPO7(1개)보다 크게 늘어남 — Archaeology·Music 두 지문에 몰림."
+      },
+      {
+        "skill": "WORD",
+        "recurrence": "repeat",
+        "text": "pro___ insights into → process(provide insights 연어), con___ feelings → concer(convey), bio___ → biolo(미완성), prompted ↔ accompanied(원인 vs 동반). R7~R9는 'hard to convey with words' 한 문장에서 연속 오답 — 의미 단위 하나를 놓친 연쇄 가능성 (추정)."
+      },
+      {
+        "skill": "TARGET",
+        "recurrence": "repeat",
+        "text": "옛 주방이 작았다(과거 정보)를 선물 거절 이유로, 마감 공지를 채점 기준으로, 크라우드펀딩을 투자 위험으로, 모금 목표를 장기 성공 요인으로, 파티가 즐겁다를 직접 참여 의지로 — 지문에 있는 정보지만 질문이 가리킨 대상이 아님. Main Topic/Purpose 3개 포함."
+      },
+      {
+        "skill": "BIND",
+        "recurrence": "repeat",
+        "text": "은행·벤처 투자자(우회 대상)를 고객으로, 산호의 algae 영양 공급을 coral gardening(이식 복원)에 연결 — 다른 개념의 진짜 특징을 붙임."
+      },
+      {
+        "skill": "ACT",
+        "recurrence": "repeat",
+        "text": "Listen & Reply 3개: 이미 도착한 방법(How did you get here) → 앞으로 따라오라, 회의 지속 시간 → 내 약속 시각, 발표자가 누구 → 같은 테이블 사람. TPO3·5·7에 이어 재발 (TPO7 6개 → 이번 3개, 분모가 달라 개선으로 단정하지 않음)."
+      }
+    ],
+    "next": "C-Test: 단어를 떠올리기 전에 자리(명사·본동사·분사·형용사) → 수·시제 → 완성 후 문장 재삽입. 강의 Main Topic: 첫 정의 문장으로 범위를 정하고 장단점·예시는 세부로. Detail: 선택지 단어가 지문 '어디서' 나왔는지 확인하고 그 위치가 질문 대상인지 본다. 마지막 지문까지 집중을 유지하는지 다음 모의고사에서 앞·뒤 정답률을 따로 기록."
+  },
+  "audioSets": {
+    "o-t8-quickly": {
+      "title": "TPO8 Reply — get here so quickly",
+      "note": "화면의 질문 문장만 재구성 (원 음성 없음)",
+      "lines": [
+        {
+          "v": "W",
+          "t": "How did you get here so quickly?"
+        }
+      ]
+    },
+    "o-t8-meetings": {
+      "title": "TPO8 Reply — how long meetings last",
+      "note": "화면의 질문 문장만 재구성 (원 음성 없음)",
+      "lines": [
+        {
+          "v": "M",
+          "t": "How long do these meetings usually last?"
+        }
+      ]
+    },
+    "o-t8-speaker": {
+      "title": "TPO8 Reply — speaker for tonight",
+      "note": "화면의 질문 문장만 재구성 (원 음성 없음)",
+      "lines": [
+        {
+          "v": "W",
+          "t": "Who is the speaker for tonight's event?"
+        }
+      ]
+    },
+    "o-t8-midterm": {
+      "title": "TPO8 Announcement — midterm project",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to an announcement in a classroom."
+        },
+        {
+          "v": "W",
+          "t": "I want to make sure everyone is aware that the midterm project is due next Friday. Please ensure you have included all necessary sections: introduction, methodology, results, and discussion. Of course, you know the introduction and methodology provide the background to the research, and the results and ensuing discussion section can give ideas for further research. The project should be submitted through the course portal before midnight. Late submissions will not be accepted."
+        }
+      ]
+    },
+    "o-t8-governance": {
+      "title": "TPO8 Talk — corporate governance",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a talk in a business class."
+        },
+        {
+          "v": "W",
+          "t": "Let's talk about corporate governance. Corporate governance is the way a company is governed and managed. It's like a set of rules and practices that help make sure the company runs smoothly and fairly. It's important because it helps balance the needs of groups like shareholders, managers, customers, and suppliers. One key part of corporate governance is the board of directors. This group makes major decisions about where the company is headed. A strong board is often made up of people with diverse backgrounds—for example, individuals with experience in finance, law, operations, or marketing. This mix of expertise helps the board look at issues from different angles and make more informed decisions."
+        },
+        {
+          "v": "W",
+          "t": "Another important part is ensuring transparency. This means the company should be open and honest about what it's doing and how it's performing. One major way companies show transparency is through financial reports. Companies should regularly share financial reports to show how they're doing financially, and also explain any risks they're facing. When companies are transparent, it builds trust and helps investors feel more confident."
+        },
+        {
+          "v": "W",
+          "t": "Of course, putting good corporate governance into practice isn't always easy. It takes effort and money—the cost of hiring outside experts to check the company's finances could be high. And you'll need to set up systems in advance to make sure rules are being followed."
+        }
+      ]
+    },
+    "o-t8-housewarming": {
+      "title": "TPO8 Conversation — housewarming gift",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a conversation."
+        },
+        {
+          "v": "M",
+          "t": "I really need to find a gift for Anna's housewarming party."
+        },
+        {
+          "v": "W",
+          "t": "Didn't you say her new place has a fancy kitchen?"
+        },
+        {
+          "v": "M",
+          "t": "Yeah, she's thrilled. She loves to cook, and the kitchen in her last place was tiny."
+        },
+        {
+          "v": "W",
+          "t": "Why don't you get her some kitchenware then? A good skillet or a set of knives or something like that?"
+        },
+        {
+          "v": "M",
+          "t": "Thing is, I don't know what Anna needs. That seems like the sort of thing she should choose for herself, you know?"
+        },
+        {
+          "v": "W",
+          "t": "How about a nice cookbook then? It's personal, and you really can't have too many."
+        }
+      ]
+    },
+    "o-t8-karaoke": {
+      "title": "TPO8 Conversation — Jamie's party",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a conversation."
+        },
+        {
+          "v": "M",
+          "t": "Are you going to Jamie's party this weekend? I heard it's going to be pretty lively."
+        },
+        {
+          "v": "W",
+          "t": "Definitely. I heard there's going to be a karaoke competition and a taco buffet."
+        },
+        {
+          "v": "M",
+          "t": "That sounds amazing. I hope someone records the karaoke—those are always hilarious."
+        },
+        {
+          "v": "W",
+          "t": "Oh, about that... Jamie actually asked me to host the karaoke. I've never done that before!"
+        },
+        {
+          "v": "M",
+          "t": "You'll be great. Just don't expect me to join in! I have stage fright."
+        }
+      ]
+    },
+    "o-t8-coral": {
+      "title": "TPO8 Talk — coral reefs",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a talk on a life sciences podcast."
+        },
+        {
+          "v": "M",
+          "t": "Let's dive into the fascinating world of coral reefs, which provide crucial habitat for a wide variety of fish and other marine organisms. The reefs themselves are created by countless tiny creatures known as coral polyps. Each polyp is a small, soft-bodied animal that lives in colonies and secretes calcium carbonate. This calcium carbonate then forms the hard skeletons that build up coral reefs over time. What's truly remarkable is that coral polyps contain microscopic organisms, called algae, inside the coral's own tissues. These algae transform sunlight into usable energy by performing the process of photosynthesis. This way, the algae provide the coral polyps with most of their energy. So the algae and corals are in a mutually beneficial relationship that fuels the entire reef ecosystem."
+        },
+        {
+          "v": "M",
+          "t": "But coral reefs are in trouble. One of the most pressing threats they face is coral bleaching. When ocean temperatures rise, as they do today, coral polyps often become stressed and expel the algae living in their tissues. This not only turns the corals ghostly white but also strips them of their main energy source. If the stress continues, the polyps can die, leaving behind a lifeless reef structure and threatening the entire ecosystem that depends on it."
+        },
+        {
+          "v": "M",
+          "t": "Scientists are bringing some coral reefs back to life through a method called coral gardening. Scientists grow healthy coral fragments in underwater nurseries and transplant them to degraded reefs. This hands-on restoration technique helps rebuild reef structures, support marine life, and even select heat-resistant coral strains for future resilience."
+        }
+      ]
+    },
+    "o-t8-crowdfunding": {
+      "title": "TPO8 Talk — crowdfunding",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a talk on a business podcast."
+        },
+        {
+          "v": "M",
+          "t": "Crowdfunding has become a popular way for entrepreneurs to raise money for their projects. It involves collecting small amounts of money from many people, usually through online platforms. These platforms allow entrepreneurs to bypass traditional funding sources like banks and venture capitalists, giving them direct access to potential customers and investors. What customers can get in exchange is first dibs on the first products of their kind when they're eventually produced. For entrepreneurs, one major benefit is that crowdfunding lowers financial risk. By getting funds through preorders or donations, entrepreneurs can test if people are truly interested in their idea before spending a lot of time and money. And the crowdfunding can create buzz and build a community around a product, which helps with long-term success."
+        },
+        {
+          "v": "M",
+          "t": "However, there are challenges. Entrepreneurs must put in time and effort to create strong campaigns and keep supporters engaged. Competition is high, and not every project meets its funding goal. Even after raising money, it can be difficult to actually make and deliver the promised product. Entrepreneurs need to keep supporters updated and be honest if problems come up—like delays in manufacturing or shipping the product—so they don't lose trust. For example, there was this high-tech cooler for which millions of dollars were raised. But production delays happened and weren't properly communicated to the financial backers. The project never recovered from its reputational loss and went bankrupt, and many people who paid for the cooler never received one."
+        }
+      ]
+    }
+  },
+  "originals": [
+    {
+      "id": "TPO8-R1",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Economics C-Test",
+      "qtype": "C-Test",
+      "skill": "FORM",
+      "skills2": [
+        "WORD"
+      ],
+      "ctest": {
+        "text": "Economists create models to understand how economic {{}} work and predict future trends.",
+        "prefix": "proc",
+        "answer": "processes"
+      },
+      "my": "processed",
+      "evidence": "how economic proc___ work — 형용사 economic 뒤 + 동사 work 앞 = 복수 명사 주어 자리",
+      "trap": "processed도 실제 단어이고 economic 뒤에 자연스럽게 붙어 보임 (AI 추정)",
+      "diff": "how + 주어 + work: 동사 work의 주어가 필요 → 복수 명사 processes. processed(분사)로는 주어가 없음",
+      "rule": "빈칸 바로 뒤에 동사가 오면 빈칸은 그 동사의 주어(명사). 뒤 동사가 work(복수형) → 복수 명사",
+      "causeAI": "빈칸 뒤 동사와의 관계를 보지 않고 어근 process에서 익숙한 형태를 고름 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R2",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Archaeology C-Test",
+      "qtype": "C-Test",
+      "skill": "FORM",
+      "skills2": [],
+      "ctest": {
+        "text": "Radiocarbon dating {{}} chemical principles to estimate the age of artifacts, while DNA analysis from biology can provide insights into ancient human populations and their diets.",
+        "prefix": "us",
+        "answer": "uses"
+      },
+      "my": "used",
+      "evidence": "Radiocarbon dating us___ chemical principles to estimate the age of artifacts — 일반적 방법 설명, 단수 주어",
+      "trap": "used도 문법적으로 가능한 과거형이라 어색함이 느껴지지 않음 (AI 추정)",
+      "diff": "지문 전체가 현재형으로 학문 방법을 설명 (is considered, integrates, draws on) → 단수 주어 + 현재형 uses",
+      "rule": "본동사 자리면 주어 수 + 지문의 시제(일반 사실 = 현재)를 함께 확인",
+      "causeAI": "시제를 주변 문장과 맞춰 보지 않음 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R3",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Archaeology C-Test",
+      "qtype": "C-Test",
+      "skill": "FORM",
+      "skills2": [
+        "WORD"
+      ],
+      "ctest": {
+        "text": "Radiocarbon dating uses chemical principles to estimate the age of artifacts, while DNA {{}} from biology can provide insights into ancient human populations and their diets.",
+        "prefix": "anal",
+        "answer": "analysis"
+      },
+      "my": "analized",
+      "evidence": "DNA anal___ from bio___ can pro___ insights — can 앞의 주어 = 명사 자리",
+      "trap": "analyze의 과거형처럼 쓰기 쉬움 (analized는 철자도 비표준)",
+      "diff": "while + DNA ___ (주어) + can provide → 명사 analysis. analyzed(동사·분사)로는 can의 주어가 없음",
+      "rule": "조동사 can 앞에 빈칸이 있으면 주어 명사. analysis(n.) / analyze(v.) 구별",
+      "causeAI": "명사 자리에 동사 계열 형태를 복원 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R4",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Archaeology C-Test",
+      "qtype": "C-Test",
+      "skill": "WORD",
+      "skills2": [
+        "FORM"
+      ],
+      "ctest": {
+        "text": "Radiocarbon dating uses chemical principles to estimate the age of artifacts, while DNA analysis from {{}} can provide insights into ancient human populations and their diets.",
+        "prefix": "bio",
+        "answer": "biology"
+      },
+      "my": "biolo",
+      "evidence": "DNA analysis from bio___ — 전치사 from 뒤 학문 분야 명사",
+      "trap": "bio- 어근은 맞혔으나 단어를 끝까지 완성하지 못함",
+      "diff": "from + 학문 분야 명사 biology. biolo는 미완성",
+      "rule": "어근을 맞혔으면 칸 수를 세어 끝까지 완성. -logy(학문) 어미: biology, geology, sociology",
+      "causeAI": "단어 끝부분 철자 복원 실패 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음",
+        "원문 'DNA analysis from biology' 자체가 다소 어색한 표현 — 이 문항 하나로 어휘력을 단정하지 않는다"
+      ]
+    },
+    {
+      "id": "TPO8-R5",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Archaeology C-Test",
+      "qtype": "C-Test",
+      "skill": "WORD",
+      "skills2": [],
+      "ctest": {
+        "text": "Radiocarbon dating uses chemical principles to estimate the age of artifacts, while DNA analysis from biology can {{}} insights into ancient human populations and their diets.",
+        "prefix": "pro",
+        "answer": "provide"
+      },
+      "my": "process",
+      "evidence": "DNA analysis ... can pro___ insights into ancient human populations — insights를 목적어로 하는 동사",
+      "trap": "process는 데이터·정보를 다룬다는 맥락에서 그럴듯함 (AI 추정)",
+      "diff": "provide insights into = ~에 대한 통찰을 주다 (연어). process insights는 쓰지 않는 결합",
+      "rule": "동사 빈칸은 뒤 목적어와 묶어서 연어로 확인: provide insights / process data",
+      "causeAI": "목적어 insights와의 연어를 확인하지 않음 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R6",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Music C-Test",
+      "qtype": "C-Test",
+      "skill": "FORM",
+      "skills2": [
+        "WORD"
+      ],
+      "ctest": {
+        "text": "Often {{}} a \"language of emotions,\" music allows people to express feelings that might be hard to convey with words alone.",
+        "prefix": "consi",
+        "answer": "considered"
+      },
+      "my": "consistent",
+      "evidence": "Often consi___ a \"language of emotions,\" music allows — 문장 앞 분사구문 (= Music is often considered a language)",
+      "trap": "consi- 로 시작하는 익숙한 형용사 consistent가 먼저 떠오름 (AI 추정)",
+      "diff": "Often ___ a 'language' , music … → 수동 분사 considered (be considered A = A로 여겨지다). consistent(일관된)는 뒤 명사구와 연결 안 됨",
+      "rule": "콤마 앞 문장 머리의 빈칸 + 뒤에 주어 → 분사구문. 주어와 수동 관계면 p.p.",
+      "causeAI": "분사구문 구조를 인식하지 못함 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R7",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Music C-Test",
+      "qtype": "C-Test",
+      "skill": "FORM",
+      "skills2": [],
+      "ctest": {
+        "text": "Often considered a \"language of emotions,\" music allows people to express feelings that might be {{}} to convey with words alone.",
+        "prefix": "ha",
+        "answer": "hard"
+      },
+      "my": "hav",
+      "evidence": "feelings that might be ha___ to con___ with wo___ alone — be 뒤 보어 + to 부정사",
+      "trap": "ha- 뒤에 have가 떠올랐을 가능성 (AI 추정). R7~R9가 한 문장에서 연속 오답",
+      "diff": "might be + 형용사 + to V → hard to convey. be 뒤에 have(동사)는 올 수 없음",
+      "rule": "be ___ to V → 형용사(hard/easy/difficult). 조동사·be 뒤에 또 동사를 넣지 않는다",
+      "causeAI": "be 동사 뒤 보어 자리 판단 실패 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음",
+        "입력은 'v' 한 글자 — have를 의도했는지는 기록 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R8",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Music C-Test",
+      "qtype": "C-Test",
+      "skill": "WORD",
+      "skills2": [
+        "FORM"
+      ],
+      "ctest": {
+        "text": "Often considered a \"language of emotions,\" music allows people to express feelings that might be hard to {{}} with words alone.",
+        "prefix": "con",
+        "answer": "convey"
+      },
+      "my": "concer",
+      "evidence": "express feelings that might be hard to con___ with words alone — feelings를 전달하다",
+      "trap": "con-으로 시작하는 익숙한 단어 concern이 먼저 떠오름 (AI 추정)",
+      "diff": "convey feelings / emotions / a message = 전달하다. concern(관련되다·걱정시키다)은 '말로 ~하기 어려운 감정'과 맞지 않음",
+      "rule": "to 뒤 동사 빈칸은 목적어(feelings)와 수단(with words)을 함께 넣어 의미 확인",
+      "causeAI": "convey를 문맥에서 복원하지 못함 — 단어를 몰랐는지는 기록 없음 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R9",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Music C-Test",
+      "qtype": "C-Test",
+      "skill": "FORM",
+      "skills2": [],
+      "ctest": {
+        "text": "Often considered a \"language of emotions,\" music allows people to express feelings that might be hard to convey with {{}} alone.",
+        "prefix": "wo",
+        "answer": "words"
+      },
+      "my": "would",
+      "evidence": "hard to convey with wo___ alone — 전치사 with 뒤 명사",
+      "trap": "would는 매우 익숙한 단어라 wo- 에서 바로 떠오름 (AI 추정)",
+      "diff": "with + 명사 → words (말로만). would(조동사)는 전치사의 목적어가 될 수 없음",
+      "rule": "전치사 뒤 빈칸 = 명사. 완성 후 'with would alone'처럼 다시 읽어 확인",
+      "causeAI": "전치사 뒤 명사 자리 확인 누락 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R10",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Daily Life — Security email",
+      "qtype": "Detail",
+      "skill": "AUDIT",
+      "skills2": [
+        "WORD"
+      ],
+      "passage": "Subject: New security procedures\n\nEffective Monday, all visitors must check in at the front desk and receive a temporary badge before entering the building. Employees are responsible for escorting their guests at all times. Please inform any clients or vendors you're expecting about this new requirement.\n\nSecurity Department\nJennifer",
+      "stem": "What must employees do when they have visitors?",
+      "options": [
+        "Register them in advance",
+        "Meet them outside the building",
+        "Accompany them throughout their visit",
+        "Provide them with permanent badges"
+      ],
+      "my": 1,
+      "correct": 2,
+      "evidence": "Employees are responsible for escorting their guests at all times.",
+      "trap": "escort(데리고 다니다)에서 '맞이하러 나간다'는 장면이 연상될 수 있음 (AI 추정)",
+      "diff": "escorting at all times = accompany throughout their visit. 'outside the building'(장소)은 원문에 없음 — 방문객은 front desk에서 체크인",
+      "rule": "선택지의 장소·시간·조건 단어(outside, in advance, permanent)마다 원문 근거가 있는지 확인",
+      "causeAI": "escort ↔ accompany 재표현을 연결하지 못했거나 근거 없는 장소 요소를 받아들임 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-R11",
+      "test": "TPO8",
+      "sec": "R",
+      "set": "Industrial Revolution and Its Impact",
+      "qtype": "Vocabulary",
+      "skill": "WORD",
+      "skills2": [],
+      "passage": "Working conditions in factories were often harsh. Workers, including children, faced long hours, low wages, and unsafe environments. This exploitation of workers prompted the rise of labor unions, which fought for better wages, safer conditions, and reasonable hours, leading to labor reforms that improved workers' lives.",
+      "stem": "The word \"prompted\" in the passage is closest in meaning to",
+      "options": [
+        "led to",
+        "delayed",
+        "accompanied",
+        "forced"
+      ],
+      "my": 2,
+      "correct": 0,
+      "evidence": "This exploitation of workers prompted the rise of labor unions",
+      "trap": "착취와 노조 등장이 같은 시기에 함께 나타났으므로 '동반했다'도 말이 되는 것처럼 보임 (AI 추정)",
+      "diff": "prompt = 촉발하다(원인 → 결과) = led to. accompany는 함께 일어남일 뿐 원인 관계가 없음",
+      "rule": "A ___ B 에서 A가 B의 원인인지 확인: 원인이면 cause / lead to / trigger, 단순 동시 발생이면 accompany",
+      "causeAI": "인과 관계와 동반 관계를 구분하지 못함 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L1",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Listen & Reply",
+      "qtype": "Listen & Reply",
+      "skill": "ACT",
+      "skills2": [],
+      "audio": "o-t8-quickly",
+      "stem": "Choose the best response.",
+      "options": [
+        "I took a taxi.",
+        "You can follow me there.",
+        "Even later than that.",
+        "Usually about fifteen minutes."
+      ],
+      "my": 1,
+      "correct": 0,
+      "evidence": "How did you get here so quickly? = 이미 도착한 방법을 묻는 과거 질문",
+      "trap": "이동 방법이라는 같은 주제라 관련 있어 보임 (AI 추정)",
+      "diff": "did ... get here(과거, 이미 도착) → 수단 I took a taxi. follow me there는 앞으로의 이동 제안 — 시간축 불일치",
+      "rule": "How 질문: 방법인지 정도인지 + 시제(did = 이미 일어난 일)를 먼저 정한다",
+      "causeAI": "과거 시제·방법 질문의 기능 판단 실패 (추정)",
+      "gaps": [
+        "원 음성 없음: 화면의 질문 문장으로 TTS 재구성",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L2",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Listen & Reply",
+      "qtype": "Listen & Reply",
+      "skill": "ACT",
+      "skills2": [],
+      "audio": "o-t8-meetings",
+      "stem": "Choose the best response.",
+      "options": [
+        "I'm meeting with the manager after lunch.",
+        "We tend to be out by noon.",
+        "I'm afraid I'll be very late to the meeting.",
+        "We prefer to speak with the client directly."
+      ],
+      "my": 0,
+      "correct": 1,
+      "evidence": "How long do these meetings usually last? = 지속 시간",
+      "trap": "meeting 단어 반복 + after lunch라는 시간 표현이 있어 답처럼 들림 (AI 추정)",
+      "diff": "How long ... last(지속 시간) → 'be out by noon'(정오면 끝남)으로 간접 답. after lunch는 내 약속 시각",
+      "rule": "How long = 길이. 선택지가 시각(when)인지 길이(how long)인지 구분. 간접 답(be out by ~)도 길이 답이 될 수 있음",
+      "causeAI": "시간 종류(지속 vs 시각) 불일치 + 단어 반복 함정 (추정)",
+      "gaps": [
+        "원 음성 없음: 화면의 질문 문장으로 TTS 재구성",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L3",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Listen & Reply",
+      "qtype": "Listen & Reply",
+      "skill": "ACT",
+      "skills2": [],
+      "audio": "o-t8-speaker",
+      "stem": "Choose the best response.",
+      "options": [
+        "We're at a table with Yasmine and Jim.",
+        "We'll speak about it when I see them next week.",
+        "It's the former chair of the department.",
+        "It's no problem if she's late."
+      ],
+      "my": 0,
+      "correct": 2,
+      "evidence": "Who is the speaker for tonight's event? = 발표자의 신원",
+      "trap": "사람 이름이 나와 Who 질문에 답하는 것처럼 보임 (AI 추정)",
+      "diff": "Who is the speaker → 신원(former chair of the department). Yasmine and Jim은 같은 테이블 사람이지 발표자가 아님",
+      "rule": "Who 질문: 사람이 나온다고 답이 아니라, 그 사람이 '질문 속 역할(speaker)'인지 확인",
+      "causeAI": "사람 등장 여부로 판단 (추정)",
+      "gaps": [
+        "원 음성 없음: 화면의 질문 문장으로 TTS 재구성",
+        "세트·문항 번호가 화면에 없음",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L4",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Announcement — midterm project",
+      "qtype": "Main Purpose",
+      "skill": "TARGET",
+      "skills2": [
+        "AUDIT"
+      ],
+      "audio": "o-t8-midterm",
+      "stem": "What is the main purpose of the announcement?",
+      "options": [
+        "To introduce a new project",
+        "To remind students of a deadline",
+        "To explain the grading criteria",
+        "To notify students about class cancellation"
+      ],
+      "my": 2,
+      "correct": 1,
+      "evidence": "I want to make sure everyone is aware that the midterm project is due next Friday / Late submissions will not be accepted.",
+      "trap": "필수 섹션(introduction, methodology…) 설명이 길어 '기준 설명'처럼 들림 (AI 추정)",
+      "diff": "첫 문장 = 목적(due next Friday 상기), 마지막 = 마감 엄수. 섹션 목록은 세부이고, 채점 기준(grading)은 언급 없음",
+      "rule": "공지 목적: 첫 문장(I want to make sure…)과 마지막 지시를 묶어서 판단. 가운데 세부를 목적으로 올리지 않는다",
+      "causeAI": "세부(제출 구성 요소)를 목적으로 선택 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L5",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Talk — Corporate governance",
+      "qtype": "Main Topic",
+      "skill": "TARGET",
+      "skills2": [
+        "AUDIT"
+      ],
+      "audio": "o-t8-governance",
+      "stem": "What is the main topic of the talk?",
+      "options": [
+        "Leadership styles in management",
+        "How companies are directed and operated",
+        "How company leaders overcome financial challenges",
+        "Marketing strategies for corporations"
+      ],
+      "my": 0,
+      "correct": 1,
+      "evidence": "Corporate governance is the way a company is governed and managed.",
+      "trap": "board of directors·managers 이야기가 나와 리더십처럼 들림 (AI 추정)",
+      "diff": "첫 정의: governed and managed = directed and operated. 리더십 '스타일'은 다루지 않음",
+      "rule": "Main Topic: 첫 정의 문장을 패러프레이즈한 선택지를 찾는다. 하위 요소(이사회)에서 연상한 주제는 제외",
+      "causeAI": "하위 요소에서 연상한 범위로 주제를 판단 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L6",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Talk — Corporate governance",
+      "qtype": "Detail",
+      "skill": "AUDIT",
+      "skills2": [
+        "CATCH"
+      ],
+      "audio": "o-t8-governance",
+      "stem": "What challenge related to corporate governance is mentioned?",
+      "options": [
+        "It limits innovation and creativity.",
+        "It may harm relationships with shareholders.",
+        "It requires careful planning and can be expensive.",
+        "It creates confusion about company goals."
+      ],
+      "my": 3,
+      "correct": 2,
+      "evidence": "It takes effort and money / you'll need to set up systems in advance to make sure rules are being followed",
+      "trap": "일반적인 경영 문제처럼 그럴듯함 (AI 추정)",
+      "diff": "Of course, … isn't always easy 뒤가 어려움: effort and money → expensive, set up systems in advance → careful planning. 목표 혼란은 언급 없음",
+      "rule": "'challenge' 질문은 However / Of course … isn't easy 신호 뒤를 잡는다. 선택지 내용이 원문에 있는지 확인",
+      "causeAI": "어려움 신호 뒤 정보를 놓치고 일반 상식으로 고름 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L7",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Conversation — housewarming gift",
+      "qtype": "Reason",
+      "skill": "TARGET",
+      "skills2": [],
+      "audio": "o-t8-housewarming",
+      "stem": "Why doesn't the man believe that kitchenware would be a good gift?",
+      "options": [
+        "He suspects that Anna already has all the kitchenware she needs.",
+        "He's afraid Anna's kitchen may not have enough space.",
+        "He believes that Anna may prefer to buy her own.",
+        "He doesn't have enough money to buy good kitchenware."
+      ],
+      "my": 1,
+      "correct": 2,
+      "evidence": "Thing is, I don't know what Anna needs. That seems like the sort of thing she should choose for herself, you know?",
+      "trap": "the kitchen in her last place was tiny — '공간이 작다'가 실제로 들림 (AI 추정)",
+      "diff": "tiny는 옛 집(last place) 이야기, 새 집은 fancy kitchen. 거절 이유는 Thing is 뒤: choose for herself = buy her own",
+      "rule": "Why 질문: 이유 신호(Thing is / The problem is / because) 뒤를 잡고, 정보가 과거·현재 중 어디 것인지 확인",
+      "causeAI": "옛 정보를 현재 이유로 연결 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L8",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Conversation — Jamie's party",
+      "qtype": "Attitude",
+      "skill": "TARGET",
+      "skills2": [
+        "CATCH"
+      ],
+      "audio": "o-t8-karaoke",
+      "stem": "What attitude does the man have about an event?",
+      "options": [
+        "He is excited to participate.",
+        "He is disappointed that it isn't longer.",
+        "He is nervous about it.",
+        "He is upset he wasn't invited."
+      ],
+      "my": 0,
+      "correct": 2,
+      "evidence": "Just don't expect me to join in! I have stage fright.",
+      "trap": "That sounds amazing / hilarious — 긍정 반응이 먼저 나옴 (AI 추정)",
+      "diff": "amazing은 파티 자체에 대한 반응. 참여(노래)에 대해서는 don't expect me to join in + stage fright = nervous",
+      "rule": "태도 질문: 화자의 반응이 '행사 전체'인지 '자기가 직접 하는 것'인지 나눠서 듣는다. 마지막 말이 태도를 바꾸는지 확인",
+      "causeAI": "행사에 대한 긍정과 참여에 대한 불안을 구분하지 못함 (추정)",
+      "gaps": [
+        "정답 'nervous about it'의 it이 행사 전체인지 노래 참여인지 다소 모호 — 이 문항으로 태도 판단 능력을 단정하지 않는다",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L9",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Talk — Coral reefs",
+      "qtype": "Detail",
+      "skill": "BIND",
+      "skills2": [
+        "TARGET"
+      ],
+      "audio": "o-t8-coral",
+      "stem": "What does the speaker say about coral gardening?",
+      "options": [
+        "It replaces coral reefs with artificial structures.",
+        "It focuses on feeding coral polyps during bleaching.",
+        "It is no longer used because it was ineffective.",
+        "It involves moving healthy coral pieces to areas where coral reefs are damaged."
+      ],
+      "my": 1,
+      "correct": 3,
+      "evidence": "Scientists grow healthy coral fragments in underwater nurseries and transplant them to degraded reefs.",
+      "trap": "앞부분의 algae 에너지 공급·bleaching 설명이 길어 '먹이 공급'이 기억에 남음 (AI 추정)",
+      "diff": "coral gardening = 건강한 조각(fragments = pieces)을 손상된(degraded = damaged) 곳에 이식(transplant = move). feeding은 algae–산호 관계 설명",
+      "rule": "개념 이름(coral gardening)이 나온 바로 그 문장의 동사를 적어 둔다. 앞 개념의 특징을 붙이지 않는다",
+      "causeAI": "앞 개념(algae 영양 공급·백화)의 특징을 복원 기술에 연결 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L10",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Talk — Crowdfunding",
+      "qtype": "Main Topic",
+      "skill": "TARGET",
+      "skills2": [],
+      "audio": "o-t8-crowdfunding",
+      "stem": "What is the main topic of the talk?",
+      "options": [
+        "The risks and rewards of investing in new businesses",
+        "A way of raising money for business projects",
+        "A new type of online business",
+        "A reason that people donate money to businesses"
+      ],
+      "my": 0,
+      "correct": 1,
+      "evidence": "Crowdfunding has become a popular way for entrepreneurs to raise money for their projects.",
+      "trap": "장점(lowers financial risk)과 어려움·실패 사례가 길어 '위험과 보상'으로 들림 (AI 추정)",
+      "diff": "첫 문장: a popular way … to raise money = 정답 B. 장단점은 세부이고, 관점도 투자자가 아니라 창업자",
+      "rule": "Main Topic: 첫 정의 문장 → 그 뒤 장점·어려움·예시는 세부. 관점(누구 입장인지)도 확인",
+      "causeAI": "세부 장단점을 주제로 + 관점 전환 (추정)",
+      "gaps": [
+        "Listening 후반 졸음 보고(사용자 진술) — 이 지문 오답 3개와의 인과는 미확인",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L11",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Talk — Crowdfunding",
+      "qtype": "Inference",
+      "skill": "BIND",
+      "skills2": [
+        "AUDIT"
+      ],
+      "audio": "o-t8-crowdfunding",
+      "stem": "What can be inferred about the customers of a business that uses crowdfunding?",
+      "options": [
+        "They are not always interested in owning the product they have bought.",
+        "They often personally participate in advertising campaigns.",
+        "They are often banks and venture capitalists.",
+        "They do not always receive their product very soon after paying for it."
+      ],
+      "my": 2,
+      "correct": 3,
+      "evidence": "What customers can get in exchange is first dibs on the first products of their kind when they're eventually produced.",
+      "trap": "banks and venture capitalists가 실제로 들려서 익숙함 (AI 추정)",
+      "diff": "banks·VCs는 '우회하는(bypass)' 기존 자금원 — 고객이 아님. 고객은 먼저 돈을 내고 eventually 받음 + 배송 지연 사례 → 바로 받지 못할 수 있음",
+      "rule": "인물·기관이 나오면 역할을 메모(누가 돈을 내고, 누가 우회되나). 추론 문제는 eventually·delays 같은 시간 단서를 모은다",
+      "causeAI": "다른 대상(기존 자금원)을 고객 역할에 연결 (추정)",
+      "gaps": [
+        "Listening 후반 졸음 보고(사용자 진술) — 인과 미확인",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO8-L12",
+      "test": "TPO8",
+      "sec": "L",
+      "set": "Talk — Crowdfunding",
+      "qtype": "Detail",
+      "skill": "TARGET",
+      "skills2": [],
+      "audio": "o-t8-crowdfunding",
+      "stem": "The speaker mentions what factor that can help a product achieve long-term success on the market?",
+      "options": [
+        "Receiving a large investment from a bank",
+        "Excitement among the public about the product",
+        "Ensuring that the funding campaign reaches all of its funding goals",
+        "Continuous innovation in the product's design"
+      ],
+      "my": 2,
+      "correct": 1,
+      "evidence": "And the crowdfunding can create buzz and build a community around a product, which helps with long-term success.",
+      "trap": "funding goal이 강의에 실제로 나옴 (AI 추정)",
+      "diff": "long-term success 바로 앞: create buzz = public excitement. funding goal은 '어려움(not every project meets its funding goal)' 부분",
+      "rule": "질문 키워드(long-term success)가 나온 문장 안에서 원인을 찾는다. 다른 부분에서 들은 단어는 제외",
+      "causeAI": "다른 단락(어려움)의 단어를 성공 요인에 연결 (추정)",
+      "gaps": [
+        "Listening 후반 졸음 보고(사용자 진술) — 인과 미확인",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    }
+  ]
+}
