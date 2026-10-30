@@ -54,6 +54,16 @@ test('drillQueue: new items come newest tutor correction first; a second call co
   assert.deepStrictEqual(K.drillQueue(items, cards, T0, 10, 2).map(i => i.id), ['B', 'A']);
 });
 
+test('drillQueue: a backlog of due reviews still leaves 4 slots for new items; without new items, all 10 are reviews', () => {
+  const items = Array.from({ length: 30 }, (_, i) => ({ id: 'X' + i }));
+  const cards = Object.fromEntries(items.slice(0, 15).map((x, i) => [x.id, { box: 1, due: T0 - i }]));
+  const q = K.drillQueue(items, cards, T0);
+  assert.strictEqual(q.length, 10);
+  assert.strictEqual(q.filter(i => !cards[i.id]).length, 4);
+  const allDue = Object.fromEntries(items.map(x => [x.id, { box: 1, due: T0 - 1 }]));
+  assert.strictEqual(K.drillQueue(items, allDue, T0).length, 10);
+});
+
 test('lrScore matches the tutor scale on real feedback cases', () => {
   const t = 'Cooking is allowed only in the common kitchen area.';
   assert.strictEqual(K.lrScore(t, t).score, 5);
