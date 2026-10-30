@@ -1,0 +1,461 @@
+{
+  "_help": {
+    "test": "reading/listening/ctest = [정답, 전체] — 화면에서 분모를 확인할 수 없으면 null. errors = originals 개수와 같아야 함.",
+    "report": "headline 한 줄 / findings: 능력별 발견 (skill + text, recurrence: 'repeat'|'new'|'improved') / next: 다음 훈련 초점. 확인된 사실과 추정을 구분.",
+    "originals": "content/originals.json 과 같은 형식. id = '<TEST>-R1' / '<TEST>-L1'. 모르는 값은 null + gaps[]. evidence 는 지문/스크립트 원문 그대로.",
+    "audioSets": "리스닝 오답은 스크린샷의 스크립트로 음원 세트를 만든다. id = 'o-<test>-<topic>'. 화자: N 내레이터, W/M 여·남, W2/M2 두 번째 여·남."
+  },
+  "test": {
+    "id": "TPO15",
+    "date": "2026-10-30",
+    "reading": [
+      29,
+      35
+    ],
+    "listening": [
+      42,
+      45
+    ],
+    "ctest": [
+      18,
+      20
+    ],
+    "errors": 9,
+    "note": "출처: tpo오답/2026-10-30_TPO15 캡처 8장 + 진단 보고서(사용자 공유 10-30). 점수는 사용자 제공: Reading 29/35(C-Test 18/20 포함, C-Test 제외 11/15), Listening 42/45. 세트별(캡처로 확인): Listen & Reply 5번 오답(11/12), Linear vs circular economy 1번 오답(3/4), Guerrilla marketing 4번 오답(3/4), Visual Arts C-Test 4·7번 오답(8/10), Play rehearsal email 3번 오답(2/3), Elephants 1·5번 오답(3/5), Deep-sea 5번 오답(4/5). R5(코끼리 보전)는 정답 근거가 약하고 R6(Insert Text)는 삽입 문장·답이 없어 분석 제외. 시험까지 하루(사용자 진술). 풀이 시간·선택 이유에 대한 기록 없음."
+  },
+  "report": {
+    "headline": "오답 9개 중 분석 가능한 7개 대부분이 '본문에 있는 정보지만 질문 대상·주장과 다름': rehearsal 3시간을 play에, 다친 개체 돌봄을 부상 예방으로, crowded public space를 crowd control 어려움으로, 과거 성공 여부 질문에 현재 가능 여부로 답함. C-Test는 18/20으로 TPO8(21/30)의 자리 오류가 이번엔 없었고, 틀린 2개는 어휘(narratives·disciplines).",
+    "findings": [
+      {
+        "skill": "TARGET",
+        "recurrence": "repeat",
+        "text": "R3: 6~9시(3시간)는 rehearsal의 시간인데 play의 길이로 적용. R5: 코끼리 지능은 본문 사실이지만 '보전에 왜 중요한가'에 답하지 않음 — 단, R5는 정답 C의 본문 근거가 약해 약점 증거로 약하게 본다. TPO8에 이어 재발."
+      },
+      {
+        "skill": "AUDIT",
+        "recurrence": "repeat",
+        "text": "R4: care for the injured(사후) → prevents injuries(사전 예방). L3: crowded public space에서 crowd control 어려움을 추론 — 강의가 말한 어려움은 lawsuits·public backlash·측정 어려움. 둘 다 본문 단어와 겹치는 선택지에 근거 없는 주장이 붙음."
+      },
+      {
+        "skill": "ACT",
+        "recurrence": "repeat",
+        "text": "L1: Were you able to contact the client?(과거 성공 여부) → Sure, I'm available(현재 가능). TPO8의 How did you get here → follow me와 같은 시간축 불일치. able/available 소리 혼동 여부는 사용자 진술 없음."
+      },
+      {
+        "skill": "CATCH",
+        "recurrence": "repeat",
+        "text": "L2: linear → on the other hand → circular 대조 구조인데 '역사'를 고름 — 강의에 역사 내용은 없음. Main Purpose 오답 1개라 반복 약점으로 단정하지 않음."
+      },
+      {
+        "skill": "WORD",
+        "recurrence": "repeat",
+        "text": "C-Test 18/20: narrations(→narratives, 행위 vs 내용), disci___ 빈칸 미입력(→disciplines; 몰랐는지 미입력인지 기록 없음). FORM(자리) 오답은 이번엔 0개 — 한 회차라 개선으로 판정하지 않음."
+      }
+    ],
+    "next": "선택지 하나를 고르기 전 두 가지만 확인: ① 이 정보의 주인(주어)이 질문 대상과 같은가(play ≠ rehearsal) ② 선택지 동사·주장이 본문 동사와 같은 시점·방향인가(care for ≠ prevent, 장면 ≠ 언급된 어려움). Listen & Reply는 were you able / did you manage → '결과'로 답. 강의는 on the other hand / in contrast가 들리면 Purpose = 대조."
+  },
+  "audioSets": {
+    "o-t15-client": {
+      "title": "TPO15 Reply — contact the client",
+      "note": "화면의 질문 문장만 재구성 (원 음성 없음)",
+      "lines": [
+        {
+          "v": "M",
+          "t": "Were you able to contact the client?"
+        }
+      ]
+    },
+    "o-t15-circular": {
+      "title": "TPO15 Talk — linear vs circular economy",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a talk in an environmental science class."
+        },
+        {
+          "v": "W",
+          "t": "The traditional economy of production is linear."
+        },
+        {
+          "v": "W",
+          "t": "It follows a “take, make, dispose” model."
+        },
+        {
+          "v": "W",
+          "t": "A typical case is the production of single-use plastic water bottles."
+        },
+        {
+          "v": "W",
+          "t": "Raw materials like crude oil and natural gas are extracted to produce plastic."
+        },
+        {
+          "v": "W",
+          "t": "These materials are then processed and manufactured into plastic bottles and filled with water."
+        },
+        {
+          "v": "W",
+          "t": "After consumption, the bottles are often discarded after a single use."
+        },
+        {
+          "v": "W",
+          "t": "Many end up in landfills or, worse, in the natural environment, where they are a major source of pollution."
+        },
+        {
+          "v": "W",
+          "t": "A circular economy, on the other hand, is a production system aimed at eliminating waste and promoting the continual use of resources."
+        },
+        {
+          "v": "W",
+          "t": "One goal of the circular economy is designing out waste by keeping products and materials in use."
+        },
+        {
+          "v": "W",
+          "t": "This can be achieved through strategies like remanufacturing or recycling."
+        },
+        {
+          "v": "W",
+          "t": "Take the electronics industry."
+        },
+        {
+          "v": "W",
+          "t": "Companies are developing products with modular designs that can be easily upgraded or repaired, reducing the need for new materials."
+        },
+        {
+          "v": "W",
+          "t": "Additionally, programs for recycling old electronics help recover valuable materials like metals and plastics, which can be used to make new products."
+        },
+        {
+          "v": "W",
+          "t": "The circular economy can also regenerate land by returning valuable nutrients to the soil."
+        },
+        {
+          "v": "W",
+          "t": "In composting, for example, food scraps, agricultural residues, or other organic waste products are collected and composted, which, uh, is a natural process that uses microorganisms."
+        },
+        {
+          "v": "W",
+          "t": "These microorganisms break down organic matter into nutrient-rich humus."
+        },
+        {
+          "v": "W",
+          "t": "The humus is then applied back to farmland, which enriches the soil and reduces the need for harmful fertilizers."
+        }
+      ]
+    },
+    "o-t15-guerrilla": {
+      "title": "TPO15 Talk — guerrilla marketing",
+      "note": "스크린샷 스크립트로 재구성, 원본 음원 아님",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a talk in a marketing class."
+        },
+        {
+          "v": "W",
+          "t": "Today we’ll be discussing an innovative but somewhat unorthodox marketing concept."
+        },
+        {
+          "v": "W",
+          "t": "I’m talking about guerrilla marketing."
+        },
+        {
+          "v": "W",
+          "t": "In a nutshell, guerrilla marketing is an advertising strategy that focuses on low-cost, unconventional marketing tactics that yield maximum results."
+        },
+        {
+          "v": "W",
+          "t": "It’s been around for quite a while—since the 1980s, in fact."
+        },
+        {
+          "v": "W",
+          "t": "Now, one of the key aspects of guerrilla marketing is creativity."
+        },
+        {
+          "v": "W",
+          "t": "Unlike traditional marketing, which often requires large budgets for TV commercials or print ads, guerrilla marketing relies on imaginative ideas to capture public attention."
+        },
+        {
+          "v": "W",
+          "t": "Think of flash mobs, viral videos, and street art."
+        },
+        {
+          "v": "W",
+          "t": "Using these tactics to promote your products can create buzz and engage audiences in ways that more conventional methods might not."
+        },
+        {
+          "v": "W",
+          "t": "Another important element is the use of unexpected locations or events."
+        },
+        {
+          "v": "W",
+          "t": "For instance, a company might project a huge image of its product onto the side of a building...or organize a surprise, pop-up event in a crowded public space where the product takes center stage."
+        },
+        {
+          "v": "W",
+          "t": "These surprise elements can generate word-of-mouth publicity and are often shared widely on social media, amplifying their impact."
+        },
+        {
+          "v": "W",
+          "t": "However, guerrilla marketing is not without its challenges."
+        },
+        {
+          "v": "W",
+          "t": "Because it relies on public spaces and unexpected events, it can sometimes face lawsuits or public backlash if not executed carefully."
+        },
+        {
+          "v": "W",
+          "t": "In addition, measuring the success of guerrilla marketing campaigns can be difficult."
+        },
+        {
+          "v": "W",
+          "t": "They don’t always translate directly into sales figures."
+        }
+      ]
+    }
+  },
+  "originals": [
+    {
+      "id": "TPO15-R1",
+      "test": "TPO15",
+      "sec": "R",
+      "set": "Visual Arts C-Test",
+      "qtype": "C-Test",
+      "skill": "WORD",
+      "skills2": [
+        "FORM"
+      ],
+      "ctest": {
+        "text": "Such works are used to express ideas, emotions, and {{}} through visual means.",
+        "prefix": "narra",
+        "answer": "narratives"
+      },
+      "my": "narrations",
+      "evidence": "express ideas, emotions, and narra___ — 뒤의 'telling stories'가 뜻을 받쳐 줌",
+      "trap": "narrations도 실제 단어이고 복수형 -s까지 맞아 형태상 자연스러워 보임 (AI 추정)",
+      "diff": "narrative = 이야기·서사(표현되는 내용), narration = 서술 행위·내레이션. 예술이 '표현하는 것'은 이야기 → narratives",
+      "rule": "같은 어근 파생어 후보가 둘이면 문장 속 역할(표현하는 '내용'인지 '행위'인지)로 고르고, 뒤 문장의 재표현(telling stories)과 맞춰 본다",
+      "causeAI": "어근 narra-에서 먼저 떠오른 파생어를 넣고 의미 적합성은 확인하지 않음 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO15-R2",
+      "test": "TPO15",
+      "sec": "R",
+      "set": "Visual Arts C-Test",
+      "qtype": "C-Test",
+      "skill": "WORD",
+      "skills2": [],
+      "ctest": {
+        "text": "Throughout history, these {{}} have evolved with changing technologies and cultural influences.",
+        "prefix": "disci",
+        "answer": "disciplines"
+      },
+      "my": null,
+      "evidence": "these disci___ have evolved — 앞 문장의 painting, sculpture, photography를 these로 받는 복수 명사",
+      "trap": "UNKNOWN",
+      "diff": "discipline = (여기서) 예술·학문 분야. these + 복수 명사 + have → 앞에 나열한 분야들 = disciplines",
+      "rule": "these/such + 빈칸은 앞 문장의 나열을 묶는 말. 나열 항목(painting, sculpture…)을 한 단어로 부르는 복수 명사를 찾는다",
+      "causeAI": "판단 불가 — 단어를 몰랐는지, 떠올리지 못했는지, 입력하지 않았는지 기록 없음",
+      "gaps": [
+        "스크린샷상 빈칸이 비어 있음 — 입력값 UNKNOWN (미입력 가능성)",
+        "disciplines를 모른다는 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO15-R3",
+      "test": "TPO15",
+      "sec": "R",
+      "set": "Daily Life — Play rehearsal email",
+      "qtype": "Inference",
+      "skill": "TARGET",
+      "skills2": [
+        "AUDIT"
+      ],
+      "passage": "Subject: Play rehearsal\n\nDear Ms. Rivera,\n\nGreetings! I’m writing to remind you that our first rehearsal for the community theater’s spring production of A Midsummer Night’s Dream will take place on Wednesday, April 5 at 6:00 P.M. We’ll be meeting at the downtown theater, located at 456 Main Street, in the main rehearsal hall on the second floor. Please arrive by 5:45 P.M. to allow time for check-in, script distribution (for those who haven’t received a final copy), and a brief welcome from the director. The rehearsal will run until approximately 9:00 P.M. with a 15-minute break midway through. Be sure to bring your script and any notes you have on your character, and wear comfortable clothing suitable for movement exercises. If you have any conflicts with the schedule, or if you require special accommodations, please let me know in advance. We’re thrilled to begin this journey and can’t wait to see the cast come together.\n\nWarm regards,\nMichael Chen",
+      "stem": "What can be concluded about the play?",
+      "options": [
+        "It has already started rehearsing.",
+        "It is a community event.",
+        "It lasts 3 hours.",
+        "It does not yet have a director."
+      ],
+      "my": 2,
+      "correct": 1,
+      "evidence": "our first rehearsal for the community theater’s spring production of A Midsummer Night’s Dream",
+      "trap": "6:00 P.M.~9:00 P.M.이 본문에 있어 '3시간'이 계산상 맞아 보임 (AI 추정)",
+      "diff": "3시간(6시~9시)은 rehearsal의 시간이지 play(공연)의 길이가 아님. community theater’s production → community event",
+      "rule": "숫자·시간 선택지는 '그 숫자가 누구/무엇의 것인지' 본문에서 주어를 확인하고, 질문의 대상(the play)과 같을 때만 고른다",
+      "causeAI": "본문에 있는 수치를 질문 대상이 다른데도 적용 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO15-R4",
+      "test": "TPO15",
+      "sec": "R",
+      "set": "Academic — Elephant social behavior",
+      "qtype": "Inference",
+      "skill": "AUDIT",
+      "skills2": [
+        "TARGET"
+      ],
+      "passage": "Elephants are known for their complex social structures and behaviors. Female elephants lead matriarchal herds, which include their offspring and related females. These groups are cohesive and display cooperative behaviors. For example, when a member of the herd is injured, others assist and care for it. This level of cooperation is rare among terrestrial mammals and highlights elephants' intelligence and empathy.\n\nCommunication within herds is vital for maintaining bonds. Elephants use vocalizations, such as trumpets and low-frequency rumbles, to convey information. These sounds can travel long distances, allowing communication even when far apart. At closer ranges, elephants use body language, like trunk gestures and ear movements, to express emotions and intentions.\n\nAn intriguing aspect of elephant behavior is mourning rituals. When a herd member dies, elephants engage in activities resembling mourning. They often stand vigil over the body, touch it gently with their trunks, and cover it with branches. This behavior suggests a deep emotional connection and an understanding of death that is unusual in the animal kingdom.",
+      "stem": "What is one effect of the matriarchal structure in elephant herds?",
+      "options": [
+        "It guarantees that only one male elephant will join the group.",
+        "It ensures that young elephants are cared for by relatives.",
+        "It prevents injuries within the group.",
+        "It encourages solitary behaviors among elephants."
+      ],
+      "my": 2,
+      "correct": 1,
+      "evidence": "when a member of the herd is injured, others assist and care for it.",
+      "trap": "injured가 본문에 그대로 나와 부상 관련 선택지가 근거 있어 보임 (AI 추정)",
+      "diff": "본문은 다친 '뒤' 돌봄(care for the injured). prevent injuries는 다치기 '전' 예방 — 원문에 없음. 정답 B는 offspring and related females(친족 무리)에서 추론 — ensures는 원문보다 강한 표현",
+      "rule": "선택지 동사(prevent / ensure / cause)의 시점과 방향을 원문 동사와 대조한다: 사후 돌봄 ≠ 사전 예방",
+      "causeAI": "본문 단어(injured)와 겹치는 선택지를 동사 의미 확인 없이 받아들임 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO15-R5",
+      "test": "TPO15",
+      "sec": "R",
+      "set": "Academic — Elephant social behavior",
+      "qtype": "Inference (conservation)",
+      "skill": "TARGET",
+      "skills2": [],
+      "passage": "Elephants are known for their complex social structures and behaviors. Female elephants lead matriarchal herds, which include their offspring and related females. These groups are cohesive and display cooperative behaviors. For example, when a member of the herd is injured, others assist and care for it. This level of cooperation is rare among terrestrial mammals and highlights elephants' intelligence and empathy.\n\nCommunication within herds is vital for maintaining bonds. Elephants use vocalizations, such as trumpets and low-frequency rumbles, to convey information. These sounds can travel long distances, allowing communication even when far apart. At closer ranges, elephants use body language, like trunk gestures and ear movements, to express emotions and intentions.\n\nAn intriguing aspect of elephant behavior is mourning rituals. When a herd member dies, elephants engage in activities resembling mourning. They often stand vigil over the body, touch it gently with their trunks, and cover it with branches. This behavior suggests a deep emotional connection and an understanding of death that is unusual in the animal kingdom.",
+      "stem": "Why is understanding elephant social behaviors important for their conservation?",
+      "options": [
+        "It helps us identify their communication methods.",
+        "It reveals how they mourn for their dead.",
+        "It aids in understanding which strategies will work best.",
+        "It demonstrates the intelligence of elephants."
+      ],
+      "my": 3,
+      "correct": 2,
+      "evidence": "This level of cooperation is rare among terrestrial mammals and highlights elephants' intelligence and empathy.",
+      "trap": "D(intelligence)는 본문에 실제로 있는 내용 (AI 추정 아님 — 원문 확인)",
+      "diff": "질문은 '보전(conservation)에 왜 중요한가' = 목적. D는 본문 사실이지만 보전과 연결되지 않음. C만 보전 목적(전략)에 답함 — 단, 본문에 보전 관련 문장 자체가 없음",
+      "rule": "Why ... important for X 질문: 선택지가 본문에 있는지보다 X(목적)에 답하는지를 먼저 본다",
+      "causeAI": "본문에 있는 사실을 질문의 목적과 대조하지 않음 (추정) — 문항 근거가 약해 약점으로 단정하지 않음",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음",
+        "정답 C의 본문 근거가 약함 (보전·전략 문장이 지문에 없음) — 출제 문제 가능성, 약점 증거로 약하게 취급"
+      ]
+    },
+    {
+      "id": "TPO15-R6",
+      "test": "TPO15",
+      "sec": "R",
+      "set": "Academic — Deep-sea exploration",
+      "qtype": "Insert Text",
+      "skill": "UNKNOWN",
+      "skills2": [],
+      "passage": "Deep-sea exploration has expanded our understanding of the ocean's depths, revealing diverse and often bizarre organisms. The deep sea begins at around 200 meters below the surface and is characterized by high pressure, low temperatures, and complete darkness. Despite this harsh environment, life thrives in various forms.\n\nOne remarkable discovery is hydrothermal vents. ■A These fissures in the ocean floor release heated water rich in minerals, creating unique ecosystems. ■B Organisms near hydrothermal vents, such as tube worms and giant clams, have cell membranes and proteins that are adapted to remain functional under crushing pressure. ■C These organisms also rely on chemosynthesis--a process where bacteria convert the vent's chemicals into energy-rather than photosynthesis. ■D Living in perpetual darkness, vent organisms also do not rely on vision, although vent shrimp can detect faint infrared from vent emissions.\n\nAdvancements in technology have enabled scientists to explore deeper parts of the vehicles (ROVs) and submersibles equipped with cameras and sensors can withstand the pressure and capture images of deep-sea creatures. These explorations have uncovered new species and provided insights into how life can exist under such extreme conditions. However, deep-sea exploration remains challenging and costly, Funding and international collaboration are essential for continuing research.",
+      "stem": "UNKNOWN (5번 탭이 빨간색 — 삽입 문장이 화면에 없음)",
+      "my": null,
+      "correct": null,
+      "gaps": [
+        "삽입할 문장·내가 고른 위치·정답 위치 모두 기록 없음 — 분석에서 제외"
+      ],
+      "evidence": "",
+      "trap": "",
+      "diff": "",
+      "rule": "",
+      "causeAI": "분석 불가"
+    },
+    {
+      "id": "TPO15-L1",
+      "test": "TPO15",
+      "sec": "L",
+      "set": "Listen & Reply",
+      "qtype": "Listen & Reply",
+      "skill": "ACT",
+      "skills2": [],
+      "audio": "o-t15-client",
+      "stem": "Choose the best response.",
+      "options": [
+        "No, it wasn't.",
+        "Sure, I’m available.",
+        "Finally, after multiple tries.",
+        "You've got a good point."
+      ],
+      "my": 1,
+      "correct": 2,
+      "evidence": "Were you able to contact the client? = 이미 시도한 연락이 성공했는지 묻는 과거 질문",
+      "trap": "able / available 소리가 비슷하고 Sure가 Yes처럼 들림 (AI 추정 — 혼동했다는 사용자 진술 없음)",
+      "diff": "Were you able to(과거, 성공 여부) → 결과로 답: Finally, after multiple tries. I'm available은 지금 시간이 된다는 현재 응답 — 시간축·기능 불일치",
+      "rule": "Were you able to / Did you manage to → '했다/못 했다'의 결과로 답하는 선택지. 현재 가능 여부(available, free)는 제외",
+      "causeAI": "과거 성공 여부 질문을 현재 가능 여부 질문처럼 처리 (추정)",
+      "gaps": [
+        "원 음성 없음: 화면의 질문 문장으로 TTS 재구성",
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO15-L2",
+      "test": "TPO15",
+      "sec": "L",
+      "set": "Talk — Linear vs circular economy",
+      "qtype": "Main Purpose",
+      "skill": "CATCH",
+      "skills2": [
+        "TARGET"
+      ],
+      "audio": "o-t15-circular",
+      "stem": "What is the main purpose of the talk?",
+      "options": [
+        "To describe the history of the circular economy",
+        "To discuss a new process of manufacturing plastic bottles",
+        "To highlight the importance of productive soil for agriculture",
+        "To contrast two types of production models"
+      ],
+      "my": 0,
+      "correct": 3,
+      "evidence": "A circular economy, on the other hand, is a production system aimed at eliminating waste and promoting the continual use of resources.",
+      "trap": "강의 후반이 circular economy 설명이라 그 개념이 주제처럼 남음 (AI 추정)",
+      "diff": "linear(take, make, dispose) → on the other hand → circular: 두 생산 모델 대조. 역사(연도·발전 과정)는 강의에 없음",
+      "rule": "Main Purpose: 강의가 두 개념을 on the other hand / unlike / in contrast로 잇는지 듣는다. 두 개가 나오면 '대조'가 목적",
+      "causeAI": "대조 신호 on the other hand를 놓치고 뒤쪽 개념 하나로 목적을 판단 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    },
+    {
+      "id": "TPO15-L3",
+      "test": "TPO15",
+      "sec": "L",
+      "set": "Talk — Guerrilla marketing",
+      "qtype": "Detail",
+      "skill": "AUDIT",
+      "skills2": [
+        "CATCH"
+      ],
+      "audio": "o-t15-guerrilla",
+      "stem": "What challenge related to guerilla marketing is mentioned in the talk?",
+      "options": [
+        "High television advertising costs",
+        "The logistics needed for crowd control",
+        "The need to constantly update social media",
+        "Poor reaction from the public"
+      ],
+      "my": 1,
+      "correct": 3,
+      "evidence": "Because it relies on public spaces and unexpected events, it can sometimes face lawsuits or public backlash if not executed carefully.",
+      "trap": "crowded public space에서 행사를 한다는 말이 있어 군중 관리가 어려울 것 같음 — 상식적 추론 (AI 추정)",
+      "diff": "강의가 말한 어려움: lawsuits, public backlash(= poor reaction from the public), 매출로 측정 어려움. crowd control은 언급 없음",
+      "rule": "'mentioned' 문제는 However / challenges 뒤 문장에서 실제로 나온 항목만 고른다. 그럴듯한 추론은 제외",
+      "causeAI": "본문 장면(crowded public space)에서 추론한 어려움을 언급된 것으로 받아들임 (추정)",
+      "gaps": [
+        "오답 선택 이유에 대한 사용자 진술 없음"
+      ]
+    }
+  ]
+}

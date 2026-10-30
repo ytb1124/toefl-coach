@@ -1,0 +1,239 @@
+{
+  "_note": "TPO15 오답 패턴용 Transfer 문제 (AI 작성, 원본 문장·정답 재사용 없음). 초점: 숫자·시간이 가리키는 대상 확인, 사후 돌봄 vs 사전 예방(동사 시점), 파생어 의미(narration/narrative), 나열을 묶는 복수 명사, Were you able to / Did you manage to → 결과로 답하기, 대조 신호(in contrast)로 Main Purpose, mentioned challenge만 고르기.",
+  "audioSets": {
+    "ac-t15-1": {
+      "title": "TPO15 Transfer — reply tickets",
+      "lines": [
+        {
+          "v": "W",
+          "t": "Did you manage to get tickets for the concert?"
+        }
+      ]
+    },
+    "ac-t15-2": {
+      "title": "TPO15 Transfer — reply printer",
+      "lines": [
+        {
+          "v": "M",
+          "t": "Were you able to fix the printer this morning?"
+        }
+      ]
+    },
+    "t15-rotation": {
+      "title": "TPO15 Transfer — crop rotation",
+      "lines": [
+        {
+          "v": "N",
+          "t": "Listen to a talk in an agriculture class."
+        },
+        {
+          "v": "W",
+          "t": "Two methods of farming are often compared."
+        },
+        {
+          "v": "W",
+          "t": "In conventional farming, a single crop is planted across a large field year after year."
+        },
+        {
+          "v": "W",
+          "t": "This approach is efficient for harvesting machines, but it drains the same nutrients from the soil every season, so farmers must add more and more fertilizer."
+        },
+        {
+          "v": "W",
+          "t": "Crop rotation, in contrast, changes what is grown in a field from one year to the next."
+        },
+        {
+          "v": "W",
+          "t": "For example, a farmer might plant corn one year and beans the next."
+        },
+        {
+          "v": "W",
+          "t": "Beans return nitrogen to the soil, so the following crop needs less fertilizer."
+        },
+        {
+          "v": "W",
+          "t": "Crop rotation does have drawbacks, though."
+        },
+        {
+          "v": "W",
+          "t": "Farmers have to learn how to grow and sell several different crops, and in the first few years their income can be less predictable."
+        }
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "TG-T15-1",
+      "skill": "TARGET",
+      "tier": "transfer",
+      "kind": "mc",
+      "passage": "Hi Jordan,\n\nThe volunteer orientation for the city library's summer reading festival will be held on Saturday from 10:00 A.M. to noon in Room 204. The festival itself opens the following Monday and runs for two weeks. Please bring a photo ID so we can print your volunteer badge.\n\nThanks,\nPriya",
+      "qs": [
+        {
+          "prompt": "What can be concluded about the festival?",
+          "options": [
+            "It lasts two hours.",
+            "It is organized by a public library.",
+            "It takes place in Room 204.",
+            "It begins on Saturday."
+          ],
+          "answer": 1,
+          "why": [
+            "2시간은 orientation의 시간 — 질문 대상(festival)과 다름",
+            "✓ the city library's summer reading festival",
+            "Room 204는 orientation 장소",
+            "Saturday는 orientation 날짜. 축제는 다음 월요일 시작"
+          ],
+          "evidence": "The volunteer orientation for the city library's summer reading festival will be held on Saturday from 10:00 A.M. to noon in Room 204."
+        }
+      ]
+    },
+    {
+      "id": "AU-T15-1",
+      "skill": "AUDIT",
+      "tier": "transfer",
+      "kind": "mc",
+      "passage": "Honeybee colonies divide labor among workers of different ages. Older workers forage for food outside the hive, while younger ones stay inside. When a larva hatches, the young nurse bees feed it several times an hour until it can care for itself.",
+      "qs": [
+        {
+          "prompt": "What is one effect of the division of labor described in the passage?",
+          "options": [
+            "It prevents larvae from hatching too early.",
+            "It ensures that newly hatched larvae are fed.",
+            "It stops older bees from leaving the hive.",
+            "It makes all workers forage equally."
+          ],
+          "answer": 1,
+          "why": [
+            "부화 '후' 먹이 주기만 나옴 — 부화 시기 조절(사전 예방)은 원문에 없음",
+            "✓ nurse bees feed it until it can care for itself",
+            "반대: older workers forage outside",
+            "반대: 나이에 따라 일을 나눔"
+          ],
+          "evidence": "When a larva hatches, the young nurse bees feed it several times an hour until it can care for itself."
+        }
+      ]
+    },
+    {
+      "id": "W-T15-1",
+      "skill": "WORD",
+      "tier": "transfer",
+      "kind": "ctest",
+      "ctest": {
+        "text": "The documentary has almost no dialogue; instead, a calm {{}} by the director guides viewers through each scene.",
+        "prefix": "narra",
+        "answer": "narration",
+        "slot": 0
+      },
+      "explain": "a calm ___ by the director guides viewers = 감독이 '말로 설명하는 행위·목소리' → narration (단수, a 뒤). narrative(이야기 내용)는 by the director가 '읽어 주는' 행위와 맞지 않음"
+    },
+    {
+      "id": "W-T15-2",
+      "skill": "WORD",
+      "tier": "transfer",
+      "kind": "ctest",
+      "ctest": {
+        "text": "Dance, theater, and music are all performing arts, and each of these {{}} requires years of practice.",
+        "prefix": "pursu",
+        "answer": "pursuits",
+        "slot": 0
+      },
+      "explain": "each of these + 복수 명사 = 앞에 나열한 dance, theater, music을 묶는 말 → pursuits(활동·분야)"
+    },
+    {
+      "id": "AC-T15-1",
+      "skill": "ACT",
+      "tier": "transfer",
+      "kind": "reply",
+      "audio": "ac-t15-1",
+      "qs": [
+        {
+          "prompt": "Choose the best response.",
+          "options": [
+            "Yes, but only after waiting in line for an hour.",
+            "Sure, I'm free that night.",
+            "The concert starts at eight.",
+            "I'd love to come along."
+          ],
+          "answer": 0,
+          "why": [
+            "✓ Did you manage to = 성공 여부 → 결과(했다)+과정으로 답함",
+            "현재 가능 여부(free) — 과거 성공 질문과 시간축 불일치",
+            "시작 시각 — concert 단어 함정",
+            "초대 수락 — 질문은 초대가 아님"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AC-T15-2",
+      "skill": "ACT",
+      "tier": "transfer",
+      "kind": "reply",
+      "audio": "ac-t15-2",
+      "qs": [
+        {
+          "prompt": "Choose the best response.",
+          "options": [
+            "Sure, I can take a look now.",
+            "No, I'll have to call a technician.",
+            "It prints in color, too.",
+            "Yes, I'm available this morning."
+          ],
+          "answer": 1,
+          "why": [
+            "앞으로 하겠다는 제안 — 이미 시도한 결과를 묻는 질문에 답하지 않음",
+            "✓ Were you able to → 못 했다(결과) + 다음 조치",
+            "프린터 기능 — printer 단어 함정",
+            "available — able과 소리가 비슷한 현재 가능 여부 함정"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CA-T15-1",
+      "skill": "CATCH",
+      "tier": "transfer",
+      "kind": "listen",
+      "audio": "t15-rotation",
+      "qs": [
+        {
+          "prompt": "What is the main purpose of the talk?",
+          "skill": "CATCH",
+          "options": [
+            "To compare two approaches to growing crops",
+            "To explain the history of crop rotation",
+            "To describe how harvesting machines work",
+            "To argue that fertilizer should be banned"
+          ],
+          "answer": 0,
+          "why": [
+            "✓ conventional farming → in contrast → crop rotation: 두 방식 대조",
+            "역사(연도·발전 과정)는 강의에 없음",
+            "machines는 장점 설명의 세부",
+            "fertilizer 금지 주장은 없음 — 과잉 추론"
+          ],
+          "evidence": "Crop rotation, in contrast, changes what is grown in a field from one year to the next."
+        },
+        {
+          "prompt": "What drawback of crop rotation is mentioned in the talk?",
+          "skill": "AUDIT",
+          "options": [
+            "It requires buying new harvesting machines.",
+            "It makes farmers' income less predictable at first.",
+            "It removes nitrogen from the soil.",
+            "It needs more fertilizer than conventional farming."
+          ],
+          "answer": 1,
+          "why": [
+            "기계가 새로 필요하다는 말은 없음 — 그럴듯한 추론",
+            "✓ in the first few years their income can be less predictable",
+            "반대: beans return nitrogen",
+            "반대: 다음 작물은 비료가 덜 필요"
+          ],
+          "evidence": "in the first few years their income can be less predictable"
+        }
+      ]
+    }
+  ]
+}
