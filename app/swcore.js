@@ -60,12 +60,14 @@
     c.last = now; c.lastOk = !!correct;
     return c;
   }
-  // Today's queue: due reviews first (oldest due first), then new items in content order.
+  // Tutor correction date from src ('튜터 10/28' → 1028); AI items and undated sources → 0.
+  const srcDate = src => { const m = /^튜터\s+(\d{1,2})\/(\d{1,2})/.exec(src || ''); return m ? +m[1] * 100 + +m[2] : 0; };
+  // Today's queue: due reviews first (oldest due first), then new items — newest tutor corrections first, else content order.
   function drillQueue(items, cards, now, size, maxNew) {
     size = size || 10; maxNew = maxNew == null ? 6 : maxNew;
     const due = items.filter(i => cards[i.id] && cards[i.id].box < MASTER && cards[i.id].due <= now)
       .sort((a, b) => cards[a.id].due - cards[b.id].due);
-    const fresh = items.filter(i => !cards[i.id]);
+    const fresh = items.filter(i => !cards[i.id]).sort((a, b) => srcDate(b.src) - srcDate(a.src));
     const q = due.slice(0, size);
     for (const i of fresh) { if (q.length >= size || q.filter(x => !cards[x.id]).length >= maxNew) break; q.push(i); }
     return q;

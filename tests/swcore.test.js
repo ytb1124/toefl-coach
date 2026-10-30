@@ -47,6 +47,13 @@ test('drillQueue: due reviews first, then at most 6 new, 10 total; mastered and 
   assert.strictEqual(q.length, 8); // 2 due + 6 new
 });
 
+test('drillQueue: new items come newest tutor correction first; a second call continues with the next new items', () => {
+  const items = [{ id: 'A', src: 'AI 변형' }, { id: 'B', src: '튜터 9/15' }, { id: 'C', src: '튜터 10/28' }, { id: 'D', src: '튜터 10/2' }];
+  assert.deepStrictEqual(K.drillQueue(items, {}, T0, 10, 2).map(i => i.id), ['C', 'D']);
+  const cards = { C: { box: 1, due: T0 + K.DAY }, D: { box: 1, due: T0 + K.DAY } };
+  assert.deepStrictEqual(K.drillQueue(items, cards, T0, 10, 2).map(i => i.id), ['B', 'A']);
+});
+
 test('lrScore matches the tutor scale on real feedback cases', () => {
   const t = 'Cooking is allowed only in the common kitchen area.';
   assert.strictEqual(K.lrScore(t, t).score, 5);

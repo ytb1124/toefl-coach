@@ -302,11 +302,13 @@
       const wrongCats = {};
       first.filter(r => !r.ok).forEach(r => { const c = S.grammar.find(g => g.id === r.id).cat; wrongCats[c] = (wrongCats[c] || 0) + 1; });
       drill.done = true;
+      const d = load(), more = K.drillQueue(S.grammar, d.g, now()).length, fresh = S.grammar.filter(g => !d.g[g.id]).length;
       put(main, back('#/sw', '스피킹·라이팅'), h('section', { class: 'card' }, h('h1', null, `교정 문장 ${ok} / ${first.length}`),
         Object.keys(wrongCats).length ? [h('p', null, '틀린 유형:'), h('ul', null, Object.entries(wrongCats).map(([c, n]) => h('li', null, h('b', null, CAT[c].label + ` ${n}개`), ' — ', CAT[c].tip)))]
           : h('p', null, '모두 맞았습니다.'),
         h('p', { class: 'small muted' }, drill.extra ? '추가 연습이라 복습 일정은 바뀌지 않았습니다.' : '틀린 문장은 내일 다시 나옵니다.'),
-        h('a', { class: 'primary as-btn', href: '#/sw' }, '스피킹·라이팅 홈으로')));
+        more ? h('button', { class: 'primary', onclick: () => { drill = null; render(); } }, `${more}문장 더 (남은 새 문장 ${fresh}개)`) : null,
+        h('a', { class: more ? 'ghost as-btn' : 'primary as-btn', href: '#/sw' }, '스피킹·라이팅 홈으로')));
     }
 
     // =====================================================================
