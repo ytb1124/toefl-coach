@@ -65,7 +65,7 @@
     const realTest = origs.filter(o => dates[o.test]).map(o => ({ tier: 'realtest', ref: o.id, test: o.test, at: dayStart(dates[o.test]) + DAY / 2 })).filter(e => !now || e.at <= now);
     // 숙달 판정은 소站 새 문제로만: 없어진 AI 연습 문제의 시도는 기록에 남지만 판정에서 뺀다 (legacyAttempts로 셀 수 있음).
     const idx = content.pool ? poolIndex(content) : null;
-    const events = data.attempts.filter(a => a.skill === skillId && !(idx && a.item && !idx[a.item])).concat(realTest).sort((a, b) => a.at - b.at);
+    const events = data.attempts.filter(a => a.skill === skillId && !isLegacy(a, idx)).concat(realTest).sort((a, b) => a.at - b.at);
     const realRelapses = [];
     let state = 'NEW'; let interval = 0; let dueAt = null; let since = null;
     const mastery = []; const guided = []; let relapseStreak = 0;
@@ -177,6 +177,9 @@
     return out;
   }
   function itemMinutes(item) { return item.minutes || 1.5; }
+  // 옛 AI 연습 문제의 시도: 옛 연습 tier인데 지금 풀에 없는 문항 (말하기·쓰기·모의 모듈 기록은 해당 없음)
+  const OLD_TIERS = ['guided', 'transfer', 'mixed', 'delayed', 'repeat', 'verify'];
+  const isLegacy = (a, idx) => !!(idx && a.item && OLD_TIERS.includes(a.tier) && !idx[a.item]);
   const idxCache = new WeakMap();
   function poolIndex(content) {
     if (content.pool && idxCache.has(content.pool)) return idxCache.get(content.pool);
@@ -497,7 +500,7 @@
 
   function legacyAttempts(data, content) {
     const idx = poolIndex(content);
-    return data.attempts.filter(a => a.item && !idx[a.item]).length;
+    return data.attempts.filter(a => isLegacy(a, idx)).length;
   }
 
   // ---------- 변화 탭 지표 (OVERHAUL.md 측정 표): 최근 7일 vs 그 전 7일, 기록이 적으면 null ----------
@@ -547,7 +550,7 @@
   function metrics(data, content) {
     const idx = content && content.pool ? poolIndex(content) : null;
     const ALL = data.attempts;
-    const A = idx ? ALL.filter(a => !(a.item && !idx[a.item])) : ALL;
+    const A = idx ? ALL.filter(a => !isLegacy(a, idx)) : ALL;
     const pct = (xs) => xs.length ? Math.round(100 * xs.filter(x => x.correct).length / xs.length) : null;
     const transfer = A.filter(a => (a.tier === 'transfer' || a.tier === 'mixed') && !a.hinted);
     const delayed = A.filter(a => a.tier === 'delayed');
