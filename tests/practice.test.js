@@ -4,10 +4,10 @@ const assert = require('node:assert');
 const P = require('../app/practice.js');
 
 test('align marks missed reference words and extras (받아쓰기·L&R 공용)', () => {
-  const a = P.align('Begin by choosing a bike from the station.', 'begin choosing the bike from station');
-  assert.deepStrictEqual(a.words.filter(w => !w.ok).map(w => w.w), ['by', 'a', 'the']);
+  const a = P.align('Start by taking a map from the front desk.', 'start taking the map from desk');
+  assert.deepStrictEqual(a.words.filter(w => !w.ok).map(w => w.w), ['by', 'a', 'the', 'front']);
   assert.deepStrictEqual(a.extra, ['the']);
-  assert.strictEqual(a.total, 8); assert.strictEqual(a.ok, 5); assert.strictEqual(a.pct, 63);
+  assert.strictEqual(a.total, 9); assert.strictEqual(a.ok, 5); assert.strictEqual(a.pct, 56);
   assert.strictEqual(P.align("It's the station’s bike", "it's the station's bike").pct, 100);
 });
 
@@ -19,8 +19,8 @@ test('C-Test answer accepts the missing letters or the full word', () => {
 });
 
 test('evidence lines and replay span from script timestamps', () => {
-  const lines = [{ sp: 'N', t: 'Listen to a conversation.', at: 0 }, { sp: 'M', t: 'I hope you remembered to bring the tickets.', at: 2.4 }, { sp: 'W', t: 'I thought you had them.', at: 5.1 }];
-  const idx = P.evidenceLines(lines, ['remembered to bring the tickets']);
+  const lines = [{ sp: 'N', t: 'Narration line.', at: 0 }, { sp: 'M', t: 'Did you pack the blue umbrella for the trip?', at: 2.4 }, { sp: 'W', t: 'It is in the car.', at: 5.1 }];
+  const idx = P.evidenceLines(lines, ['pack the blue umbrella']);
   assert.deepStrictEqual(idx, [1]);
   assert.deepStrictEqual(P.lineSpan(lines, idx), [2.2, 5.2]);
   assert.strictEqual(P.lineSpan([{ t: 'x', at: null }], [0]), null);

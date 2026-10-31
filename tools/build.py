@@ -428,12 +428,17 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 
 
 # ---------------------------------------------------------------- leak check
+def qnorm(t):
+    """따옴표 모양 차이(’ ' “ ")로 검사를 빠져나가지 않게."""
+    return t.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+
+
 def leak_strings(data):
     """공개 번들에 있으면 안 되는 원문 문자열: 소站 지문·스크립트·문항·보기, 원본 오답 원문, C-Test 자료."""
     out = set()
 
     def add(t):
-        t = re.sub(r"\s+", " ", str(t or "")).strip()
+        t = qnorm(re.sub(r"\s+", " ", str(t or "")).strip())
         if len(t) >= 40:
             out.add(t[:60])
     pool = PRIV / "pool.json"
@@ -462,7 +467,7 @@ def leak_strings(data):
 
 
 def leak_check(js, data):
-    flat = re.sub(r"\s+", " ", js.replace("\\n", " "))
+    flat = qnorm(re.sub(r"\s+", " ", js.replace("\\n", " ")))
     hits = [t for t in leak_strings(data) if t in flat]
     # 패턴 검사: 비공개 자료가 없어도 잡히는 것 (C-Test 빈칸 표기, 소站 해설 원문, 리포트 HTML)
     for pat in (r"【\d+】", r"<m_p>", r"解析", r"正确答案"):

@@ -159,7 +159,7 @@
 
 ### 확인 (완료 조건)
 - 미리보기: 리스닝 실전 화면에서 재생 중 문항·진행바·오디오 컨트롤 0개, 재생 후 문항 하나씩 + 20초 카운트다운, 답 없이 Next → 경고. Listen & Reply: 재생 중 보기 4개 보임·Next 비활성·카운트다운 숨김 → 끝난 뒤 활성.
-- STT: `tools/serve.py`가 Kokoro로 만든 문장 2개(WAV, 브라우저 형식 WebM/Opus)를 그대로 받아 적음 ("Begin by choosing a bike from the station." 등, 0.4~0.9초). serve.py로 연 앱 페이지에서 `/stt` 호출 → 정렬 100%.
+- STT: `tools/serve.py`가 Kokoro로 만든 문장 2개(WAV, 브라우저 형식 WebM/Opus)를 그대로 받아 적음 (두 문장 모두 원문과 똑같이, 0.4~0.9초). serve.py로 연 앱 페이지에서 `/stt` 호출 → 정렬 100%.
 - 테스트 59개 통과 · 빌드 통과 · 콘솔 오류 0.
 
 ### 확인 못 한 것

@@ -39,7 +39,7 @@
       {
         "skill": "ACT",
         "recurrence": "repeat",
-        "text": "L1: Were you able to contact the client?(연락에 성공했나)에 Sure, I'm available(지금 시간 돼)로 답함. TPO8에서 How did you get here에 follow me를 고른 것과 같은 시점 불일치. able과 available 소리를 헷갈렸는지는 본인 설명 없음."
+        "text": "L1: 고객과 연락에 성공했는지 묻는 질문에 '지금 시간 돼'라는 응답을 고름. TPO8에서 How did you get here에 follow me를 고른 것과 같은 시점 불일치. able과 available 소리를 헷갈렸는지는 본인 설명 없음."
       },
       {
         "skill": "CATCH",
