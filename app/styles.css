@@ -117,6 +117,9 @@ textarea { resize: vertical; margin-top: 8px; }
 .fb { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); }
 .fb.good { background: var(--good-bg); border-color: transparent; }
 .fb.bad { background: var(--bad-bg); border-color: transparent; }
+.verdict { font-weight: 600; margin: 10px 0 0; color: var(--warn); }
+.verdict.good { color: var(--good); }
+.verdict.bad { color: var(--bad); }
 .fb q { font-style: italic; }
 .lbl { display: inline-block; font-size: .74rem; font-weight: 700; color: var(--muted); text-transform: none; margin-right: 2px; }
 .lbl.ai { color: var(--ai); }

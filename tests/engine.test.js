@@ -181,3 +181,46 @@ test('transfer picks alternate sections, starting where the latest real errors w
   assert.deepStrictEqual(pick([{ test: 'X1', sec: 'R', skill: 'ROLE' }, { test: 'X2', sec: 'L', skill: 'ROLE' }]), ['l1', 'r1', 'l2', 'r2']);
   assert.deepStrictEqual(pick([{ test: 'X2', sec: 'R', skill: 'ROLE' }]), ['r1', 'l1', 'r2', 'l2']);
 });
+
+test('every original error is scheduled before the exam, spread over the days left', () => {
+  const d = blank(); d.settings.minutes = 60; d.settings.examDate = '2026-10-28';
+  const seen = new Set();
+  for (let n = 0; n < 9; n++) {
+    const s = E.buildSession(d, C, day(n));
+    for (const st of s.steps.filter(x => x.type === 'original' && !x.verify)) {
+      seen.add(st.ref);
+      d.attempts.push(att(st.skill, 'original', true, day(n) + 1, { ref: st.ref }));
+    }
+  }
+  const all = C.originals.filter(o => o.skill !== 'UNKNOWN').map(o => o.id);
+  assert.deepStrictEqual(all.filter(id => !seen.has(id)), []);
+});
+
+test('originals re-solved in the 리딩·리스닝 tabs are not scheduled again; still-wrong ones come back', () => {
+  const d = blank();
+  const [a, b] = C.originals;
+  d.attempts.push(att(a.skill, 'original', true, day(0), { ref: a.id }), att(b.skill, 'original', false, day(0), { ref: b.id }));
+  const q = E.originalQueue(C, d, day(1));
+  assert.ok(!q.fresh.some(o => o.id === a.id) && !q.fresh.some(o => o.id === b.id));
+  assert.deepStrictEqual(q.again.map(o => o.id), [b.id]);
+  assert.strictEqual(E.originalQueue(C, d, day(0) + 5).again.length, 0, 'not the same day');
+});
+
+test('re-checks: right answers ≥ 3 days old come back, guesses first; confirmed ones stop', () => {
+  const d = blank();
+  const its = C.items.filter(i => i.tier === 'transfer' && i.qa === 'pass' && i.qs && i.qs.length === 1).slice(0, 3);
+  d.attempts.push(att(its[0].skill, 'transfer', true, day(0), { item: its[0].id, conf: 3 }));
+  d.attempts.push(att(its[1].skill, 'transfer', true, day(0) + 1, { item: its[1].id, conf: 1 }));
+  d.attempts.push(att(its[2].skill, 'transfer', false, day(0) + 2, { item: its[2].id, conf: 2 }));
+  assert.strictEqual(E.verifyPool(C, d, day(2), 3).length, 0, 'too soon');
+  const pool = E.verifyPool(C, d, day(3), 3).map(v => v.id);
+  assert.deepStrictEqual(pool, [its[1].id, its[0].id], 'wrong ones are not re-checks; 찍음 first');
+  const s = E.buildSession(d, C, day(3));
+  assert.ok(s.steps.some(x => x.tier === 'verify'), 'mixed into the session');
+  d.attempts.push(att(its[1].skill, 'verify', true, day(3), { item: its[1].id, conf: 2, verify: true }));
+  d.attempts.push(att(its[0].skill, 'verify', true, day(3) + 1, { item: its[0].id, conf: 1, verify: true }));
+  assert.deepStrictEqual(E.verifyPool(C, d, day(6), 3).map(v => v.id), [its[0].id], 'known one stops, guessed one returns');
+  assert.notStrictEqual(E.replaySkill(its[1].skill, d, C, day(3)).mastery, undefined);
+  const m = E.metrics(d).verify;
+  assert.deepStrictEqual([m.n, m.known, m.guessed, m.lost], [2, 1, 1, 0]);
+});

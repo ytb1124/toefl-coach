@@ -359,8 +359,11 @@
           h('div', { class: 'fname' }, SKILL[id].name, ' ', chip(row(id).st.state)),
           h('div', { class: 'muted small' }, whyLine(row(id)))))) : h('p', null, '오늘은 섞어 풀기로 전체 점검만 합니다.'),
         plan.retention.length ? h('p', { class: 'small' }, '+ 유지 확인: ', plan.retention.map(id => SKILL[id].name).join(', ')) : null,
+        h('p', { class: 'small' }, `+ 원본 오답 ${plan.originals.today}개` + (plan.originals.left ? ` · 아직 안 푼 원본 ${plan.originals.left}/${plan.originals.total}개를 시험 전까지 나눠서` : ' · 원본 오답을 모두 한 번씩 다시 풀었습니다') +
+          (plan.originals.again ? ` · 다시 틀린 ${plan.originals.again}개 복습` : '')),
+        plan.verifyCount ? h('p', { class: 'small' }, `+ 다시 확인 ${plan.verifyCount}개: 며칠 전에 맞힌 문제를 섞어서, 알고 맞혔는지 찍었는지 가립니다`) : null,
         h('button', { class: 'primary', onclick: () => startSession(false) }, '시작하기')));
-      if (plan.freshLeft < 25) main.append(h('p', { class: 'notice' }, `처음 보는 새 문제가 ${plan.freshLeft}개 남았습니다. 다 쓰면 이미 푼 문제가 "다시 풀기"로 나오고, 새 문제 정답률에는 들어가지 않습니다. content/items_*.json에 문제를 추가하면 늘어납니다.`));
+      if (plan.freshLeft < 25) main.append(h('p', { class: 'notice' }, `오늘 훈련용 새 연습 문제(AI가 만든 변형 문제)가 ${plan.freshLeft}개 남았습니다. 다 쓰면 이미 푼 문제가 "다시 풀기"로 나오고, 새 문제 정답률에는 들어가지 않습니다. 모의고사 원본 오답과는 별개입니다.`));
     }
 
     // Compact state list — "am I actually improving?"
@@ -406,13 +409,14 @@
     else if (step.type === 'move') stepMove(main, step);
     else if (step.type === 'item') stepItem(main, step);
     else if (step.type === 'mixedIntro') stepMixedIntro(main);
+    else if (step.type === 'origIntro') stepOrigIntro(main, step);
     else stepEnd(main);
   }
   function next() {
     const s = D.session; s.cursor = Math.min(s.cursor + 1, s.steps.length - 1); s.sub = null; save(); render();
   }
   function tierLabel(tier) {
-    return { guided: '연습 · 단계별 안내', transfer: '새 문제 · 실전 조건', mixed: '섞어 풀기 · 새 문제', delayed: '유지 확인 · 새 문제', repeat: '유지 확인 · 다시 풀기 (새 문제 정답률 제외)' }[tier] || '';
+    return { guided: '연습 · 단계별 안내', transfer: '새 문제 · 실전 조건', mixed: '섞어 풀기 · 새 문제', delayed: '유지 확인 · 새 문제', repeat: '유지 확인 · 다시 풀기 (새 문제 정답률 제외)', verify: '다시 확인 · 전에 푼 문제 (새 문제 정답률 제외)' }[tier] || '';
   }
   function logAttempt(a) {
     const rec = Object.assign({ at: now(), sid: D.session ? D.session.id : null }, a);
@@ -487,12 +491,15 @@
   // --- original error step ---
   function stepOriginal(main, step) {
     const o = ORIG[step.ref];
-    main.append(h('p', { class: 'kicker' }, `원본 오답 · ${o.test} · ${o.sec === 'R' ? 'Reading' : 'Listening'} · ${o.set}`));
-    main.append(h('p', { class: 'muted small' }, '먼저 다시 풀어 보세요. 원본 문제는 답을 기억해서 맞힐 수도 있어서, 실력이 늘었는지 판단할 때는 쓰지 않습니다.'));
-    renderOriginalCard(main, o, true, () => next());
+    if (!o) { next(); return; }
+    const head = step.verify ? '다시 확인 · 전에 푼 원본 오답' : step.again ? '원본 오답 · 지난번에 또 틀린 문제' : '원본 오답';
+    main.append(h('p', { class: 'kicker' }, `${head} · ${o.test} · ${o.sec === 'R' ? 'Reading' : 'Listening'} · ${o.set}`));
+    main.append(h('p', { class: 'muted small' }, step.verify ? '며칠 전에 맞힌 문제입니다. 근거를 찾아 다시 풀고, 솔직하게 확신도를 고르세요. 찍어서 맞혔거나 틀리면 다시 나옵니다.'
+      : '먼저 다시 풀어 보세요. 원본 문제는 답을 기억해서 맞힐 수도 있어서, 실력이 늘었는지 판단할 때는 쓰지 않습니다.'));
+    renderOriginalCard(main, o, true, () => next(), { verify: !!step.verify });
   }
 
-  function renderOriginalCard(main, o, live, onDone) {
+  function renderOriginalCard(main, o, live, onDone, opts = {}) {
     const edit = D.edits[o.id] || {};
     const myVal = edit.my !== undefined ? edit.my : o.my;
     const box = h('section', { class: 'card' });
@@ -518,36 +525,39 @@
       });
     }
     if (o.passage) box.append(h('div', { class: 'passage' }, para(o.passage)));
-    let answer = null;
+    let answer = null; let conf = null;
     const t0 = now();
     const check = h('button', { class: 'primary', disabled: true }, '확인');
+    const upd = () => { check.disabled = (o.ctest ? !answer : answer == null) || conf == null; };
     let blank = null;
     if (o.ctest) {
       const [a, b] = o.ctest.text.split('{{}}');
       blank = letterBlank(o.ctest.prefix, o.ctest.answer, { readOnly: !live,
-        onChange: v => { answer = v; check.disabled = !v; }, onEnter: () => { if (!check.disabled) check.click(); } });
+        onChange: v => { answer = v; upd(); }, onEnter: () => { if (!check.disabled) check.click(); } });
       box.append(h('p', { class: 'ctest' }, a, blank.el, b));
       if (live) setTimeout(() => blank.focus(), 50);
     } else {
       box.append(h('p', { class: 'stem' }, o.stem));
       box.append(h('div', { class: 'opts' }, o.options.map((t, i) => h('button', { class: 'opt', onclick: e => {
-        answer = i; box.querySelectorAll('.opt').forEach(x => x.classList.remove('sel')); e.currentTarget.classList.add('sel'); check.disabled = false;
+        answer = i; box.querySelectorAll('.opt').forEach(x => x.classList.remove('sel')); e.currentTarget.classList.add('sel'); upd();
       } }, h('b', null, LETTERS[i]), ' ', t))));
     }
     if (!live) { box.append(originalFeedback(o, null, myVal)); return; }
     check.onclick = () => {
       const correct = o.ctest ? E.checkTyped(answer, o.ctest.prefix, o.ctest.answer) : answer === o.correct;
-      const rec = logAttempt({ ref: o.id, skill: o.skill, tier: 'original', correct, answer, ms: now() - t0 });
-      check.remove();
+      const rec = logAttempt({ ref: o.id, skill: o.skill, tier: 'original', correct, answer, conf, verify: opts.verify || undefined, ms: now() - t0 });
+      check.remove(); box.querySelector('.conf')?.remove();
+      if (opts.verify) box.append(verifyVerdict(correct, conf));
       box.querySelectorAll('input,.opt').forEach(x => x.disabled = true);
       if (blank) blank.mark(correct);
       if (!o.ctest) box.querySelectorAll('.opt').forEach((x, i) => { if (i === o.correct) x.classList.add('right'); else if (i === answer) x.classList.add('wrong'); });
       const holdBack = !correct && !!o.audio;
       box.append(originalFeedback(o, { answer, correct }, myVal, holdBack));
       if (holdBack) box.append(wrongFollowup(rec, { audio: o.audio, seg: o.seg }, () => box.append(evidenceBlock(o.evidence, o.audio), causeConfirm(o, onDone))));
+      else if (opts.verify && correct) box.append(h('button', { class: 'primary', onclick: onDone }, '다음'));
       else box.append(causeConfirm(o, onDone));
     };
-    box.append(check);
+    box.append(confRow(v => { conf = v; upd(); }), check);
   }
 
   function evidenceBlock(evidence, audioId) {
@@ -603,6 +613,21 @@
         myRules(step.skill).length ? h('div', { class: 'mine-list' }, h('p', { class: 'small' }, h('b', null, '내가 만든 규칙')),
           h('ul', null, myRules(step.skill).slice(0, 4).map(r => h('li', null, r.rule)))) : null),
       h('button', { class: 'primary', onclick: next }, '이 순서로 풀어 볼게요'));
+  }
+
+  // Re-check result: was the earlier right answer real knowledge?
+  function verifyVerdict(correct, conf) {
+    return correct && conf >= 2 ? h('p', { class: 'verdict good' }, '알고 맞힘으로 확인 — 이 문제는 다시 확인하지 않습니다.')
+      : correct ? h('p', { class: 'verdict' }, '맞혔지만 찍음 — 아직 아는 것으로 보지 않고, 며칠 뒤 다시 확인합니다.')
+      : h('p', { class: 'verdict bad' }, '전에 맞힌 것은 확실한 실력이 아니었습니다 — 오답으로 다시 나옵니다.');
+  }
+
+  function stepOrigIntro(main, step) {
+    main.append(h('section', { class: 'card move' },
+      h('h1', null, '원본 오답 다시 풀기'),
+      h('p', null, `모의고사에서 틀린 리딩·리스닝 문제 ${step.n}개입니다. 시험 전까지 틀린 문제를 모두 한 번씩 다시 풀도록 날마다 나눠 넣었습니다. 지난번 다시 풀 때도 틀린 문제가 먼저 나옵니다.`),
+      h('p', { class: 'small muted' }, '리딩·리스닝 탭에서 이미 다시 푼 문제는 여기서 빠집니다.')),
+      h('button', { class: 'primary', onclick: next }, '시작'));
   }
 
   function stepMixedIntro(main) {
@@ -851,13 +876,14 @@
     setTimeout(() => blank.focus(), 50);
     check.onclick = () => {
       const correct = E.checkTyped(val, it.ctest.prefix, it.ctest.answer);
-      const rec = logAttempt({ item: it.id, q: 0, ref: it.id + '#0', skill: it.skill, tier: step.tier, correct, conf, hinted: sub.hinted, answer: val, ms: now() - t0 });
+      const rec = logAttempt({ item: it.id, q: 0, ref: it.id + '#0', skill: it.skill, tier: step.tier, verify: step.tier === 'verify' || undefined, correct, conf, hinted: sub.hinted, answer: val, ms: now() - t0 });
       blank.disable(); blank.mark(correct); check.remove(); box.querySelector('.conf').remove();
       box.append(h('div', { class: 'fb ' + (correct ? 'good' : 'bad') },
         h('p', null, correct ? '✓ 정답 ' : '✗ ', h('b', null, it.ctest.answer), correct ? '' : `  (내 답: ${it.ctest.prefix}${val.trim().replace(new RegExp('^' + it.ctest.prefix, 'i'), '')})`),
         h('p', null, it.explain || ''),
         !correct && it.skill === 'FORM' ? h('p', { class: 'rule' }, '빈칸 자리: ', C.slotOptions[it.ctest.slot]) : null,
-        !correct ? ruleLine(it.skill) : null));
+        !correct ? ruleLine(it.skill) : null,
+        step.tier === 'verify' ? verifyVerdict(correct, conf) : null));
       sub.phase = 'after'; sub.si = 0; save();
       const nextBtn = () => box.append(flagLink(it), h('button', { class: 'primary', onclick: next }, '다음'));
       if (!correct && exam) box.append(wrongFollowup(rec, { askRecur: true }, nextBtn)); else nextBtn();
@@ -900,7 +926,7 @@
       const skill = q.skill || it.skill;
       const key = correct ? null : trapKey(q.why[sel]);
       const prior = key ? sameTrapCount(skill, key) : 0;
-      const rec = logAttempt({ item: it.id, q: sub.qi, ref: it.id + '#' + sub.qi, skill, tier: step.tier, correct, conf, hinted: sub.hinted, answer: sel, trap: key, plays: sub.plays, ms: now() - t0 });
+      const rec = logAttempt({ item: it.id, q: sub.qi, ref: it.id + '#' + sub.qi, skill, tier: step.tier, verify: step.tier === 'verify' || undefined, correct, conf, hinted: sub.hinted, answer: sel, trap: key, plays: sub.plays, ms: now() - t0 });
       check.remove(); box.querySelector('.conf').remove();
       box.querySelectorAll('.opt,.sq').forEach(x => { x.disabled = true; const i = +x.dataset.i; if (i === q.answer) x.classList.add('right'); else if (i === sel) x.classList.add('wrong'); });
       const L = i => it.kind === 'insert' ? LETTERS[i] : LETTERS[perm.indexOf(i)];
@@ -913,7 +939,8 @@
         q.evidence && (correct || !it.audio) ? h('p', null, h('span', { class: 'lbl' }, '근거'), ' ', h('q', null, q.evidence)) : null,
         !correct && prior > 0 ? h('p', { class: 'warn' }, `같은 함정(${key === 'off-target' ? '사실이지만 질문과 무관' : key === 'unsupported' ? '근거 없는 요소' : '같은 오답 유형'})에 ${prior + 1}번째 걸림`) : null,
         !correct ? ruleLine(skill) : null,
-        it.explain && !correct ? h('p', { class: 'muted small' }, it.explain) : null));
+        it.explain && !correct ? h('p', { class: 'muted small' }, it.explain) : null,
+        step.tier === 'verify' ? verifyVerdict(correct, conf) : null));
       const last = sub.qi >= it.qs.length - 1;
       const nextBtn = () => box.append(h('button', { class: 'primary', onclick: () => {
         if (!last) { sub.qi++; save(); render(); return; }
@@ -937,7 +964,11 @@
     const changes = Object.keys(after).filter(k => s.before && s.before[k] && s.before[k] !== after[k].st.state);
     main.append(h('section', { class: 'card hero' },
       h('h1', null, '오늘 훈련 끝'),
-      h('p', null, `새 문제 ${scored.filter(a => a.correct).length} / ${scored.length} 정답` + (mine.filter(a => a.tier === 'original').length ? ` · 원본 오답 ${mine.filter(a => a.tier === 'original').length}개 확인` : '')),
+      h('p', null, `새 문제 ${scored.filter(a => a.correct).length} / ${scored.length} 정답` + (mine.filter(a => a.tier === 'original' && !a.verify).length ? ` · 원본 오답 ${mine.filter(a => a.tier === 'original' && !a.verify).length}개 확인` : '')),
+      (() => {
+        const v = mine.filter(a => a.verify);
+        return v.length ? h('p', null, `다시 확인 ${v.length}개: 알고 맞힘 ${v.filter(a => a.correct && a.conf >= 2).length} · 찍어서 맞힘 ${v.filter(a => a.correct && !(a.conf >= 2)).length} · 틀림 ${v.filter(a => !a.correct).length}`) : null;
+      })(),
       changes.length ? h('ul', { class: 'changes' }, changes.map(k => h('li', null, SKILL[k].name, ': ', chip(s.before[k]), ' → ', chip(after[k].st.state)))) :
         h('p', { class: 'muted' }, '상태 변화는 없습니다. "개선"이 되려면 최근 새 문제 5개 중 4개 이상을 맞히고, 2번 이상의 훈련에 걸쳐 풀어야 합니다.'),
       (() => {
@@ -960,6 +991,7 @@
       metricTile('유지 확인 정답률', m.retention.pct + '%', `${m.retention.n}문항`, m.retention.n >= 3),
       metricTile('같은 함정에 또 걸림', m.recurrence.repeats + '회', `함정 오답 ${m.recurrence.trapMisses}회 중`, m.transfer.n >= 5),
       metricTile('확신하고 틀림', m.confidentMiss.n + '회', `새 문제 ${m.confidentMiss.of}개 중`, m.transfer.n >= 5),
+      metricTile('다시 확인: 알고 맞힘', m.verify.n ? Math.round(100 * m.verify.known / m.verify.n) + '%' : '—', `${m.verify.n}개 중 · 찍어서 맞힘 ${m.verify.guessed} · 틀림 ${m.verify.lost}`, m.verify.n >= 1),
       metricTile('원본 다시 맞힘 (참고)', m.originalRedo.pct + '%', `${m.originalRedo.n}개 · 답을 기억했을 수 있음`, m.originalRedo.n >= 1),
       metricTile('활동', m.activity.attempts + '문항', `${m.activity.days}일 · ${Math.round(m.activity.ms / 60000)}분`, true)));
 
