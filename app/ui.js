@@ -188,7 +188,21 @@
 
   // ---------- LISTENING: 소站 TPO独家 오답 세트를 원본 음원으로 다시 풀기 (app/listen.js, 데이터는 로컬 전용) ----------
   let LS = null;
-  const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage }));
+  // link: the same wrong questions exist as '오늘 훈련' originals (sec L) — show their skill/history and log listening-tab answers as original attempts.
+  const origLink = {
+    info(id) {
+      const o = ORIG[id]; if (!o) return null;
+      const A = D.attempts.filter(a => a.tier === 'original' && a.ref === id);
+      return { skill: SKILL[o.skill] ? SKILL[o.skill].name : null, n: A.length, ok: A.filter(a => a.correct).length, lastOk: A.length ? A[A.length - 1].correct : null };
+    },
+    log(id, correct, choiceText) {
+      const o = ORIG[id]; if (!o) return;
+      const norm = t => String(t || '').toLowerCase().replace(/[^a-z]/g, '');
+      const i = (o.options || []).findIndex(t => norm(t) === norm(choiceText));
+      logAttempt({ ref: id, skill: o.skill, tier: 'original', correct, answer: i >= 0 ? i : null, src: 'listen' });
+    },
+  };
+  const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
 
   // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
   let V = null, vocabMode = 'home';
@@ -469,7 +483,18 @@
     if (o.audio) {
       const p = Player(o.audio, { onPlay: () => {} });
       activePlayers.push(p);
-      box.append(h('div', { class: 'small muted' }, C.audio[o.audio].note || '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).'), p);
+      const note = h('div', { class: 'small muted' }, C.audio[o.audio].note || '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).');
+      box.append(note, p);
+      // 소站 원본 음원이 이 기기에서 열리면 (로컬 파일 또는 GitHub 토큰) 재구성 음성 대신 원본을 보여 준다
+      if (o.sec === 'L' && window.ListenApp) listenApp().origSource(o.id, src => {
+        if (!box.isConnected) return;
+        const a = h('audio', { controls: true, preload: 'auto', src, class: 'orig-audio' });
+        a.playbackRate = listenApp().rate();
+        activePlayers.push({ stop: () => a.pause() });
+        p.stop(); p.style.display = 'none';
+        note.replaceChildren('소站 원본 음원 (세트 전체) · ', h('a', { href: 'javascript:void 0', onclick: () => { a.pause(); a.remove(); p.style.display = ''; note.textContent = '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).'; } }, '재구성 음성으로 듣기'));
+        note.after(a);
+      });
     }
     if (o.passage) box.append(h('div', { class: 'passage' }, para(o.passage)));
     let answer = null;

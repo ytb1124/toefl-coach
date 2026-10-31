@@ -313,3 +313,4 @@ button.rec { border-color: var(--bad); color: var(--bad); }
 .tscript .tline.seek { cursor: pointer; }
 .tscript .tline.now { background: var(--sel); }
 .tscript .sp { color: var(--muted); font-weight: 600; }
+.orig-audio { width: 100%; margin: 6px 0 10px; }

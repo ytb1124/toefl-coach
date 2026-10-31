@@ -76,6 +76,7 @@ node --test tests/engine.test.js
 - 자료는 원본 저작물이라 **공개 저장소에 올리지 않는다**: `private/zhan/` (gitignore) = 비공개 저장소 `ytb1124/toefl-coach-private`의 작업 사본.
   앱은 로컬 서버면 `private/zhan/listen.js`, 아니면 기기마다 넣은 읽기 전용 GitHub 토큰(`toefl-gh-token`, 동기화 안 함)으로 그 저장소의 `listen.json`·`audio/`를 읽는다.
 - 새 회차 추가: 사용자의 크롬(Claude in Chrome)에서 `https://top.zhan.com/toefl/simulate/listentpo.html` → TPO独家 N '查看报告' 리포트를 열고 Vue 컴포넌트 props(`scoreData`·`tasks`)에서 오답 세트를 `private/zhan/Mock_Test_<N>_<workflowId>.json`으로 내보낸다 (형식은 기존 파일과 같게). 음원은 `audio/`에 받는다.
+  각 오답은 앱의 같은 리스닝 원본(`content/originals.json` 등)과 질문 문장으로 자동 연결된다(`orig`). 리스닝 탭 풀이는 그 원본의 `tier: 'original'` 시도로 기록되고, 오늘 훈련의 원본 문제는 원본 음원으로 재생된다.
   → `python3 tools/zhan.py --todo`로 해설 없는 오답을 뽑아 한국어 해설을 `ko.json`에 추가 → `python3 tools/zhan.py` → `private/zhan`에서 커밋·푸시.
 
 ## 배포

@@ -47,6 +47,9 @@
 
   root.ListenApp = { create(env) {
     const { h, go, storage, toast } = env;
+    const link = env.link || { info: () => null, log: () => {} };
+    // 로컬 서버(이 Mac, 같은 와이파이의 휴대폰)일 때만 private/ 파일을 시도한다 — 공개 사이트에서는 바로 토큰으로.
+    const localHost = /^(localhost|127\.0\.0\.1|\[::1\]|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
     let loaded = null;   // null = not tried, true/false after the local script / GitHub fetch
     let remote = false, loadErr = null;
     const token = () => { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } };
@@ -55,15 +58,31 @@
     function ensureData(then) {
       if (root.ZHAN) { loaded = true; return then(); }
       if (loaded === false) return then();
+      if (!localHost) return fromGitHub(then);
       const s = document.createElement('script');
       s.src = DATA + '?t=' + Date.now();
       s.onload = () => { loaded = !!root.ZHAN; then(); };
-      s.onerror = () => {
-        if (!token()) { loaded = false; return then(); }
-        ghFetch('listen.json').then(r => r.json()).then(z => { root.ZHAN = z; remote = true; loaded = true; loadErr = null; then(); })
-          .catch(e => { loaded = false; loadErr = e.message; then(); });
-      };
+      s.onerror = () => fromGitHub(then);
       document.head.append(s);
+    }
+    function fromGitHub(then) {
+      if (!token()) { loaded = false; return then(); }
+      ghFetch('listen.json').then(r => r.json()).then(z => { root.ZHAN = z; remote = true; loaded = true; loadErr = null; then(); })
+        .catch(e => { loaded = false; loadErr = e.message; then(); });
+    }
+    // '오늘 훈련'의 원본 오답 문제에서 같은 문항의 소站 원본 음원을 찾아 준다 (없으면 조용히 아무것도 안 함).
+    function origSource(origId, cb) {
+      if (loaded === false) return;
+      ensureData(() => {
+        if (!root.ZHAN) return;
+        for (const set of root.ZHAN.sets) {
+          const q = set.qs.find(x => x.orig === origId);
+          if (!q) continue;
+          const path = set.kind === 'reply' ? q.audio : set.audio;
+          if (path) fetchAudio(path).then(() => cb(src(path))).catch(() => {});
+          return;
+        }
+      });
     }
     // Audio: local mode plays the file path; remote mode plays a blob URL fetched once (Cache API keeps it across visits).
     const urls = {};
@@ -105,6 +124,11 @@
       draw(); return box;
     }
     const back = (hash, label) => h('a', { class: 'small', href: hash }, '← ' + label);
+    // 앱 '오늘 훈련'의 같은 원본 오답: 능력 + 지금까지 다시 푼 기록 (이번 풀이 포함)
+    function origLine(id) {
+      const i = link.info(id); if (!i) return null;
+      return h('p', { class: 'small muted' }, i.skill ? h('span', { class: 'chip' }, i.skill) : null, ` 오늘 훈련 원본 ${id} · 다시 푼 기록 ${i.ok}/${i.n} 맞힘`);
+    }
     const chipFor = st => h('span', { class: 'chip ' + ({ new: '', fixed: 'src-tutor', again: 'rc-repeat' })[st] }, ({ new: '아직 안 풂', fixed: '다시 풀어 맞힘', again: '또 틀림' })[st]);
 
     function view(main, parts, rerender) {
@@ -162,8 +186,13 @@
           h('h2', null, t.name, h('span', { class: 'muted small' }, ` ${t.date} · ${t.correct}/${t.total} · ${t.score}점`)),
           h('ul', { class: 'olist' }, sets.map(s => h('li', { onclick: () => go('#/listen/' + s.id) },
             h('div', null, h('b', null, s.title), ' ', h('span', { class: 'muted small' }, `Module ${s.module} · ${KIND[s.kind]}`), ' ', chipFor(status(s, d.sets[s.id]))),
-            h('div', { class: 'small muted' }, `틀린 문항 ${s.qs.filter(x => x.wrong).length}/${s.qs.length}`))))));
+            h('div', { class: 'small muted' }, `틀린 문항 ${s.qs.filter(x => x.wrong).length}/${s.qs.length}`, appLine(s)))))));
       }
+    }
+    function appLine(s) {
+      const linked = s.qs.filter(x => x.orig).map(x => link.info(x.orig)).filter(Boolean);
+      const tried = linked.filter(i => i.n);
+      return tried.length ? ` · 오늘 훈련에서 다시 푼 ${tried.length}문항 중 최근 맞힘 ${tried.filter(i => i.lastOk).length}` : '';
     }
     const testName = (Z, id) => (Z.tests.find(t => t.id === id) || {}).name || id;
 
@@ -214,6 +243,7 @@
           cur.ans[cur.qi] = i;
           if (cur.qi + 1 < set.qs.length) { cur.qi++; redraw(); return; }
           const ok = set.qs.filter((x, k) => cur.ans[k] === x.answer).length;
+          set.qs.forEach((x, k) => { if (x.orig) link.log(x.orig, cur.ans[k] === x.answer, x.choices[cur.ans[k]]); });
           save(d => { const r = d.sets[set.id] || { tries: [] }; r.tries.push({ at: Date.now(), ans: cur.ans.slice(), ok, n: set.qs.length }); d.sets[set.id] = r; });
           cur.phase = 'review'; redraw();
         } }, h('b', null, L[i]), ' ', c))));
@@ -233,6 +263,7 @@
             i === q.answer ? h('span', { class: 'chip src-tutor' }, '정답') : null,
             i === mine && i !== q.answer ? h('span', { class: 'chip rc-repeat' }, '이번 내 답') : null,
             q.wrong && i === q.my ? h('span', { class: 'chip' }, '시험 때 내 답') : null))),
+          q.orig ? origLine(q.orig) : null,
           q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
           q.point ? h('p', { class: 'rule small' }, '다음엔 → ', q.point) : null,
           !q.whyKo && q.whyZh ? h('details', null, h('summary', { class: 'small' }, q.wrong ? '해설 (중국어 원문, 한국어 해설 없음)' : '해설 (중국어 원문 — 시험에서 맞힌 문항)'), h('pre', { class: 'essaytext small' }, q.whyZh)) : null,
@@ -257,6 +288,6 @@
         h('button', { class: 'ghost', onclick: () => { cur = null; redraw(); } }, '같은 세트 다시 풀기'),
         nxt ? h('button', { class: 'primary', onclick: () => { cur = null; go('#/listen/' + nxt.id); } }, '다음 세트 →') : null));
     }
-    return { view, busy: () => !!(cur && cur.phase !== 'review' && audio && !audio.paused) };
+    return { view, origSource, rate, busy: () => !!(cur && cur.phase !== 'review' && audio && !audio.paused) };
   } };
 })(typeof window !== 'undefined' ? window : globalThis);

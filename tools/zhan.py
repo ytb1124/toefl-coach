@@ -66,7 +66,32 @@ def kind(title):
     return "other"
 
 
+def app_originals():
+    """앱 '오늘 훈련'의 리스닝 원본 오답 (content/originals.json + content/tests/*.json). 같은 문제를 연결하려고 읽는다."""
+    o = json.loads((ROOT / "content" / "originals.json").read_text())
+    o = o if isinstance(o, list) else o.get("originals", [])
+    for f in sorted((ROOT / "content" / "tests").glob("*.json")):
+        o += json.loads(f.read_text()).get("originals", [])
+    return [x for x in o if x.get("sec") == "L" and x.get("options")]
+
+
+def norm(t):
+    return re.sub(r"[^a-z]", "", (t or "").lower())
+
+
+def match_orig(q, origs, used):
+    """같은 질문(문장 일치) → 없으면 같은 정답 보기 문장. 한 원본은 한 문항에만."""
+    for key in (lambda o: norm(o["stem"]) == norm(q["stem"]),
+                lambda o: o.get("correct") is not None and norm(o["options"][o["correct"]]) == norm(q["choices"][q["answer"]])):
+        for o in origs:
+            if o["id"] not in used and norm(o["stem"]) and key(o):
+                used.add(o["id"])
+                return o["id"]
+    return None
+
+
 def load():
+    origs, used = app_originals(), set()
     ko = json.loads((Z / "ko.json").read_text()) if (Z / "ko.json").exists() else {}
     tests, sets = [], []
     for f in sorted(Z.glob("Mock_Test_*.json"), key=lambda p: int(p.stem.split("_")[2])):
@@ -89,6 +114,8 @@ def load():
                     "audio": local_audio(q.get("audio")),
                     "whyKo": tr.get("why"), "point": tr.get("point"), "whyZh": q.get("why") or None,
                 })
+                if q["wrong"]:
+                    qs[-1]["orig"] = match_orig(qs[-1], origs, used)
             sets.append({"id": sid, "test": tid, "module": s["m"], "task": s["task"], "title": s["title"], "kind": k,
                          "audio": local_audio(s.get("audio")), "script": script_lines(s.get("script")), "qs": qs})
     return tests, sets
@@ -126,8 +153,9 @@ def main():
     out.write_text("/* 생성 파일 (tools/zhan.py). 원본 저작물 — 공개 저장소에 올리지 않는다. */\nwindow.ZHAN = " + data + ";\n")
     (Z / "listen.json").write_text(data + "\n")   # 비공개 GitHub 저장소용 (앱이 토큰으로 읽음)
     wrong = sum(q["wrong"] for s in sets for q in s["qs"])
+    linked = sum(1 for s in sets for q in s["qs"] if q.get("orig"))
     ko = sum(1 for s in sets for q in s["qs"] if q["wrong"] and q["whyKo"])
-    print(f"{out.relative_to(ROOT)}: 회차 {len(tests)} · 세트 {len(sets)} · 오답 {wrong} (한국어 해설 {ko}/{wrong})")
+    print(f"{out.relative_to(ROOT)}: 회차 {len(tests)} · 세트 {len(sets)} · 오답 {wrong} (한국어 해설 {ko}/{wrong}) · 앱 원본 오답과 연결 {linked}")
     sys.exit(1 if errs else 0)
 
 
