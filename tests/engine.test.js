@@ -299,3 +299,36 @@ test('L&R 빠뜨림(omit) → 다음 날 ② 쉐도잉; 말하기 문법(grammar
   assert.strictEqual(sh.length, 1); assert.strictEqual(sh[0].of, 'Z4-S-A1-Q2');
   assert.strictEqual(E.replaySkill('ACT', d, ALL, day(1)).mastery, 0, 'speak attempts never count toward reading/listening mastery');
 });
+
+test('변화 지표: 최근 7일 vs 그 전 7일, 영역별 (기록 적으면 null)', () => {
+  const d = blank();
+  const L = allItems.find(i => i.sec === 'L' && i.kind === 'lecture');
+  for (let i = 0; i < 4; i++) d.attempts.push(att(L.skill, 'transfer', i < 3, day(10) + i, { item: L.id, q: i }));
+  for (let i = 0; i < 3; i++) d.attempts.push(att(L.skill, 'transfer', false, day(2) + i, { item: L.id, q: i }));
+  d.dictation = [{ at: day(10), pct: 80 }, { at: day(9), pct: 60 }];
+  d.readSpeed = [{ at: day(10), wpm: 180 }, { at: day(10), wpm: 5000 }];
+  d.speak = [{ at: day(10), kind: 'lr', stt: true, pct: 90 }, { at: day(10), kind: 'interview', stt: true, rounds: [{ wpm: 100, pauses: 4 }, { wpm: 120, pauses: 2 }] }];
+  d.writing = [{ at: day(10), kind: 'discussion', planMs: 95000, structure: [['a', true], ['b', false]], cats: ['TENSE'] }];
+  d.mock = [{ at: day(10), sec: 'L', correct: 30, total: 40, paper: 2 }];
+  const m = E.areaMetrics(d, ALL, day(10), { vocabNow: 40, vocabPrev: 50, knownRatio: 0.7 });
+  assert.deepStrictEqual(m.L.newQ, { now: 75, prev: 0 });
+  assert.deepStrictEqual(m.L.dictation, { now: 70, prev: null });
+  assert.strictEqual(m.R.wpm.now, 180, 'implausible wpm (clicked through) ignored');
+  assert.strictEqual(m.S.lr.now, 90); assert.strictEqual(m.S.wpm.now, 110); assert.strictEqual(m.S.pauses.now, 3);
+  assert.strictEqual(m.W.planSec.now, 95); assert.strictEqual(m.W.structure.now, 50); assert.strictEqual(m.W.errors.now, 1);
+  assert.strictEqual(m.L.mock.pct, 75);
+  const ind = E.weeklyIndicatorsFrom(m);
+  assert.deepStrictEqual(ind.vocab, { higherIsBetter: false, now: 40, prev: 50 });
+  assert.deepStrictEqual(E.weeklyAdjust(blank(), day(10), ind).raised, []);   // listen improved, vocab improved; others lack data
+});
+
+test('carry-over skips work already done elsewhere (원본 진단, 후속 훈련)', () => {
+  const d = blank(); d.settings.examDate = '2026-11-14';
+  const p1 = plan(d, day(0));
+  const w = p1.blocks.find(b => b.key === 'wrap');
+  const diag = w.tasks.find(t => t.type === 'diag');
+  d.attempts.push(att(diag.skill, 'original', null, day(0) + 10, { ref: diag.ref, diag: true }));
+  d.plan = p1;
+  const p2 = plan(d, day(1));
+  assert.ok(!tasks(p2, 'wrap').some(t => t.type === 'diag' && t.ref === diag.ref && t.carriedFrom));
+});

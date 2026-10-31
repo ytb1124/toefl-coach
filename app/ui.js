@@ -431,18 +431,34 @@
     return { seen: tabSeen(), vocab: vc, speak: speak().today(C, D.speak), write: window.WriteApp ? write().today(C, D) : {} };
   }
   // 주 1회 비중 자동 조정: 선행 지표가 지난주보다 오르지 않은 영역 +5%p (설정에서 고정한 영역은 제외).
-  function weeklyIndicators() {
-    const t = now();
-    const acc = (sec, a, b) => E.areaAccuracy(D, C, t, sec, a, b);
-    const ind = { listen: { now: acc('L', 7, 0), prev: acc('L', 14, 7) }, read: { now: acc('R', 7, 0), prev: acc('R', 14, 7) } };
-    const sw = swApp().weekly ? swApp().weekly(t) : {};
-    return Object.assign(ind, sw);
+  // 변화 지표 (엔진 areaMetrics) + 단어 지표: 자주 틀린 단어 수(오늘 vs 7일 전 기록), 틀린 세트 지문의 아는 단어 비율.
+  function vocabNumbers() {
+    const api = vocabApp();
+    if (!api || !api.hasData || !api.hasData() || !api.hardCount) return {};
+    const nowN = api.hardCount();
+    const hist = D.vocabHist || {};
+    const weekAgo = Object.keys(hist).filter(d => d <= E.dayStr(now() - 7 * E.DAY)).sort().pop();
+    let known = null;
+    if (window.ZHAN_POOL && api.wordStatus) {
+      // 앱에서 틀린 소站 세트의 지문·스크립트에 나온 단어 중 단어장에 있는 것 → 마스터 비율
+      const wrongSets = new Set(D.attempts.filter(a => a.item && a.correct === false).map(a => POOL()[a.item] && POOL()[a.item].set).filter(Boolean));
+      const words = new Set();
+      for (const st of ZHAN_POOL.sets) if (wrongSets.has(st.id)) for (const w of String(st.passage || (st.script || []).map(l => l.t).join(' ')).toLowerCase().match(/[a-z]{4,}/g) || []) words.add(w);
+      let inBook = 0, mastered = 0;
+      for (const w of words) { const st = api.wordStatus(w); if (st) { inBook++; if (st === 'master') mastered++; } }
+      if (inBook >= 10) known = Math.round(100 * mastered / inBook);
+    }
+    return { vocabNow: nowN, vocabPrev: weekAgo ? hist[weekAgo] : null, knownRatio: known };
   }
+  const metricsNow = () => E.areaMetrics(D, C, now(), vocabNumbers());
+  function weeklyIndicators() { return E.weeklyIndicatorsFrom(metricsNow()); }
   function todayPlan() {
     const today = E.dayStr(now());
     if (D.plan && D.plan.date === today && D.plan.v === 2) return D.plan;
     const wa = E.weeklyAdjust(D, now(), weeklyIndicators());
     if (!D.weightAuto || wa.week !== D.weightAuto.week) D.weightAuto = wa;
+    const vn = vocabNumbers();
+    if (vn.vocabNow != null) { D.vocabHist = D.vocabHist || {}; D.vocabHist[today] = vn.vocabNow; }
     const p = E.buildPlan(D, C, now(), planCtx());
     p.before = Object.fromEntries(E.skillTable(D, C, now()).map(r => [r.skill.id, r.st.state]));
     D.plan = p; save();
@@ -914,8 +930,27 @@
     return h('div', { class: 'tile' }, h('div', { class: 'tl' }, label), h('div', { class: 'tv' }, enough ? val : '—'), h('div', { class: 'ts muted' }, enough ? sub : sub + ' · 기록 부족'));
   }
   function viewProgress(main) {
-    const m = E.metrics(D);
+    const m = E.metrics(D, C);
     main.append(h('h1', null, '실력이 실제로 늘고 있을까'));
+    // 영역별 지표: 최근 7일 vs 그 전 7일 (OVERHAUL.md 측정 표). 실전에 가까운 지표는 모의 모듈.
+    const am = metricsNow();
+    const cmp = (x, unit, lowerBetter) => {
+      if (!x || x.now == null) return h('span', { class: 'muted' }, '기록 부족');
+      const d = x.prev == null ? null : Math.round((x.now - x.prev) * 10) / 10;
+      const good = d == null || d === 0 ? '' : (lowerBetter ? d < 0 : d > 0) ? ' good' : ' bad';
+      return h('span', null, h('b', null, x.now + unit), d == null ? h('span', { class: 'muted small' }, ' (지난주 기록 없음)') : h('span', { class: 'small' + good }, ` (지난주 ${x.prev}${unit}, ${d > 0 ? '+' : ''}${d})`));
+    };
+    const mock = x => x ? h('span', null, h('b', null, x.pct + '%'), h('span', { class: 'muted small' }, ` 독점 TPO ${x.paper} · ${fmtDate(x.at)}`)) : h('span', { class: 'muted' }, '아직 없음');
+    const row = (area, items) => h('tr', null, h('th', null, area), h('td', null, items[0].map(([l, v]) => h('div', null, h('span', { class: 'muted small' }, l + ' '), v))), h('td', null, items[1]));
+    main.append(h('section', { class: 'card scroll' }, h('h2', null, '영역별 지표 (최근 7일 · 괄호는 그 전 7일)'),
+      h('table', { class: 'grid' },
+        h('tr', null, h('th', null, ''), h('th', null, '매일 지표'), h('th', null, '실전에 가까운 지표')),
+        row('리스닝', [[['받아쓰기 단어 정확도', cmp(am.L.dictation, '%')], ['새 문제 정답률', cmp(am.L.newQ, '%')]], h('div', null, h('span', { class: 'muted small' }, '모의 모듈 L '), mock(am.L.mock))]),
+        row('리딩', [[['읽기 속도', cmp(am.R.wpm, ' wpm')], ['새 문제 정답률', cmp(am.R.newQ, '%')], ['C-Test 정답률', cmp(am.R.ctest, '%')]], h('div', null, h('span', { class: 'muted small' }, '모의 모듈 R '), mock(am.R.mock))]),
+        row('단어', [[['자주 틀린 단어 수', cmp(am.V.frequent, '개', true)]], h('div', null, h('span', { class: 'muted small' }, '틀린 세트 지문의 아는 단어 비율 '), am.V.known == null ? h('span', { class: 'muted' }, '기록 부족') : h('b', null, am.V.known + '%'))]),
+        row('말하기', [[['L&R 단어 일치율', cmp(am.S.lr, '%')], ['Interview 말 속도', cmp(am.S.wpm, ' wpm')], ['Interview 멈춤(0.8초+)', cmp(am.S.pauses, '번', true)]], h('span', { class: 'muted' }, '—')]),
+        row('쓰기', [[['계획 카드 시간', cmp(am.W.planSec, '초', true)], ['구조 체크', cmp(am.W.structure, '%')], ['반복 오류 범주 수', cmp(am.W.errors, '개', true)]], h('span', { class: 'muted' }, '—')])),
+      h('p', { class: 'small muted' }, '주 1회 비중 자동 조정은 영역마다 하나의 지표를 봅니다: 리스닝·리딩 새 문제 정답률, 단어 자주 틀린 단어 수, 말하기 L&R 일치율, 쓰기 구조 체크. 그 지표가 지난주보다 오르지 않으면 그 영역 +5%p (설정에서 고정한 영역 제외).')));
     main.append(h('p', { class: 'muted small' }, '많이 풀었다고 실력이 는 것은 아닙니다. 실력은 처음 보는 문제(새 문제·유지 확인)로만 판단합니다.'));
     main.append(h('div', { class: 'tiles' },
       metricTile('새 문제 정답률', m.transfer.pct + '%', `${m.transfer.n}문항`, m.transfer.n >= 5),
@@ -924,7 +959,7 @@
       metricTile('확신하고 틀림', m.confidentMiss.n + '회', `새 문제 ${m.confidentMiss.of}개 중`, m.transfer.n >= 5),
       metricTile('다시 확인: 알고 맞힘', m.verify.n ? Math.round(100 * m.verify.known / m.verify.n) + '%' : '—', `${m.verify.n}개 중 · 찍어서 맞힘 ${m.verify.guessed} · 틀림 ${m.verify.lost}`, m.verify.n >= 1),
       metricTile('원본 다시 맞힘 (참고)', m.originalRedo.pct + '%', `${m.originalRedo.n}개 · 답을 기억했을 수 있음`, m.originalRedo.n >= 1),
-      metricTile('활동', m.activity.attempts + '문항', `${m.activity.days}일 · ${Math.round(m.activity.ms / 60000)}분`, true)));
+      metricTile('활동', m.activity.attempts + '문항', `${m.activity.days}일 · ${Math.round(m.activity.ms / 60000)}분` + (m.activity.legacy ? ` · 옛 AI 문제 ${m.activity.legacy}건은 정답률에서 뺌` : ''), true)));
 
     // Old-site strengths: my own recurrence verdicts + where listening breaks down.
     const rc = m.recur, nRc = Object.values(rc).reduce((a, b) => a + b, 0);

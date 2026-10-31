@@ -2358,6 +2358,8 @@ const __api = {
   frequentList() { return frequentWords().map(w => Object.assign({ en: w.en, ko: getCoreMeaning(w), day: w.day, cl: w.cl || null }, frequentInfo(w.en))); },
   // '뜻을 몰랐다'로 킵한 단어가 단어장에 있으면 자주 틀린 단어 후보로 (틀린 날 하나로 셈)
   flagWrong(word) { const hit = __api.lookup(word); if (!hit) return null; const m = getWordMeta(hit.en); m.keepFlagAt = dayKey(); saveMeta(); return hit.en; },
+  // 단어장에 있는 단어면 그 상태 ('master' | 'review' | 'new' | 'hard'), 없으면 null
+  wordStatus(word) { const hit = __api.lookup(word); return hit ? getGlobalStatus(hit.en) : null; },
   clusters() { return [...new Set(WORDS.map(w => w.cl).filter(Boolean))]; },
   plan: loadChunkPlan,
   createPlan: createChunkPlan,

@@ -390,3 +390,5 @@ li.ok { color: var(--good); } li.miss { color: var(--bad); }
 .bs-line .slot { display: inline-block; min-width: 3em; border-bottom: 2px solid var(--accent); margin: 0 2px; text-align: center; }
 .student { padding-left: 10px; border-left: 3px solid var(--line); }
 .insert-s { background: var(--sel); padding: 6px 10px; border-radius: 8px; }
+span.good { color: var(--good); } span.bad { color: var(--bad); }
+.card.scroll { overflow-x: auto; }

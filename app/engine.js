@@ -398,8 +398,12 @@
       for (const b of prev.blocks) {
         if (!blocks[b.key]) continue;
         const rest = (b.tasks || []).slice(b.cursor || 0).filter(t => !t.carriedFrom || t.carriedFrom >= dayStr(now - 3 * DAY));
+        const fu = data.followups || {};
         for (const t of rest) {
           if (t.item && (seen.has(t.item) || used.has(t.item))) continue;
+          // 다른 화면에서 이미 한 것은 넘기지 않는다 (원본 진단·다시 확인, 받아쓰기 등 후속 훈련)
+          if (t.ref && data.attempts.some(a => a.ref === t.ref && a.tier === 'original' && a.at >= prev.createdAt)) continue;
+          if (t.key && fu[t.key] && fu[t.key] >= prev.createdAt) continue;
           take(b.key, Object.assign({}, t, { carriedFrom: t.carriedFrom || prev.date }), t.min || 1); blocks[b.key].carried++;
         }
       }
@@ -496,6 +500,40 @@
     return data.attempts.filter(a => a.item && !idx[a.item]).length;
   }
 
+  // ---------- 변화 탭 지표 (OVERHAUL.md 측정 표): 최근 7일 vs 그 전 7일, 기록이 적으면 null ----------
+  function areaMetrics(data, content, now, extra) {
+    const t = dayStart(dayStr(now)) + DAY;
+    const win = (list, from, to) => (list || []).filter(x => x.at >= t - from * DAY && x.at < t - to * DAY);
+    const avg = (xs, f, min) => { const v = xs.map(f).filter(x => x != null && !isNaN(x)); return v.length >= (min || 1) ? Math.round(10 * v.reduce((a, b) => a + b, 0) / v.length) / 10 : null; };
+    const pct = (xs, min) => xs.length >= (min || 3) ? Math.round(100 * xs.filter(a => a.correct).length / xs.length) : null;
+    const idx = poolIndex(content);
+    const newQ = sec => a => a.item && idx[a.item] && idx[a.item].sec === sec && ['transfer', 'mixed', 'delayed', 'verify-twin'].includes(a.tier);
+    const ctest = a => a.item && idx[a.item] && idx[a.item].kind === 'ctest' && a.tier !== 'mock';
+    const two = (f) => ({ now: f(7, 0), prev: f(14, 7) });
+    const mockLast = sec => { const m = (data.mock || []).filter(x => x.sec === sec).slice(-1)[0]; return m ? { pct: m.total ? Math.round(100 * m.correct / m.total) : null, n: m.total, paper: m.paper, at: m.at } : null; };
+    const speak = data.speak || [], writing = data.writing || [];
+    const lr = x => x.kind === 'lr' && x.stt;
+    const iv = x => x.kind === 'interview' && x.stt && (x.rounds || []).length;
+    const essays = x => x.kind === 'email' || x.kind === 'discussion';
+    const ex = extra || {};
+    return {
+      L: { dictation: two((a, b) => avg(win(data.dictation, a, b), x => x.pct)), newQ: two((a, b) => pct(win(data.attempts, a, b).filter(newQ('L')))), mock: mockLast('L') },
+      R: { wpm: two((a, b) => avg(win(data.readSpeed, a, b).filter(x => x.wpm && x.wpm < 1000), x => x.wpm)), newQ: two((a, b) => pct(win(data.attempts, a, b).filter(newQ('R')))),
+        ctest: two((a, b) => pct(win(data.attempts, a, b).filter(ctest), 10)), mock: mockLast('R') },
+      V: { frequent: ex.vocabNow == null ? null : { now: ex.vocabNow, prev: ex.vocabPrev == null ? null : ex.vocabPrev }, known: ex.knownRatio == null ? null : ex.knownRatio },
+      S: { lr: two((a, b) => avg(win(speak, a, b).filter(lr), x => x.pct)),
+        wpm: two((a, b) => avg(win(speak, a, b).filter(iv), x => avg(x.rounds, r => r.wpm))),
+        pauses: two((a, b) => avg(win(speak, a, b).filter(iv), x => avg(x.rounds, r => r.pauses))) },
+      W: { planSec: two((a, b) => avg(win(writing, a, b).filter(x => x.planMs), x => Math.round(x.planMs / 1000))),
+        structure: two((a, b) => avg(win(writing, a, b).filter(essays).filter(x => x.structure), x => Math.round(100 * x.structure.filter(c => c[1]).length / x.structure.length))),
+        errors: two((a, b) => avg(win(writing, a, b).filter(essays), x => (x.cats || []).length)) },
+    };
+  }
+  // 주간 비중 자동 조정용 선행 지표 (영역별 하나): 리스닝 새 문제 정답률, 리딩 새 문제 정답률, 단어 자주 틀린 수(낮을수록 좋음), 말하기 L&R 일치율, 쓰기 구조 체크.
+  function weeklyIndicatorsFrom(m) {
+    return { listen: m.L.newQ, read: m.R.newQ, vocab: m.V.frequent && Object.assign({ higherIsBetter: false }, m.V.frequent), speak: m.S.lr, write: m.W.structure };
+  }
+
   // Old plan/session records (v1 'session' with steps of removed AI items) are kept as-is under
   // data.legacySession and never rendered; nothing in the attempt log is touched.
   function migrateRecord(d) {
@@ -505,8 +543,11 @@
   }
 
   // ---------- metrics (activity vs accuracy vs retention vs transfer vs recurrence) ----------
-  function metrics(data) {
-    const A = data.attempts;
+  // content를 주면 없어진 AI 연습 문제의 시도는 정답률 지표에서 뺀다 (활동량에는 남김).
+  function metrics(data, content) {
+    const idx = content && content.pool ? poolIndex(content) : null;
+    const ALL = data.attempts;
+    const A = idx ? ALL.filter(a => !(a.item && !idx[a.item])) : ALL;
     const pct = (xs) => xs.length ? Math.round(100 * xs.filter(x => x.correct).length / xs.length) : null;
     const transfer = A.filter(a => (a.tier === 'transfer' || a.tier === 'mixed') && !a.hinted);
     const delayed = A.filter(a => a.tier === 'delayed');
@@ -529,7 +570,7 @@
       stuck: Object.fromEntries(CAUSES.map(c => [c, A.filter(a => causeOf(a) === c).length])),
       reheard: count('reheard', ['clear', 'still']),
       recur: count('recur', ['same', 'rulefail', 'other', 'unknown']),
-      activity: { attempts: A.length, days: days.size, ms: A.reduce((s, a) => s + (a.ms || 0), 0) },
+      activity: { attempts: ALL.length, days: new Set(ALL.map(a => dayStr(a.at))).size, ms: ALL.reduce((s, a) => s + (a.ms || 0), 0), legacy: ALL.length - A.length },
       originalRedo: { n: originals.length, pct: pct(originals) },
       // Re-checks of questions answered right before: 알고 맞힘 (right, 보통/확신) · 찍어서 맞힘 (right, 찍음) · 틀림 (the earlier right answer didn't hold).
       verify: { n: verify.length, known: verify.filter(a => a.correct && a.conf >= 2).length, guessed: verify.filter(a => a.correct && !(a.conf >= 2)).length, lost: verify.filter(a => !a.correct).length },
@@ -568,7 +609,7 @@
 
   const api = { testMatrix, recencyMap, dayStr, dayStart, daysLeft, firstInterval, evidence, replaySkill, priority, skillTable, metrics,
     permutation, checkTyped, pickItems, poolItems, poolIndex, freshPool, seenItems, originalQueue, originalQuota, verifyPool, twinFor, origKind,
-    causeQueues, causeOf, legacyAttempts, CAUSES, buildPlan, weights, weeklyAdjust, weekKey, areaAccuracy, migrateRecord, BLOCKS, BASE_WEIGHTS,
+    causeQueues, causeOf, legacyAttempts, areaMetrics, weeklyIndicatorsFrom, CAUSES, buildPlan, weights, weeklyAdjust, weekKey, areaAccuracy, migrateRecord, BLOCKS, BASE_WEIGHTS,
     STATE_LABEL, MASTERY_TIERS, DAY };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
