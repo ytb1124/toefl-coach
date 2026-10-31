@@ -9,18 +9,28 @@
   'use strict';
 
   // ---------- pure logic ----------
-  // A set is "fixed" when the latest try answered every originally-wrong question correctly.
-  function status(set, rec) {
+  // Latest result of each originally-wrong question: the newer of this tab's last try and
+  // `hist(q)` = the same question re-solved in '오늘 훈련' ({ok, at} from the linked original, or null).
+  function latest(set, rec, hist) {
     const tries = (rec && rec.tries) || [];
-    if (!tries.length) return 'new';
     const last = tries[tries.length - 1];
-    const wrongIdx = set.qs.map((q, i) => (q.wrong ? i : -1)).filter(i => i >= 0);
-    return wrongIdx.every(i => last.ans[i] === set.qs[i].answer) ? 'fixed' : 'again';
+    return set.qs.filter(q => q.wrong).map(q => {
+      const i = set.qs.indexOf(q);
+      const mine = last ? { ok: last.ans[i] === q.answer, at: last.at } : null;
+      const h = hist ? hist(q) : null;
+      return !mine ? h : !h ? mine : (h.at > mine.at ? h : mine);
+    });
   }
-  // Queue: still-wrong sets (oldest try first), then untried sets (newest test first), then fixed ones (oldest try first).
-  function queue(sets, recs, testOrder) {
-    const st = s => status(s, recs[s.id]);
-    const last = s => { const t = (recs[s.id] || {}).tries || []; return t.length ? t[t.length - 1].at : 0; };
+  // fixed = every originally-wrong question is right on its latest result · again = any is wrong · new = none tried yet.
+  function status(set, rec, hist) {
+    const r = latest(set, rec, hist);
+    if (r.some(x => x && !x.ok)) return 'again';
+    return r.length && r.every(x => x && x.ok) ? 'fixed' : 'new';
+  }
+  // Queue: still-wrong sets (oldest result first), then untried sets (newest test first), then fixed ones (oldest result first).
+  function queue(sets, recs, testOrder, hist) {
+    const st = s => status(s, recs[s.id], hist);
+    const last = s => Math.max(0, ...latest(s, recs[s.id], hist).map(x => (x ? x.at : 0)));
     const rank = { again: 0, new: 1, fixed: 2 };
     const tpos = s => -(testOrder.indexOf(s.test));
     return sets.slice().sort((a, b) => rank[st(a)] - rank[st(b)] || (st(a) === 'new' ? tpos(a) - tpos(b) : last(a) - last(b)));
@@ -31,7 +41,7 @@
     lines.forEach((l, i) => { if (l.at != null && l.at <= t + 0.05) k = i; });
     return k;
   }
-  const Core = { status, queue, lineAt };
+  const Core = { status, queue, lineAt, latest };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
   root.ListenCore = Core;
 
@@ -125,6 +135,7 @@
     }
     const back = (hash, label) => h('a', { class: 'small', href: hash }, '← ' + label);
     // 앱 '오늘 훈련'의 같은 원본 오답: 능력 + 지금까지 다시 푼 기록 (이번 풀이 포함)
+    const hist = q => { const i = q.orig ? link.info(q.orig) : null; return i && i.n ? { ok: i.lastOk, at: i.lastAt } : null; };
     function origLine(id) {
       const i = link.info(id); if (!i) return null;
       return h('p', { class: 'small muted' }, i.skill ? h('span', { class: 'chip' }, i.skill) : null, ` 오늘 훈련 원본 ${id} · 다시 푼 기록 ${i.ok}/${i.n} 맞힘`);
@@ -171,28 +182,29 @@
       const d = load();
       main.append(h('p', { class: 'small muted' }, remote ? ['비공개 GitHub 저장소에서 불러옴 · ', h('a', { href: 'javascript:void 0', onclick: () => { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ } location.reload(); } }, '이 기기에서 토큰 지우기')] : '이 Mac의 로컬 파일에서 불러옴'));
       const order = Z.tests.map(t => t.id);
-      const q = queue(Z.sets, d.sets, order);
+      const q = queue(Z.sets, d.sets, order, hist);
       const counts = { new: 0, again: 0, fixed: 0 };
-      Z.sets.forEach(s => counts[status(s, d.sets[s.id])]++);
+      Z.sets.forEach(s => counts[status(s, d.sets[s.id], hist)]++);
       const wrongTotal = Z.sets.reduce((n, s) => n + s.qs.filter(x => x.wrong).length, 0);
       main.append(h('section', { class: 'card hero' },
         h('h1', null, '리스닝 오답 다시 풀기'),
         h('p', { class: 'muted' }, `소站 TPO独家 ${Z.tests.length}회에서 틀린 ${wrongTotal}문항이 들어 있는 ${Z.sets.length}세트. 원본 음원으로 시험처럼 한 번 듣고 풀고, 끝나면 스크립트·해설을 봅니다.`),
         h('p', { class: 'small' }, `또 틀림 ${counts.again} · 아직 안 풂 ${counts.new} · 다시 풀어 맞힘 ${counts.fixed}`),
+        h('p', { class: 'small muted' }, '오늘 훈련에서 같은 원본 문제를 다시 푼 기록도 함께 셉니다 (가장 최근 결과 기준).'),
         q.length ? h('button', { class: 'primary', onclick: () => go('#/listen/' + q[0].id) }, `다음 세트: ${q[0].title} (${testName(Z, q[0].test)})`) : null));
       for (const t of Z.tests.slice().reverse()) {
         const sets = Z.sets.filter(s => s.test === t.id);
         main.append(h('section', { class: 'card' },
           h('h2', null, t.name, h('span', { class: 'muted small' }, ` ${t.date} · ${t.correct}/${t.total} · ${t.score}점`)),
           h('ul', { class: 'olist' }, sets.map(s => h('li', { onclick: () => go('#/listen/' + s.id) },
-            h('div', null, h('b', null, s.title), ' ', h('span', { class: 'muted small' }, `Module ${s.module} · ${KIND[s.kind]}`), ' ', chipFor(status(s, d.sets[s.id]))),
+            h('div', null, h('b', null, s.title), ' ', h('span', { class: 'muted small' }, `Module ${s.module} · ${KIND[s.kind]}`), ' ', chipFor(status(s, d.sets[s.id], hist))),
             h('div', { class: 'small muted' }, `틀린 문항 ${s.qs.filter(x => x.wrong).length}/${s.qs.length}`, appLine(s)))))));
       }
     }
     function appLine(s) {
       const linked = s.qs.filter(x => x.orig).map(x => link.info(x.orig)).filter(Boolean);
       const tried = linked.filter(i => i.n);
-      return tried.length ? ` · 오늘 훈련에서 다시 푼 ${tried.length}문항 중 최근 맞힘 ${tried.filter(i => i.lastOk).length}` : '';
+      return tried.length ? ` · 오늘 훈련 기록 포함 다시 푼 ${tried.length}문항 중 최근 맞힘 ${tried.filter(i => i.lastOk).length}` : '';
     }
     const testName = (Z, id) => (Z.tests.find(t => t.id === id) || {}).name || id;
 
@@ -283,7 +295,7 @@
           h('p', { class: 'small muted' }, hasTime ? '줄을 누르면 그 부분부터 재생됩니다. 지금 나오는 줄이 표시됩니다.' : '이 세트의 스크립트에는 시간 표시가 없어 줄 이동은 안 됩니다.'), box);
       }
       const d = load(), order = root.ZHAN.tests.map(t => t.id);
-      const nxt = queue(root.ZHAN.sets, d.sets, order).find(s => s.id !== set.id);
+      const nxt = queue(root.ZHAN.sets, d.sets, order, hist).find(s => s.id !== set.id);
       card.append(h('div', { class: 'row' },
         h('button', { class: 'ghost', onclick: () => { cur = null; redraw(); } }, '같은 세트 다시 풀기'),
         nxt ? h('button', { class: 'primary', onclick: () => { cur = null; go('#/listen/' + nxt.id); } }, '다음 세트 →') : null));

@@ -27,3 +27,15 @@ test('lineAt follows timestamps and ignores lines without one', () => {
   assert.strictEqual(L.lineAt(lines, 20), 3);
   assert.strictEqual(L.lineAt([{ at: null }], 3), -1);
 });
+
+test('status/queue count the same question re-solved in 오늘 훈련 (newest result wins)', () => {
+  const s2 = { id: 'S2', test: 'Z7', qs: [{ wrong: true, answer: 1, orig: 'O1' }, { wrong: true, answer: 0, orig: 'O2' }] };
+  const hist = h => q => h[q.orig] || null;
+  assert.strictEqual(L.status(s2, undefined, hist({})), 'new');
+  assert.strictEqual(L.status(s2, undefined, hist({ O1: { ok: true, at: 5 } })), 'new', 'one tried right, one untried');
+  assert.strictEqual(L.status(s2, undefined, hist({ O1: { ok: true, at: 5 }, O2: { ok: true, at: 6 } })), 'fixed');
+  assert.strictEqual(L.status(s2, undefined, hist({ O1: { ok: false, at: 5 } })), 'again');
+  const rec = { tries: [{ at: 10, ans: [1, 0] }] };
+  assert.strictEqual(L.status(s2, rec, hist({ O1: { ok: false, at: 5 } })), 'fixed', 'this tab\'s newer try wins');
+  assert.strictEqual(L.status(s2, rec, hist({ O1: { ok: false, at: 20 } })), 'again', 'newer 오늘 훈련 miss wins');
+});

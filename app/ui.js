@@ -193,7 +193,8 @@
     info(id) {
       const o = ORIG[id]; if (!o) return null;
       const A = D.attempts.filter(a => a.tier === 'original' && a.ref === id);
-      return { skill: SKILL[o.skill] ? SKILL[o.skill].name : null, n: A.length, ok: A.filter(a => a.correct).length, lastOk: A.length ? A[A.length - 1].correct : null };
+      const last = A.reduce((m, a) => (!m || a.at > m.at ? a : m), null);
+      return { skill: SKILL[o.skill] ? SKILL[o.skill].name : null, n: A.length, ok: A.filter(a => a.correct).length, lastOk: last ? last.correct : null, lastAt: last ? last.at : 0 };
     },
     log(id, correct, choiceText) {
       const o = ORIG[id]; if (!o) return;
