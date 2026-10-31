@@ -106,12 +106,13 @@
     else if (view === 'tests') viewTests(main);
     else if (view === 'vocab') viewVocab(main);
     else if (view === 'sw') swApp().view(main, (location.hash || '').split('/').slice(2), render);
+    else if (view === 'listen') listenApp().view(main, (location.hash || '').split('/').slice(2), render);
     else viewToday(main);
   }
   function nav(cur) {
     const link = (hash, label, key) => h('a', { href: hash, class: cur === key ? 'on' : '' }, label);
     return h('header', { class: 'nav' }, h('div', { class: 'brandbox' }, h('span', { class: 'brand' }, 'TOEFL 교정 코치'), syncLabel()),
-      h('nav', null, link('#/', '오늘', ''), link('#/vocab', '단어', 'vocab'), link('#/sw', '말하기·쓰기', 'sw'), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
+      h('nav', null, link('#/', '오늘', ''), link('#/vocab', '단어', 'vocab'), link('#/listen', '리스닝', 'listen'), link('#/sw', '말하기·쓰기', 'sw'), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
   }
 
   // ---------- sync status ----------
@@ -184,6 +185,10 @@
   // ---------- SPEAKING·WRITING: separate part with its own record 'toefl-sw-v1' (app/sw.js) ----------
   let SW = null;
   const swApp = () => SW || (SW = SWApp.create({ h, toast, go, storage: window.Sync || localStorage }));
+
+  // ---------- LISTENING: 소站 TPO独家 오답 세트를 원본 음원으로 다시 풀기 (app/listen.js, 데이터는 로컬 전용) ----------
+  let LS = null;
+  const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage }));
 
   // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
   let V = null, vocabMode = 'home';

@@ -71,6 +71,13 @@ node --test tests/engine.test.js
 - 튜터 피드백을 새로 받으면 `grammar`에 `src: "튜터 M/D"`로 원문 그대로 추가한다. AI가 만든 문장·문제는 `AI 변형`/`AI 재구성`으로 구분한다.
 - `lr`·`interview` 문장은 빌드가 음원(`audio/SW-*.mp3`)으로 만든다.
 
+## 리스닝 오답 다시 풀기 (소站 TPO独家, `#/listen`)
+- 코드 `app/listen.js` (순수 로직 `ListenCore`, `tests/listen.test.js`), 기록 키 `toefl-listen-v1`.
+- 자료는 원본 저작물이라 **공개 저장소에 올리지 않는다**: `private/zhan/` (gitignore) = 비공개 저장소 `ytb1124/toefl-coach-private`의 작업 사본.
+  앱은 로컬 서버면 `private/zhan/listen.js`, 아니면 기기마다 넣은 읽기 전용 GitHub 토큰(`toefl-gh-token`, 동기화 안 함)으로 그 저장소의 `listen.json`·`audio/`를 읽는다.
+- 새 회차 추가: 사용자의 크롬(Claude in Chrome)에서 `https://top.zhan.com/toefl/simulate/listentpo.html` → TPO独家 N '查看报告' 리포트를 열고 Vue 컴포넌트 props(`scoreData`·`tasks`)에서 오답 세트를 `private/zhan/Mock_Test_<N>_<workflowId>.json`으로 내보낸다 (형식은 기존 파일과 같게). 음원은 `audio/`에 받는다.
+  → `python3 tools/zhan.py --todo`로 해설 없는 오답을 뽑아 한국어 해설을 `ko.json`에 추가 → `python3 tools/zhan.py` → `private/zhan`에서 커밋·푸시.
+
 ## 배포
 - `main`에 푸시하면 GitHub Pages(https://taebin.link/toefl-coach/)가 자동 갱신된다. 저장소는 공개 — 키·토큰 등 비밀 값을 커밋하지 않는다 (jsonbin 키는 각 기기 브라우저에만 저장).
 - claude.ai 버전은 `artifact.html` + app/* + audio/*를 Artifact로 다시 게시해야 갱신된다 (capabilities: db, user).
