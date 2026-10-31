@@ -80,51 +80,6 @@ test('delayed success → retained with doubled interval', () => {
   assert.strictEqual(b.interval, a.interval * 2);
 });
 
-test('first session: two focus skills with originals, move, guided and transfer; no unknown originals', () => {
-  const s = E.buildSession(blank(), C, T0);
-  assert.strictEqual(s.focus.length, 2);
-  for (const f of s.focus) {
-    const block = s.steps.filter(x => x.block === f);
-    assert.ok(block.some(x => x.type === 'original'), f + ' has originals');
-    assert.ok(block.some(x => x.type === 'move'));
-    assert.ok(block.some(x => x.tier === 'guided'));
-    assert.ok(block.filter(x => x.tier === 'transfer').length >= 2);
-  }
-  assert.ok(!s.steps.some(x => x.ref === 'T3-L10'));
-  assert.strictEqual(s.steps[s.steps.length - 1].type, 'end');
-  const ids = s.steps.filter(x => x.item).map(x => x.item);
-  assert.strictEqual(new Set(ids).size, ids.length, 'no item twice');
-});
-
-test('final day: no focus skills, mixed practice only', () => {
-  const d = blank(); d.settings.examDate = '2026-10-19';
-  const s = E.buildSession(d, C, T0);
-  assert.strictEqual(s.focus.length, 0);
-  assert.ok(s.steps.filter(x => x.tier === 'mixed').length >= 4);
-});
-
-test('transfer items already seen are not served again as transfer', () => {
-  const d = blank();
-  const s1 = E.buildSession(d, C, T0);
-  for (const st of s1.steps.filter(x => x.item && x.tier !== 'guided')) {
-    d.attempts.push(att(st.skill, st.tier, true, T0 + 1, { item: st.item }));
-  }
-  const s2 = E.buildSession(d, C, day(1));
-  const firstIds = new Set(s1.steps.filter(x => x.item && x.tier !== 'guided').map(x => x.item));
-  for (const st of s2.steps.filter(x => x.item && ['transfer', 'mixed', 'delayed'].includes(x.tier))) {
-    assert.ok(!firstIds.has(st.item), 'repeat served as transfer: ' + st.item);
-  }
-});
-
-test('flagged items are excluded', () => {
-  const d = blank();
-  const s1 = E.buildSession(d, C, T0);
-  const first = s1.steps.find(x => x.tier === 'transfer');
-  d.flags[first.item] = 'two answers';
-  const s2 = E.buildSession(d, C, T0);
-  assert.ok(!s2.steps.some(x => x.item === first.item));
-});
-
 test('checkTyped accepts the completion or the full word', () => {
   assert.ok(E.checkTyped('ves', 'invol', 'involves'));
   assert.ok(E.checkTyped(' Involves ', 'invol', 'involves'));
@@ -154,9 +109,6 @@ test('a real mock-test error after improvement → relapse (and its originals ar
   const st = E.replaySkill('BIND', d, C2, day(4));
   assert.strictEqual(st.state, 'RELAPSED');
   assert.deepStrictEqual(st.realRelapses, ['TPO9-L1']);
-  const s = E.buildSession(d, C2, day(4));
-  const firstOrig = s.steps.find(x => x.type === 'original' && x.skill === 'BIND');
-  if (s.focus.includes('BIND')) assert.strictEqual(firstOrig.ref, 'TPO9-L1');
 });
 
 test('testMatrix counts primary errors per test in date order', () => {
@@ -174,53 +126,164 @@ test('metrics count my recurrence verdicts and listening stuck points', () => {
   assert.strictEqual(m.reheard.still, 1); assert.strictEqual(m.recur.same, 1); assert.strictEqual(m.recur.rulefail, 1);
 });
 
-test('transfer picks alternate sections, starting where the latest real errors were', () => {
-  const items = ['r1', 'r2', 'l1', 'l2'].map(id => ({ id, skill: 'ROLE', tier: 'transfer', qa: 'pass', audio: id[0] === 'l' ? 'a' : undefined }));
-  const base = { tests: [{ id: 'X1', date: '2026-10-01' }, { id: 'X2', date: '2026-10-05' }], items };
-  const pick = originals => E.pickItems(Object.assign({}, base, { originals }), blank(), 'ROLE', 'transfer', 4, new Set()).map(x => x.item.id);
-  assert.deepStrictEqual(pick([{ test: 'X1', sec: 'R', skill: 'ROLE' }, { test: 'X2', sec: 'L', skill: 'ROLE' }]), ['l1', 'r1', 'l2', 'r2']);
-  assert.deepStrictEqual(pick([{ test: 'X2', sec: 'R', skill: 'ROLE' }]), ['r1', 'l1', 'r2', 'l2']);
-});
+// ---------------------------------------------------------------- 소站 문제 풀 · 하루 계획 (개편 단계 2–3)
+const allItems = E.poolItems(ALL);
+const plan = (d, t, ctx) => E.buildPlan(d, ALL, t, ctx);
+const tasks = (p, blk) => p.blocks.filter(b => !blk || b.key === blk).flatMap(b => b.tasks);
+const itemIds = p => tasks(p).filter(t => t.item).map(t => t.item);
+const held = new Set(ALL.pool.papers.filter(p => p.held).map(p => p.n));
 
-test('every original error is scheduled before the exam, spread over the days left', () => {
-  const d = blank(); d.settings.minutes = 60; d.settings.examDate = '2026-10-28';
-  const seen = new Set();
-  for (let n = 0; n < 9; n++) {
-    const s = E.buildSession(d, C, day(n));
-    for (const st of s.steps.filter(x => x.type === 'original' && !x.verify)) {
-      seen.add(st.ref);
-      d.attempts.push(att(st.skill, 'original', true, day(n) + 1, { ref: st.ref }));
-    }
+test('pool: 소站 TPO独家 문항만, 메타데이터만 (공개 번들에 원문 없음)', () => {
+  assert.ok(allItems.length > 300);
+  for (const s of ALL.pool.sets) {
+    assert.ok(/^(Z\d+|FIB)-/.test(s.id), s.id);
+    for (const k of ['passage', 'script', 'choices', 'stem']) assert.ok(!(k in s), s.id + ' has ' + k);
+    for (const q of s.qs) for (const k of ['stem', 'choices', 'answer', 'whyZh']) assert.ok(!(k in q), q.id + ' has ' + k);
   }
-  const all = C.originals.filter(o => o.skill !== 'UNKNOWN').map(o => o.id);
+  for (const o of ALL.originals) for (const k of ['stem', 'options', 'passage', 'ctest', 'evidence']) assert.ok(!(k in o), o.id + ' has ' + k);
+  assert.ok(!('items' in ALL), 'AI 연습 문제(items) 번들에서 제거');
+});
+
+test('(a) block minutes follow the weights; custom total and fixed weights', () => {
+  const d = blank(); d.settings.minutes = 60; d.settings.examDate = '2026-11-14';
+  const p = plan(d, T0);
+  const m = Object.fromEntries(p.blocks.map(b => [b.key, b.minutes]));
+  assert.deepStrictEqual(m, { vocab: 6, listen: 18, read: 9, speak: 9, write: 12, wrap: 6 });
+  assert.deepStrictEqual(p.blocks.map(b => b.key), ['vocab', 'listen', 'read', 'speak', 'write', 'wrap']);
+  d.settings.minutes = 95; d.settings.weights = { listen: 40 };
+  const w = E.weights(d);
+  assert.strictEqual(w.listen, 40);
+  assert.ok(Math.abs(Object.values(w).reduce((s, x) => s + x, 0) - 100) < 1e-9);
+  assert.strictEqual(plan(d, T0).blocks.find(b => b.key === 'listen').minutes, 38);
+  // Each block's tasks fit its time (within one task).
+  d.settings.weights = {};
+  for (const b of plan(d, T0, { speak: { lr: 'x', interview: 'y' }, write: { task: 'w', kind: 'discussion' } }).blocks) {
+    const used = b.tasks.reduce((s, t) => s + t.min, 0);
+    assert.ok(used <= b.minutes + 6, b.key + ' ' + used + ' > ' + b.minutes);
+  }
+});
+
+test('(b) "안 들렸다" → 받아쓰기 대기열 (다음 날 ② 리스닝); 처리하면 빠진다', () => {
+  const d = blank(); d.settings.examDate = '2026-11-14';
+  const L = allItems.find(i => i.sec === 'L' && i.kind === 'lecture' && !i.held);
+  d.attempts.push(att(L.skill, 'transfer', false, day(0), { item: L.id, q: 1, cause: 'sound' }));
+  d.attempts.push(att('ACT', 'original', false, day(0) + 1, { ref: 'T3-L1', stuck: 'sound' }));   // 옛 기록 형식(stuck)도 같은 원인
+  const q = E.causeQueues(d, day(1));
+  assert.strictEqual(q.dictation.length, 2);
+  const p = plan(d, day(1));
+  const dict = tasks(p, 'listen').filter(t => t.type === 'dictation');
+  assert.strictEqual(dict.length, 2);
+  assert.strictEqual(dict[0].of, L.id);
+  d.followups = { [dict[0].key]: day(1) + 5, [dict[1].key]: day(1) + 6 };
+  assert.strictEqual(E.causeQueues(d, day(2)).dictation.length, 0);
+  // other causes route elsewhere
+  d.attempts.push(att('TARGET', 'transfer', false, day(2), { item: 'x', cause: 'memory' }), att('AUDIT', 'transfer', false, day(2) + 1, { item: 'y', cause: 'judge' }), att('TARGET', 'transfer', false, day(2) + 2, { item: 'z', cause: 'time' }));
+  const q2 = E.causeQueues(d, day(3));
+  assert.deepStrictEqual([q2.twoPass.length, q2.judge.length, q2.timed.length], [1, 1, 1]);
+});
+
+test('(c) AI 문항이 계획에 없음: every planned item is a 소站 pool item', () => {
+  const idx = E.poolIndex(ALL);
+  const d = blank(); d.settings.examDate = '2026-11-14'; d.settings.minutes = 120;
+  for (let n = 0; n < 5; n++) {
+    const p = plan(d, day(n));
+    for (const id of itemIds(p)) { assert.ok(idx[id], 'not in pool: ' + id); assert.ok(!/^(AC|F|W|B|C|A|T)-T/.test(id)); }
+    for (const id of itemIds(p)) d.attempts.push(att(idx[id].skill, 'transfer', true, day(n) + 1, { item: id }));
+  }
+});
+
+test('(d) 보류 회차(모의 모듈용)는 일상 계획에 없음', () => {
+  assert.strictEqual(held.size, 2);
+  const idx = E.poolIndex(ALL);
+  const d = blank(); d.settings.examDate = '2026-11-14'; d.settings.minutes = 180;
+  for (let n = 0; n < 12; n++) {
+    const p = plan(d, day(n));
+    for (const id of itemIds(p)) { assert.ok(!held.has(idx[id].paper), 'held paper served: ' + id); d.attempts.push(att(idx[id].skill, 'transfer', true, day(n) + 1, { item: id })); }
+  }
+  assert.ok(E.freshPool(ALL, d).every(i => !held.has(i.paper)));
+});
+
+// 사용자 학습 기록이라 비공개 저장소에만 둔다 (private/zhan/fixtures). 없으면 건너뜀.
+const LEGACY = path.join(__dirname, '../private/zhan/fixtures/legacy-record.json');
+test('(e) 옛 기록(사용자 내보내기 2026-11-01 형식)으로 계획 생성 — 오류 없음, 기록은 그대로', { skip: !fs.existsSync(LEGACY) && '비공개 fixture 없음' }, () => {
+  const rec = JSON.parse(fs.readFileSync(LEGACY, 'utf8'));
+  const before = JSON.stringify(rec.attempts);
+  const d = E.migrateRecord(rec);
+  assert.ok(d.legacySession && d.session === null, 'old v1 session kept aside, not rendered');
+  const now = new Date(2026, 10, 1, 9).getTime();
+  const p = plan(d, now, { vocab: { hard: 12, due: 30 } });
+  assert.strictEqual(p.v, 2);
+  assert.ok(tasks(p).length > 5);
+  assert.ok(E.skillTable(d, ALL, now).length === 8);
+  assert.ok(E.metrics(d).activity.attempts === rec.attempts.length);
+  assert.ok(E.legacyAttempts(d, ALL) > 100, 'old AI-item attempts are still in the log');
+  assert.strictEqual(JSON.stringify(d.attempts), before, 'attempt log untouched');
+  // verify pool skips removed AI items without throwing
+  assert.ok(Array.isArray(E.verifyPool(ALL, d, now, 3)));
+});
+
+test('new questions: never in app, 소站-wrong sets last; answered items are not served again', () => {
+  const d = blank();
+  const f = E.freshPool(ALL, d);
+  const firstWrong = f.findIndex(i => i.z === -1);
+  assert.ok(firstWrong === -1 || f.slice(firstWrong).every(i => i.z === -1));
+  d.attempts.push(att(f[0].skill, 'transfer', true, day(0), { item: f[0].id }));
+  assert.ok(!E.freshPool(ALL, d).some(i => i.id === f[0].id));
+  const seen = new Map([[f[1].id, day(0)]]);   // solved in the 리딩·리스닝 tabs
+  assert.ok(!E.freshPool(ALL, d, { seen: E.seenItems(d, seen) }).some(i => i.id === f[1].id));
+});
+
+test('twins: a right answer is re-checked with a new 소站 question of the same skill and type', () => {
+  const d = blank(); d.settings.examDate = '2026-11-14';
+  const it = E.freshPool(ALL, d, { kinds: ['daily'] })[0];
+  d.attempts.push(att(it.skill, 'transfer', true, day(0), { item: it.id, conf: 1 }));
+  assert.strictEqual(E.verifyPool(ALL, d, day(2), 3).length, 0, 'too soon');
+  const v = E.verifyPool(ALL, d, day(3), 3)[0];
+  assert.strictEqual(v.id, it.id);
+  const t = E.twinFor(v, ALL, d, day(3));
+  assert.ok(t.twin && t.item.id !== it.id && t.item.kind === 'daily' && t.item.skills.includes(it.skill));
+  const p = plan(d, day(3));
+  const tw = tasks(p, 'wrap').find(x => x.tier === 'verify-twin');
+  assert.ok(tw && tw.verifyOf === 'i:' + it.id);
+  d.attempts.push(att(it.skill, 'verify-twin', true, day(3) + 1, { item: tw.item, conf: 2, verify: true, verifyOf: tw.verifyOf }));
+  assert.ok(!E.verifyPool(ALL, d, day(6), 3).some(x => x.id === it.id), 'confirmed by its twin');
+});
+
+test('originals: quick diagnosis cards cover every original before the exam; diag is not a re-solve', () => {
+  const d = blank(); d.settings.minutes = 60; d.settings.examDate = '2026-11-14';
+  const T = new Date(2026, 10, 1, 9).getTime();
+  const seen = new Set();
+  for (let n = 0; n < 12; n++) {
+    const p = plan(d, T + n * E.DAY);
+    for (const t of tasks(p, 'wrap').filter(x => x.type === 'diag')) { seen.add(t.ref); d.attempts.push(att(t.skill, 'original', null, T + n * E.DAY + 1, { ref: t.ref, diag: true })); }
+  }
+  const all = ALL.originals.filter(o => o.skill !== 'UNKNOWN').map(o => o.id);
   assert.deepStrictEqual(all.filter(id => !seen.has(id)), []);
+  assert.strictEqual(E.originalQueue(ALL, d, T + 13 * E.DAY).again.length, 0, 'diagnosed ≠ wrong');
+  assert.strictEqual(E.metrics(d).originalRedo.n, 0, 'diag cards are not counted as re-solves');
 });
 
-test('originals re-solved in the 리딩·리스닝 tabs are not scheduled again; still-wrong ones come back', () => {
-  const d = blank();
-  const [a, b] = C.originals;
-  d.attempts.push(att(a.skill, 'original', true, day(0), { ref: a.id }), att(b.skill, 'original', false, day(0), { ref: b.id }));
-  const q = E.originalQueue(C, d, day(1));
-  assert.ok(!q.fresh.some(o => o.id === a.id) && !q.fresh.some(o => o.id === b.id));
-  assert.deepStrictEqual(q.again.map(o => o.id), [b.id]);
-  assert.strictEqual(E.originalQueue(C, d, day(0) + 5).again.length, 0, 'not the same day');
+test('unfinished blocks carry over to the next day (first in the same block)', () => {
+  const d = blank(); d.settings.examDate = '2026-11-14';
+  const p1 = plan(d, day(0));
+  const lb = p1.blocks.find(b => b.key === 'listen'); lb.cursor = 1;
+  d.plan = p1;
+  const p2 = plan(d, day(1));
+  const l2 = p2.blocks.find(b => b.key === 'listen');
+  assert.ok(l2.carried >= 1);
+  assert.strictEqual(l2.tasks[0].item, lb.tasks[1].item);
+  assert.strictEqual(l2.tasks[0].carriedFrom, p1.date);
 });
 
-test('re-checks: right answers ≥ 3 days old come back, guesses first; confirmed ones stop', () => {
+test('weekly auto weights: an area whose indicator did not improve gets +5%p, once a week, not if fixed', () => {
   const d = blank();
-  const its = C.items.filter(i => i.tier === 'transfer' && i.qa === 'pass' && i.qs && i.qs.length === 1).slice(0, 3);
-  d.attempts.push(att(its[0].skill, 'transfer', true, day(0), { item: its[0].id, conf: 3 }));
-  d.attempts.push(att(its[1].skill, 'transfer', true, day(0) + 1, { item: its[1].id, conf: 1 }));
-  d.attempts.push(att(its[2].skill, 'transfer', false, day(0) + 2, { item: its[2].id, conf: 2 }));
-  assert.strictEqual(E.verifyPool(C, d, day(2), 3).length, 0, 'too soon');
-  const pool = E.verifyPool(C, d, day(3), 3).map(v => v.id);
-  assert.deepStrictEqual(pool, [its[1].id, its[0].id], 'wrong ones are not re-checks; 찍음 first');
-  const s = E.buildSession(d, C, day(3));
-  assert.ok(s.steps.some(x => x.tier === 'verify'), 'mixed into the session');
-  d.attempts.push(att(its[1].skill, 'verify', true, day(3), { item: its[1].id, conf: 2, verify: true }));
-  d.attempts.push(att(its[0].skill, 'verify', true, day(3) + 1, { item: its[0].id, conf: 1, verify: true }));
-  assert.deepStrictEqual(E.verifyPool(C, d, day(6), 3).map(v => v.id), [its[0].id], 'known one stops, guessed one returns');
-  assert.notStrictEqual(E.replaySkill(its[1].skill, d, C, day(3)).mastery, undefined);
-  const m = E.metrics(d).verify;
-  assert.deepStrictEqual([m.n, m.known, m.guessed, m.lost], [2, 1, 1, 0]);
+  const ind = { listen: { now: 0.6, prev: 0.6 }, read: { now: 0.8, prev: 0.6 }, vocab: { now: 30, prev: 20, higherIsBetter: false } };
+  const a = E.weeklyAdjust(d, T0, ind);
+  assert.deepStrictEqual(a.adj, { listen: 5, vocab: 5 });
+  d.weightAuto = a;
+  assert.strictEqual(E.weeklyAdjust(d, T0 - E.DAY, ind), a, 'same week (Sat) → unchanged');
+  const w = E.weights(d);
+  assert.ok(w.listen > 30 && Math.abs(Object.values(w).reduce((s, x) => s + x, 0) - 100) < 1e-9);
+  d.settings.weights = { listen: 30 };
+  assert.ok(!('listen' in E.weeklyAdjust(Object.assign({}, d, { weightAuto: null }), T0, ind).adj));
 });

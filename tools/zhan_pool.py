@@ -300,6 +300,12 @@ def check(sets):
     return errs
 
 
+def zres(q):
+    """소站에서 마지막으로 푼 결과: 1 맞힘 · -1 틀림 · 0 기록 없음 (객관식·C-Test만)."""
+    t = [x for x in q.get("zhanTries") or [] if "ok" in x]
+    return 0 if not t else (1 if t[-1]["ok"] else -1)
+
+
 def meta(papers, sets):
     """공개 번들용: 원문 문자열 없이 id·유형·능력만."""
     return {
@@ -307,19 +313,77 @@ def meta(papers, sets):
         "papers": [dict(p, held=HELD.get(p["n"])) for p in papers],
         "sets": [{"id": s["id"], "paper": s["paper"], "sec": s["sec"], "kind": s["kind"], "module": s["module"], "task": s["task"],
                   "held": s["paper"] in HELD, "audio": bool(s.get("audio") or any(q.get("audio") for q in s["qs"])),
-                  "qs": [{k: q[k] for k in ("id", "type", "skill", "skillSrc") if k in q} for q in s["qs"]]} for s in sets],
+                  "zdate": max((t.get("date") or "" for q in s["qs"] for t in q.get("zhanTries") or []), default="") or None,
+                  "qs": [dict({k: q[k] for k in ("id", "type", "skill") if k in q}, z=zres(q)) for q in s["qs"]]} for s in sets],
     }
+
+
+FIB = ROOT.parent / "fill in the blank"
+FIB_SLOT = re.compile(r"([A-Za-z'’\-]*)\{([^|}]*)\|([^}]*)\}")
+
+
+def fib_sets():
+    """../fill in the blank/ 49개 C-Test (verified-tasks.json + task-notes.json) → 같은 C-Test 세트 형식. 출처 'Fill in the blank 자료'."""
+    vf = FIB / "verified-tasks.json"
+    if not vf.exists():
+        return []
+    tasks = json.loads(vf.read_text())
+    notes = json.loads((FIB / "task-notes.json").read_text()) if (FIB / "task-notes.json").exists() else []
+    out = []
+    for i, t in enumerate(tasks, 1):
+        qs, k = [], [0]
+
+        def slot(m):
+            k[0] += 1
+            qs.append({"type": "ctest", "n": k[0], "prefix": m.group(1), "answer": m.group(2), "glossKo": m.group(3), "choices": [], "stem": ""})
+            return f"{m.group(1)}【{k[0]}】"
+        passage = FIB_SLOT.sub(slot, t["template"])
+        sid = f"FIB-{i}"
+        for q in qs:
+            q["id"] = f"{sid}-Q{q['n']}"
+            q["skill"] = classify("R", "ctest", q, "")
+            q["skillSrc"] = "AI 분류"
+            q["zhanTries"] = []
+        out.append({"id": sid, "test": "FIB", "paper": 0, "sec": "R", "module": 1, "task": i, "title": "Fill in the missing letters",
+                    "src": "Fill in the blank 자료", "kind": "ctest", "passage": passage, "qs": qs,
+                    "noteKo": notes[i - 1] if i - 1 < len(notes) else None, "capture": t.get("source")})
+    return out
+
+
+def load_ko():
+    """private/zhan/ko_pool/in_K.json(key·ids·zh) + out_K.json(key→한국어): 소站 해설의 한국어 번역 (AI 번역)."""
+    ko, d = {}, Z / "ko_pool"
+    for f in sorted(d.glob("in_*.json")):
+        out = d / f.name.replace("in_", "out_")
+        if not out.exists():
+            continue
+        tr = json.loads(out.read_text())
+        for it in json.loads(f.read_text()):
+            if tr.get(it["key"]):
+                for i in it["ids"]:
+                    ko[i] = {"zh": it["zh"], "ko": tr[it["key"]]}
+    return ko
 
 
 def main():
     papers, sets = load()
+    ko = load_ko()
+    for s in sets:
+        for q in s["qs"]:
+            k = ko.get(q["id"])
+            if k and k["zh"] == q.get("whyZh"):      # 해설 원문이 바뀌었으면 옛 번역을 쓰지 않는다
+                q["whyKo"] = k["ko"]
+    fib = fib_sets()
+    (Z / "ctest_fib.json").write_text(json.dumps(fib, ensure_ascii=False) + "\n")
+    sets = sets + fib
     errs = check(sets)
     for e in errs:
         print("✗", e)
     data = json.dumps({"papers": papers, "held": HELD, "sets": sets}, ensure_ascii=False)
     (Z / "pool.json").write_text(data + "\n")
     (Z / "pool.js").write_text("/* 생성 파일 (tools/zhan_pool.py). 원본 저작물 — 공개 저장소에 올리지 않는다. */\nwindow.ZHAN_POOL = " + data + ";\n")
-    (ROOT / "content" / "pool.json").write_text(json.dumps(meta(papers, sets), ensure_ascii=False, indent=0) + "\n")
+    m = meta(papers, sets)
+    (ROOT / "content" / "pool.json").write_text("{\n" + ",\n".join(f'"{k}": ' + (json.dumps(v, ensure_ascii=False) if k != "sets" else "[\n" + ",\n".join(json.dumps(x, ensure_ascii=False) for x in v) + "\n]") for k, v in m.items()) + "\n}\n")
     by = defaultdict(lambda: defaultdict(int))
     for s in sets:
         by[s["paper"]][s["sec"]] += len(s["qs"])
@@ -328,6 +392,9 @@ def main():
         print(f"Z{n:<3} " + " ".join(f"{by[n][x]:<4}" for x in "RLSW") + ("  (보류: 모의 모듈 " + HELD[n] + ")" if n in HELD else ""))
     tot = {x: sum(by[n][x] for n in by) for x in "RLSW"}
     ev = sum(1 for s in sets for q in s["qs"] if q.get("evidence"))
+    nz = sum(1 for s in sets for q in s["qs"] if q.get("whyZh"))
+    nk = sum(1 for s in sets for q in s["qs"] if q.get("whyKo"))
+    print(f"한국어 해설 {nk}/{nz} (소站 해설 AI 번역)")
     print(f"합계 R {tot['R']} · L {tot['L']} · S {tot['S']} · W {tot['W']} · 세트 {len(sets)} · 근거 인용 있는 문항 {ev}")
     sys.exit(1 if errs else 0)
 

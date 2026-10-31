@@ -3,10 +3,14 @@
 
 Content sources (all merged):
   content/skills.json            8 skills
-  content/originals.json         TPO2–4 original errors (+ their audio scripts)
-  content/tests/<ID>.json        every later mock test added through the intake procedure (CLAUDE.md)
-  content/items_*.json           practice items (guided / transfer) + audio scripts
+  content/originals.json         TPO2–4 original errors — metadata only (원문은 private/zhan/originals/)
+  content/tests/<ID>.json        every later mock test added through the intake procedure (CLAUDE.md) — metadata only
+  content/pool.json              소站 TPO独家 연습 문제 메타데이터 (tools/zhan_pool.py가 생성; 원문은 private/zhan/pool.json)
   content/sw.json                speaking·writing part (tutor corrections, L&R, interview, email, discussion)
+  private/zhan/originals/*.json  원본 오답의 원문 필드·재구성 스크립트 (비공개 저장소; 없으면 원문 검사를 건너뜀)
+
+Outputs: app/content.js (공개 — 원문 문자열이 없는지 빌드가 검사), private/zhan/orig.js·orig.json (비공개),
+재구성 음성은 private/zhan/tts/, 말하기 음성(SW-*)은 audio/.
 
 Usage:
   python3 tools/build.py            # check + audio + bundle
@@ -27,6 +31,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "content"
 AUDIO = ROOT / "audio"
+PRIV = ROOT / "private" / "zhan"
+TTS = PRIV / "tts"
 APP = ROOT / "app"
 
 # Speaker role -> macOS voice. TOEFL uses several English accents.
@@ -76,33 +82,47 @@ def split_sentences(text):
 
 
 # ---------------------------------------------------------------- loading
+def merge_private(data, stem, d):
+    """private/zhan/originals/<stem>.json의 원문 필드를 원본 오답·재구성 음성 세트에 합친다 (QA·비공개 번들용)."""
+    f = PRIV / "originals" / f"{stem}.json"
+    if not f.exists():
+        return False
+    pv = read_json(f)
+    for o in d.get("originals", []):
+        o.update(pv["originals"].get(o["id"], {}))
+    for sid, a in (d.get("audioSets") or {}).items():
+        a.update(pv["audioSets"].get(sid, {}))
+    return True
+
+
 def load_all():
     skills = read_json(CONTENT / "skills.json")["skills"]
     base = read_json(CONTENT / "originals.json")
-    reading = read_json(CONTENT / "items_reading.json")
-    listening = read_json(CONTENT / "items_listening.json")
+    public = {"originals": [dict(o) for o in base["originals"]], "audioSets": {k: dict(v) for k, v in base["audioSets"].items()}}
+    has_priv = merge_private(public, "originals", base)
     data = {
         "skills": skills,
         "tests": [dict(t, source="originals.json") for t in base["tests"]],
         "originals": list(base["originals"]),
-        "audioSets": {**base["audioSets"], **listening["audioSets"]},
+        "public": public,
+        "private": has_priv,
+        "audioSets": dict(base["audioSets"]),
         "origAudio": set(base["audioSets"]),
-        "items": reading["items"] + listening["items"],
-        "slotOptions": reading["slotOptions"],
-        "actOptions": listening["actOptions"],
         "files": {},
     }
-    for f in sorted(CONTENT.glob("items_*.json")):
-        if f.name in ("items_reading.json", "items_listening.json"):
-            continue
-        extra = read_json(f)
-        data["audioSets"].update(extra.get("audioSets", {}))
-        data["items"] += extra.get("items", [])
     for f in sorted((CONTENT / "tests").glob("*.json")):
         add_test_file(data, f)
     data["tests"].sort(key=lambda t: t["date"])
     data["sw"] = read_json(CONTENT / "sw.json")
+    # 소站 원문과 같은 쓰기 문제의 문제 문장은 private/zhan/sw_private.json에 (QA에는 합쳐서 쓰고, 공개 번들에는 넣지 않는다)
+    swp = PRIV / "sw_private.json"
+    data["swPrivate"] = read_json(swp) if swp.exists() else None
+    data["swFull"] = json.loads(json.dumps(data["sw"]))
+    for kind, m in (data["swPrivate"] or {}).items():
+        for it in data["swFull"].get(kind, []):
+            it.update(m.get(it["id"], {}))
     data["audioSets"].update(sw_audio_sets(data["sw"]))
+    data["pool"] = read_json(CONTENT / "pool.json") if (CONTENT / "pool.json").exists() else {"papers": [], "sets": []}
     return data
 
 
@@ -120,8 +140,10 @@ def sw_audio_sets(sw):
     return sets
 
 
-def check_sw(sw, voices):
+def check_sw(sw, voices, skip_private=False):
     errs = []
+    if skip_private:
+        sw = dict(sw, email=[e for e in sw.get("email", []) if not e.get("private")], discussion=[e for e in sw.get("discussion", []) if not e.get("private")])
     cats = set(sw["cats"])
     ids = [x["id"] for k in ("grammar", "lr", "buildSentence", "interview", "email", "discussion", "ideas") for x in sw.get(k, [])]
     dup = {i for i in ids if ids.count(i) > 1}
@@ -192,6 +214,9 @@ def add_test_file(data, f):
     if t.get("report"):
         test["report"] = t["report"]
     data["tests"].append(test)
+    data["public"]["originals"] += [dict(o) for o in t.get("originals", [])]
+    data["public"]["audioSets"].update({k: dict(v) for k, v in t.get("audioSets", {}).items()})
+    data["private"] = merge_private(data["public"], f.stem, t) and data["private"]
     data["originals"] += t.get("originals", [])
     for k, v in t.get("audioSets", {}).items():
         data["audioSets"][k] = v
@@ -244,6 +269,8 @@ def check(data):
         for k in ("diff", "rule", "causeAI"):
             if o["skill"] != "UNKNOWN" and not o.get(k):
                 errs.append(f"{p}: missing {k}")
+        if not data["private"]:
+            continue      # 원문이 이 환경에 없음 (비공개 저장소 없이 빌드) → 원문 검사 생략
         if "ctest" in o:
             c = o["ctest"]
             if c["text"].count("{{}}") != 1:
@@ -272,77 +299,14 @@ def check(data):
                 and "—" not in o["evidence"] and not contains(o["passage"], o["evidence"]):
             errs.append(f"{p}: evidence not found in passage")
 
-    # Memorization guard: transfer answers must not reuse an original correct answer verbatim.
-    orig_answers = set()
-    for o in data["originals"]:
-        if "ctest" in o:
-            orig_answers.add(o["ctest"]["answer"].lower())
-        elif o.get("options") and isinstance(o.get("correct"), int):
-            orig_answers.add(o["options"][o["correct"]].lower().strip())
-
-    # ---- items ----
-    seen = set()
-    for it in data["items"]:
-        p = f"item {it['id']}"
-        if it["id"] in seen:
-            errs.append(f"{p}: duplicate id")
-        seen.add(it["id"])
-        if it["skill"] not in skill_ids:
-            errs.append(f"{p}: unknown skill")
-        if it["tier"] not in ("guided", "transfer"):
-            errs.append(f"{p}: bad tier")
-        text = it.get("passage", "")
-        if "audio" in it:
-            if it["audio"] not in audio_sets:
-                errs.append(f"{p}: missing audio set")
-                continue
-            text = audio_text(audio_sets[it["audio"]])
-        if it["kind"] == "ctest":
-            c = it["ctest"]
-            if c["text"].count("{{}}") != 1:
-                errs.append(f"{p}: ctest blank count")
-            if not c["answer"].startswith(c["prefix"]) or c["answer"] == c["prefix"]:
-                errs.append(f"{p}: ctest prefix/answer mismatch")
-            if it["tier"] == "transfer" and c["answer"].lower() in orig_answers:
-                errs.append(f"{p}: transfer answer reuses an original answer")
-            if it["skill"] == "FORM" and "slot" not in c:
-                errs.append(f"{p}: FORM item needs slot")
-        for q in it.get("qs", []):
-            n = len(q["options"])
-            if len({o.strip().lower() for o in q["options"]}) != n:
-                errs.append(f"{p}: duplicate options")
-            if not (0 <= q["answer"] < n):
-                errs.append(f"{p}: answer out of range")
-            if len(q.get("why", [])) != n:
-                errs.append(f"{p}: why[] must match options")
-            if q.get("skill") and q["skill"] not in skill_ids:
-                errs.append(f"{p}: q.skill unknown")
-            if it["tier"] == "transfer" and not q.get("fixed") and q["options"][q["answer"]].lower().strip() in orig_answers:
-                errs.append(f"{p}: transfer answer reuses an original answer")
-            ev = q.get("evidence")
-            if ev and text and not contains(text, ev):
-                errs.append(f"{p}: evidence not found in passage/transcript: {ev[:50]}")
-            if it["kind"] != "reply" and not ev:
-                errs.append(f"{p}: missing evidence")
-        for st in it.get("steps", []) + it.get("stepsAfter", []):
-            t = st["type"]
-            if t == "choice" and not (0 <= st["answer"] < len(st["options"])):
-                errs.append(f"{p}: step answer out of range")
-            if t == "tag" and len(st["answer"]) != len(it["qs"][0]["options"]):
-                errs.append(f"{p}: tag answers must cover each option")
-            if t == "match" and len(st["answer"]) != len(st["rows"]):
-                errs.append(f"{p}: match answers must cover each row")
-            if t == "pick":
-                words = set(norm(st["sentence"]))
-                for w in st["answer"]:
-                    if w.lower() not in words:
-                        errs.append(f"{p}: pick word '{w}' not in sentence")
-            if t == "act" and not (0 <= st["answer"] < len(data["actOptions"])):
-                errs.append(f"{p}: act answer out of range")
-        if it["kind"] == "insert":
-            markers = re.findall(r"■[A-D]", it["passage"])
-            if markers != ["■A", "■B", "■C", "■D"]:
-                errs.append(f"{p}: insert passage needs ■A..■D in order")
+    # ---- 소站 연습 문제 메타데이터 ----
+    pids = [x["id"] for x in data["pool"]["sets"]]
+    if len(set(pids)) != len(pids):
+        errs.append("pool: duplicate set id")
+    for x in data["pool"]["sets"]:
+        for q in x["qs"]:
+            if x["sec"] in ("R", "L") and q.get("skill") not in skill_ids:
+                errs.append(f"pool {q['id']}: unknown skill {q.get('skill')}")
     return errs
 
 
@@ -352,12 +316,18 @@ def wav_seconds(path):
     return max(0.0, (path.stat().st_size - 44) / (2 * SR))
 
 
-def tts_set(set_id, aset, force=False):
+def audio_dir(set_id, data):
+    """재구성 음성(원본 오답 스크립트)은 비공개 private/zhan/tts/, 말하기 음성(SW-*)은 공개 audio/."""
+    return TTS if set_id in data["origAudio"] else AUDIO
+
+
+def tts_set(set_id, aset, force=False, out_dir=AUDIO):
     """Render one audio set sentence by sentence; write <id>.mp3 and <id>.cues.json (start/end per sentence)."""
     sig = hashlib.sha1(json.dumps([aset["lines"], VOICES, RATE, GAP_LINE, GAP_SENT, "v2"]).encode()).hexdigest()[:12]
-    out = AUDIO / f"{set_id}.mp3"
-    cues_f = AUDIO / f"{set_id}.cues.json"
-    stamp = AUDIO / f".{set_id}.sig"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / f"{set_id}.mp3"
+    cues_f = out_dir / f"{set_id}.cues.json"
+    stamp = out_dir / f".{set_id}.sig"
     if out.exists() and cues_f.exists() and stamp.exists() and stamp.read_text() == sig and not force:
         return
     with tempfile.TemporaryDirectory() as td:
@@ -447,6 +417,7 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 <script src="app/vocab.js"></script>
 <script src="app/sw.js"></script>
 <script src="app/listen.js"></script>
+<script src="app/practice.js"></script>
 <script src="app/read.js"></script>
 <script src="app/kotrial.js"></script>
 <script src="app/keep.js"></script>
@@ -454,18 +425,61 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 """
 
 
+# ---------------------------------------------------------------- leak check
+def leak_strings(data):
+    """공개 번들에 있으면 안 되는 원문 문자열: 소站 지문·스크립트·문항·보기, 원본 오답 원문, C-Test 자료."""
+    out = set()
+
+    def add(t):
+        t = re.sub(r"\s+", " ", str(t or "")).strip()
+        if len(t) >= 40:
+            out.add(t[:60])
+    pool = PRIV / "pool.json"
+    if pool.exists():
+        for s in read_json(pool)["sets"]:
+            for p in re.split(r"\n+", s.get("passage") or ""):
+                add(p)
+            for l in s.get("script") or []:
+                add(l["t"])
+            for q in s["qs"]:
+                add(q.get("stem")); add(q.get("prompt")); add(q.get("model")); add(q.get("text"))
+                for c in q.get("choices") or []:
+                    add(c)
+    for o in data["originals"]:
+        add(o.get("passage")); add(o.get("stem"))
+        for c in o.get("options") or []:
+            add(c)
+        if o.get("ctest"):
+            add(o["ctest"]["text"].split("{{}}")[0][-80:])
+    for sid in data["origAudio"]:
+        for l in data["audioSets"][sid].get("lines", []):
+            add(l["t"])
+    return out
+
+
+def leak_check(js, data):
+    flat = re.sub(r"\s+", " ", js.replace("\\n", " "))
+    hits = [t for t in leak_strings(data) if t in flat]
+    # 패턴 검사: 비공개 자료가 없어도 잡히는 것 (C-Test 빈칸 표기, 소站 해설 원문, 리포트 HTML)
+    for pat in (r"【\d+】", r"<m_p>", r"解析", r"正确答案"):
+        if re.search(pat, js):
+            hits.append("패턴 " + pat)
+    return hits
+
+
 # ---------------------------------------------------------------- main
 def main():
     args = set(sys.argv[1:])
     data = load_all()
-    errs = check(data) + check_sw(data["sw"], VOICES)
+    errs = check(data) + check_sw(data["swFull"] if data["swPrivate"] else data["sw"], VOICES, skip_private=not data["swPrivate"])
     if errs:
         print("QA FAILED:")
         for e in errs:
             print("  -", e)
         sys.exit(1)
     n_orig = len(data["originals"])
-    print(f"QA passed: {len(data['tests'])} tests, {n_orig} originals, {len(data['items'])} practice items")
+    print(f"QA passed: {len(data['tests'])} tests, {n_orig} originals, {len(data['pool']['sets'])} pool sets"
+          + ("" if data["private"] else " (비공개 원문 없음: 원문 검사 생략)"))
     if "--check" in args:
         return
 
@@ -474,47 +488,60 @@ def main():
             sys.exit("need macOS `say` and ffmpeg for audio")
         AUDIO.mkdir(exist_ok=True)
         for sid, aset in data["audioSets"].items():
-            tts_set(sid, aset, force="--force-audio" in args)
+            if "lines" not in aset:
+                continue          # 비공개 스크립트가 없는 환경
+            tts_set(sid, aset, force="--force-audio" in args, out_dir=audio_dir(sid, data))
 
-    audio_meta = {}
+    audio_meta, priv_audio = {}, {}
     for sid, aset in data["audioSets"].items():
-        f = AUDIO / f"{sid}.mp3"
-        cf = AUDIO / f"{sid}.cues.json"
-        audio_meta[sid] = {
-            "src": f"audio/{sid}.mp3",
-            "dur": duration(f) if f.exists() else None,
-            "title": aset.get("title", ""),
-            "lines": aset["lines"],
-            "cues": read_json(cf) if cf.exists() else [],
-            "note": aset.get("note", ""),
-        }
+        d = audio_dir(sid, data)
+        f, cf = d / f"{sid}.mp3", d / f"{sid}.cues.json"
+        cues = read_json(cf) if cf.exists() else []
+        if sid in data["origAudio"]:
+            # 원본 오답 스크립트로 만든 음성: 공개 번들에는 경로·길이만, 스크립트·자막은 비공개 번들에
+            audio_meta[sid] = {"src": f"private/zhan/tts/{sid}.mp3", "private": True, "dur": duration(f) if f.exists() else None,
+                               "title": aset.get("title", ""), "note": aset.get("note", "")}
+            priv_audio[sid] = {"lines": aset.get("lines", []), "cues": cues}
+        else:
+            audio_meta[sid] = {"src": f"audio/{sid}.mp3", "dur": duration(f) if f.exists() else None, "title": aset.get("title", ""),
+                               "lines": aset["lines"], "cues": cues, "note": aset.get("note", "")}
 
-    items = []
-    for it in data["items"]:
-        it = dict(it, qa="pass")
-        if it.get("audio"):
-            cues = audio_meta[it["audio"]]["cues"]
-            it["qs"] = [dict(q, seg=segment_for(cues, q.get("evidence"))) for q in it.get("qs", [])]
-        items.append(it)
+    full = {o["id"]: o for o in data["originals"]}
     originals = []
-    for o in data["originals"]:
-        if o.get("audio"):
-            o = dict(o, seg=segment_for(audio_meta[o["audio"]]["cues"], o.get("evidence")))
+    for o in data["public"]["originals"]:
+        o = dict(o)
+        fo = full[o["id"]]
+        if fo.get("audio") and fo["audio"] in priv_audio:
+            o["seg"] = segment_for(priv_audio[fo["audio"]]["cues"], fo.get("evidence"))
         originals.append(o)
+    TEXT = ("stem", "options", "passage", "ctest", "evidence", "trap", "diff")
+    if data["private"]:
+        priv = {"originals": {o["id"]: {k: o[k] for k in TEXT if k in o} for o in data["originals"]}, "audio": priv_audio}
+        pj = json.dumps(priv, ensure_ascii=False)
+        (PRIV / "orig.json").write_text(pj + "\n", encoding="utf-8")
+        if data["swPrivate"]:
+            priv["sw"] = data["swPrivate"]
+            pj = json.dumps(priv, ensure_ascii=False)
+            (PRIV / "orig.json").write_text(pj + "\n", encoding="utf-8")
+        (PRIV / "orig.js").write_text("/* 생성 파일 (tools/build.py). 원본 오답의 원문 — 공개 저장소에 올리지 않는다. */\nwindow.ZHAN_ORIG = " + pj + ";\n", encoding="utf-8")
 
     bundle = {
         "builtAt": datetime.datetime.now().isoformat(timespec="seconds"),
         "skills": data["skills"],
         "tests": data["tests"],
         "originals": originals,
-        "items": items,
+        "pool": {"papers": data["pool"]["papers"], "sets": data["pool"]["sets"]},
         "audio": audio_meta,
-        "slotOptions": data["slotOptions"],
-        "actOptions": data["actOptions"],
         "sw": data["sw"],
     }
     js = "// Generated by tools/build.py — do not edit. Edit content/*.json instead.\nwindow.CONTENT = " + \
          json.dumps(bundle, ensure_ascii=False) + ";\n"
+    leaks = leak_check(js, data)
+    if leaks:
+        print("LEAK CHECK FAILED — 공개 번들에 원문 문자열이 있습니다:")
+        for l in leaks[:10]:
+            print("  -", l)
+        sys.exit(1)
     (APP / "content.js").write_text(js, encoding="utf-8")
     import build_vocab
     print(f"vocab: app/vocab.js ({build_vocab.build() // 1024} KB)")
@@ -529,8 +556,9 @@ def main():
     # Page for the claude.ai Artifact viewer: it wraps the file in its own document skeleton,
     # so only title/meta/style/body content go here. Supporting files are published next to it.
     (ROOT / "artifact.html").write_text(ARTIFACT_PAGE, encoding="utf-8")
-    segs = sum(1 for it in items for q in it.get("qs", []) if q.get("seg")) + sum(1 for o in originals if o.get("seg"))
-    print(f"bundle: app/content.js ({len(js)//1024} KB), audio sets: {len(audio_meta)}, replay segments: {segs}")
+    segs = sum(1 for o in originals if o.get("seg"))
+    print(f"bundle: app/content.js ({len(js)//1024} KB), audio sets: {len(audio_meta)}, replay segments: {segs}, "
+          f"pool sets: {len(bundle['pool']['sets'])}, leak check: passed ({'원문 대조' if data['private'] else '비공개 자료 없음 — 패턴 검사만'})")
 
 
 if __name__ == "__main__":
