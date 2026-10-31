@@ -32,7 +32,8 @@ def available():
 
 def transcribe(data, prompt=None):
     t0 = time.time()
-    segs, info = model().transcribe(io.BytesIO(data), language="en", word_timestamps=True, vad_filter=False,
+    # vad_filter: 소리 없는 녹음에서 Whisper가 말을 지어내지 않게 (예: 무음 → "You")
+    segs, info = model().transcribe(io.BytesIO(data), language="en", word_timestamps=True, vad_filter=True,
                                     initial_prompt=prompt or None, condition_on_previous_text=False)
     words, text = [], []
     for s in segs:

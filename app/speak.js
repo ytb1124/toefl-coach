@@ -45,9 +45,12 @@
       return mic().then(s => new Promise(res => {
         const rec = new MediaRecorder(s); const chunks = [];
         rec.ondataavailable = e => chunks.push(e.data);
-        rec.onstop = () => { clearInterval(t); res(new Blob(chunks, { type: rec.mimeType || 'audio/webm' })); };
         let left = sec; onTick && onTick(left);
-        const t = setInterval(() => { left--; onTick && onTick(left); if (left <= 0 && rec.state === 'recording') rec.stop(); }, 1000);
+        let ended = false;
+        const finish = () => { if (ended) return; ended = true; clearInterval(t); res(new Blob(chunks, { type: rec.mimeType || 'audio/webm' })); };
+        rec.onstop = finish;
+        // 시간이 끝나면 멈춘다. 녹음기가 'stop'을 끝내 알리지 않아도 2초 뒤에는 있는 것으로 넘어간다 (화면이 멈추지 않게).
+        const t = setInterval(() => { left--; if (left >= 0) onTick && onTick(left); if (left <= 0 && rec.state === 'recording') rec.stop(); if (left <= -2) finish(); }, 1000);
         rec.start();
         record.stop = () => { if (rec.state === 'recording') rec.stop(); };
       }));
