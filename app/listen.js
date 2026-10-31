@@ -47,7 +47,6 @@
 
   // ---------- UI ----------
   const KEY = 'toefl-listen-v1';
-  const DATA = 'private/zhan/listen.js';
   const REPO = 'ytb1124/toefl-coach-private';
   const API = 'https://api.github.com/repos/' + REPO + '/contents/';
   const TOKEN_KEY = 'toefl-gh-token';
@@ -55,34 +54,72 @@
   const KIND = { reply: 'Listen & Reply', conversation: '대화', announcement: '공지', lecture: '강의', other: '기타' };
   const L = 'ABCDEFGHI';
 
-  root.ListenApp = { create(env) {
-    const { h, go, storage, toast } = env;
-    const link = env.link || { info: () => null, log: () => {} };
-    // 로컬 서버(이 Mac, 같은 와이파이의 휴대폰)일 때만 private/ 파일을 시도한다 — 공개 사이트에서는 바로 토큰으로.
+  // ---------- 소站 비공개 자료 불러오기 (리스닝 탭·리딩 탭 공용, window.ZhanData) ----------
+  // 로컬 서버(이 Mac, 같은 와이파이의 휴대폰)면 private/zhan/<name>.js, 아니면 이 기기에 넣은 읽기 전용 토큰으로 비공개 저장소의 <name>.json.
+  const ZhanData = root.ZhanData = (() => {
     const localHost = /^(localhost|127\.0\.0\.1|\[::1\]|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
-    let loaded = null;   // null = not tried, true/false after the local script / GitHub fetch
-    let remote = false, loadErr = null;
     const token = () => { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } };
     const ghFetch = path => fetch(API + path.split('/').map(encodeURIComponent).join('/'), { headers: { Authorization: 'Bearer ' + token(), Accept: 'application/vnd.github.raw+json' }, cache: 'no-store' })
       .then(r => { if (!r.ok) throw new Error(r.status === 401 ? '토큰이 맞지 않거나 만료됐습니다 (401)' : r.status === 404 ? '저장소를 볼 권한이 없습니다 (404) — 토큰의 저장소 선택을 확인하세요' : 'GitHub 응답 ' + r.status); return r; });
-    function ensureData(then) {
-      if (root.ZHAN) { loaded = true; return then(); }
-      if (loaded === false) return then();
-      if (!localHost) return fromGitHub(then);
+    const state = {};   // name → {loaded: null|true|false, remote, err}
+    // name: 'listen' | 'reading' → window[global]
+    function load(name, global, then) {
+      const st = state[name] || (state[name] = { loaded: null, remote: false, err: null });
+      if (root[global]) { st.loaded = true; return then(); }
+      if (st.loaded === false) return then();
+      const fromGitHub = () => {
+        if (!token()) { st.loaded = false; return then(); }
+        ghFetch(name + '.json').then(r => r.json()).then(z => { root[global] = z; st.remote = true; st.loaded = true; st.err = null; then(); })
+          .catch(e => { st.loaded = false; st.err = e.message; then(); });
+      };
+      if (!localHost) return fromGitHub();
       const s = document.createElement('script');
-      s.src = DATA + '?t=' + Date.now();
-      s.onload = () => { loaded = !!root.ZHAN; then(); };
-      s.onerror = () => fromGitHub(then);
+      s.src = 'private/zhan/' + name + '.js?t=' + Date.now();
+      s.onload = () => { st.loaded = !!root[global]; then(); };
+      s.onerror = fromGitHub;
       document.head.append(s);
     }
-    function fromGitHub(then) {
-      if (!token()) { loaded = false; return then(); }
-      ghFetch('listen.json').then(r => r.json()).then(z => { root.ZHAN = z; remote = true; loaded = true; loadErr = null; then(); })
-        .catch(e => { loaded = false; loadErr = e.message; then(); });
+    const info = name => state[name] || { loaded: null, remote: false, err: null };
+    const reset = () => { for (const k in state) if (state[k].loaded === false) state[k].loaded = null; };
+    // 토큰 입력 카드 (기기마다 한 번). onOk: 다시 불러오기를 시도하고 성공하면 호출.
+    function tokenCard(h, { title, lead, retry }) {
+      const input = h('input', { type: 'password', autocomplete: 'off', class: 'idea-ex', placeholder: 'github_pat_…' });
+      const errs = Object.values(state).map(s => s.err).filter(Boolean);
+      const msg = h('p', { class: 'small', role: 'status' }, errs.length ? '불러오기 실패: ' + errs[0] : '');
+      const ok = h('button', { class: 'primary', onclick: () => {
+        const v = input.value.trim(); if (!v) return;
+        try { localStorage.setItem(TOKEN_KEY, v); } catch (e) { msg.textContent = '저장 실패: ' + e.message; return; }
+        input.value = ''; reset(); msg.textContent = '확인하는 중…';
+        retry(okd => { if (!okd) { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ } const e2 = Object.values(state).map(s => s.err).filter(Boolean)[0]; msg.textContent = '불러오기 실패: ' + (e2 || '알 수 없음'); } });
+      } }, '토큰 저장하고 불러오기');
+      return [h('h1', null, title), h('section', { class: 'card' },
+        h('p', null, lead),
+        h('p', { class: 'small muted' }, `소站 TPO独家 원본 자료는 저작물이라 공개 사이트에 두지 않고 비공개 저장소 ${REPO}에만 있습니다. 토큰은 이 기기 브라우저에만 저장되고 동기화되지 않습니다 (기기마다 한 번, 리스닝·리딩 공용). 학습 기록은 동기화됩니다.`),
+        h('details', null, h('summary', { class: 'small' }, '토큰 만드는 법 (읽기 전용, 이 저장소 하나만)'),
+          h('ol', { class: 'small' },
+            h('li', null, 'github.com → 오른쪽 위 프로필 → Settings → 맨 아래 Developer settings'),
+            h('li', null, 'Personal access tokens → Fine-grained tokens → Generate new token'),
+            h('li', null, `Repository access: Only select repositories → ${REPO} 를 실제로 선택`),
+            h('li', null, 'Permissions → Repository permissions → + Add permissions → Contents 체크 → Read-only'),
+            h('li', null, 'Generate token → 나온 github_pat_… 를 복사해 아래에 붙여넣기'))),
+        input, ok, msg,
+        h('p', { class: 'small muted' }, 'Mac에서 start.command로 열면 토큰 없이 로컬 파일로 열립니다.'))];
     }
+    const sourceLine = (h, name) => h('p', { class: 'small muted' }, info(name).remote
+      ? ['비공개 GitHub 저장소에서 불러옴 · ', h('a', { href: 'javascript:void 0', onclick: () => { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ } location.reload(); } }, '이 기기에서 토큰 지우기')]
+      : '이 Mac의 로컬 파일에서 불러옴');
+    return { REPO, localHost, token, ghFetch, load, info, tokenCard, sourceLine };
+  })();
+
+  root.ListenApp = { create(env) {
+    const { h, go, storage, toast } = env;
+    const link = env.link || { info: () => null, log: () => {} };
+    const ensureData = then => ZhanData.load('listen', 'ZHAN', then);
+    const remoteMode = () => ZhanData.info('listen').remote;
+    const ghFetch = ZhanData.ghFetch;
     // '오늘 훈련'의 원본 오답 문제에서 같은 문항의 소站 원본 음원을 찾아 준다 (없으면 조용히 아무것도 안 함).
     function origSource(origId, cb) {
-      if (loaded === false) return;
+      if (ZhanData.info('listen').loaded === false) return;
       ensureData(() => {
         if (!root.ZHAN) return;
         for (const set of root.ZHAN.sets) {
@@ -97,7 +134,7 @@
     // Audio: local mode plays the file path; remote mode plays a blob URL fetched once (Cache API keeps it across visits).
     const urls = {};
     async function fetchAudio(path) {
-      if (!remote || urls[path]) return;
+      if (!remoteMode() || urls[path]) return;
       const key = API + path;
       let res = null, cache = null;
       try { cache = await caches.open(AUDIO_CACHE); res = await cache.match(key); } catch (e) { /* no Cache API */ }
@@ -109,8 +146,8 @@
       }
       urls[path] = URL.createObjectURL(new Blob([await res.arrayBuffer()], { type: 'audio/mpeg' }));
     }
-    const src = path => remote ? urls[path] : path;
-    const ready = paths => paths.every(p => !remote || urls[p]);
+    const src = path => remoteMode() ? urls[path] : path;
+    const ready = paths => paths.every(p => !remoteMode() || urls[p]);
     function load() { try { const d = JSON.parse(storage.getItem(KEY) || 'null'); if (d && d.v) return Object.assign({ v: 1, sets: {}, prefs: {} }, d); } catch (e) { /* fresh */ } return { v: 1, sets: {}, prefs: {} }; }
     function save(mut) { const d = load(); mut(d); try { storage.setItem(KEY, JSON.stringify(d)); } catch (e) { toast('저장 실패: ' + e.message); } return d; }
 
@@ -155,32 +192,14 @@
       });
     }
     function missing(main) {
-      const input = h('input', { type: 'password', autocomplete: 'off', class: 'idea-ex', placeholder: 'github_pat_…' });
-      const msg = h('p', { class: 'small', role: 'status' }, loadErr ? '불러오기 실패: ' + loadErr : '');
-      const ok = h('button', { class: 'primary', onclick: () => {
-        const v = input.value.trim(); if (!v) return;
-        try { localStorage.setItem(TOKEN_KEY, v); } catch (e) { msg.textContent = '저장 실패: ' + e.message; return; }
-        input.value = ''; loaded = null; msg.textContent = '확인하는 중…';
-        ensureData(() => { if (root.ZHAN) { toast('연결했습니다'); main.innerHTML = ''; view(main, [], null); } else { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ } msg.textContent = '불러오기 실패: ' + (loadErr || '알 수 없음'); } });
-      } }, '토큰 저장하고 불러오기');
-      main.append(h('h1', null, '리스닝 오답 다시 풀기'), h('section', { class: 'card' },
-        h('p', null, '이 기기에 GitHub 토큰을 한 번 넣으면 원본 음원으로 풀 수 있습니다.'),
-        h('p', { class: 'small muted' }, `소站 TPO独家 원본 스크립트·음원은 저작물이라 공개 사이트에 두지 않고 비공개 저장소 ${REPO}에만 있습니다. 토큰은 이 기기 브라우저에만 저장되고 동기화되지 않습니다 (기기마다 한 번). 학습 기록은 동기화됩니다.`),
-        h('details', null, h('summary', { class: 'small' }, '토큰 만드는 법 (읽기 전용, 이 저장소 하나만)'),
-          h('ol', { class: 'small' },
-            h('li', null, 'github.com → 오른쪽 위 프로필 → Settings → 맨 아래 Developer settings'),
-            h('li', null, 'Personal access tokens → Fine-grained tokens → Generate new token'),
-            h('li', null, `Repository access: Only select repositories → ${REPO}`),
-            h('li', null, 'Permissions → Repository permissions → Contents: Read-only (나머지는 그대로)'),
-            h('li', null, 'Generate token → 나온 github_pat_… 를 복사해 아래에 붙여넣기'))),
-        input, ok, msg,
-        h('p', { class: 'small muted' }, 'Mac에서 start.command로 열면 토큰 없이 로컬 파일로 열립니다.')));
+      main.append(...ZhanData.tokenCard(h, { title: '리스닝 오답 다시 풀기', lead: '이 기기에 GitHub 토큰을 한 번 넣으면 원본 음원으로 풀 수 있습니다.',
+        retry: done => ensureData(() => { done(!!root.ZHAN); if (root.ZHAN) { toast('연결했습니다'); main.innerHTML = ''; view(main, [], null); } }) }));
     }
 
     // ---------- list ----------
     function viewList(main, Z) {
       const d = load();
-      main.append(h('p', { class: 'small muted' }, remote ? ['비공개 GitHub 저장소에서 불러옴 · ', h('a', { href: 'javascript:void 0', onclick: () => { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ } location.reload(); } }, '이 기기에서 토큰 지우기')] : '이 Mac의 로컬 파일에서 불러옴'));
+      main.append(ZhanData.sourceLine(h, 'listen'));
       const order = Z.tests.map(t => t.id);
       const q = queue(Z.sets, d.sets, order, hist);
       const counts = { new: 0, again: 0, fixed: 0 };

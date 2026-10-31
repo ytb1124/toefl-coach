@@ -107,12 +107,13 @@
     else if (view === 'vocab') viewVocab(main);
     else if (view === 'sw') swApp().view(main, (location.hash || '').split('/').slice(2), render);
     else if (view === 'listen') listenApp().view(main, (location.hash || '').split('/').slice(2), render);
+    else if (view === 'read') readApp().view(main, (location.hash || '').split('/').slice(2));
     else viewToday(main);
   }
   function nav(cur) {
     const link = (hash, label, key) => h('a', { href: hash, class: cur === key ? 'on' : '' }, label);
     return h('header', { class: 'nav' }, h('div', { class: 'brandbox' }, h('span', { class: 'brand' }, 'TOEFL 교정 코치'), syncLabel()),
-      h('nav', null, link('#/', '오늘', ''), link('#/vocab', '단어', 'vocab'), link('#/listen', '리스닝', 'listen'), link('#/sw', '말하기·쓰기', 'sw'), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
+      h('nav', null, link('#/', '오늘', ''), link('#/vocab', '단어', 'vocab'), link('#/read', '리딩', 'read'), link('#/listen', '리스닝', 'listen'), link('#/sw', '말하기·쓰기', 'sw'), link('#/progress', '변화', 'progress'), link('#/tests', 'TPO', 'tests'), link('#/settings', '설정', 'settings')));
   }
 
   // ---------- sync status ----------
@@ -200,10 +201,13 @@
       const o = ORIG[id]; if (!o) return;
       const norm = t => String(t || '').toLowerCase().replace(/[^a-z]/g, '');
       const i = (o.options || []).findIndex(t => norm(t) === norm(choiceText));
-      logAttempt({ ref: id, skill: o.skill, tier: 'original', correct, answer: i >= 0 ? i : null, src: 'listen' });
+      // C-Test 원본은 입력한 단어 그대로, 객관식은 같은 보기 문장의 인덱스로 남긴다
+      logAttempt({ ref: id, skill: o.skill, tier: 'original', correct, answer: o.ctest ? String(choiceText || '') : i >= 0 ? i : null, src: o.sec === 'R' ? 'read' : 'listen' });
     },
   };
   const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
+  let RD = null;
+  const readApp = () => RD || (RD = ReadApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
 
   // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
   let V = null, vocabMode = 'home';

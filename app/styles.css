@@ -314,3 +314,13 @@ button.rec { border-color: var(--bad); color: var(--bad); }
 .tscript .tline.now { background: var(--sel); }
 .tscript .sp { color: var(--muted); font-weight: 600; }
 .orig-audio { width: 100%; margin: 6px 0 10px; }
+.rpassage { max-height: 46vh; overflow-y: auto; }
+.read .rpassage p { margin: .5em 0; }
+.imark { color: var(--accent); margin: 0 2px; }
+.imark.right { background: var(--good-bg); border-radius: 4px; padding: 0 3px; }
+.cword { white-space: nowrap; }
+.cblank { width: auto; min-width: 3ch; padding: 0 3px; margin: 0 1px; border: 0; border-bottom: 2px solid var(--accent); background: var(--sel); color: var(--ink); font: inherit; border-radius: 3px 3px 0 0; }
+.cword.ok b { color: var(--good); }
+.cword.no s { color: var(--bad); margin-right: 3px; }
+.cword.no b { color: var(--good); }
+.insert-s { background: var(--bg); border-radius: 8px; padding: 8px 10px; }

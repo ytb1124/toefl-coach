@@ -79,6 +79,12 @@ node --test tests/engine.test.js
   각 오답은 앱의 같은 리스닝 원본(`content/originals.json` 등)과 질문 문장으로 자동 연결된다(`orig`). 리스닝 탭 풀이는 그 원본의 `tier: 'original'` 시도로 기록되고, 오늘 훈련의 원본 문제는 원본 음원으로 재생된다.
   → `python3 tools/zhan.py --todo`로 해설 없는 오답을 뽑아 한국어 해설을 `ko.json`에 추가 → `python3 tools/zhan.py` → `private/zhan`에서 커밋·푸시.
 
+## 리딩 오답 다시 풀기 (소站 TPO独家, `#/read`)
+- 코드 `app/read.js` (판정·순서는 `ListenCore` 재사용, 자료 로딩은 `app/listen.js`의 `ZhanData` 공용), 기록 키 `toefl-read-v1`.
+- 자료: `private/zhan/reading/Mock_Test_<N>_<workflowId>.json` + `reading/ko.json` → `python3 tools/zhan_read.py` → `private/zhan/reading.js`·`reading.json` (비공개 저장소에 커밋·푸시).
+- 리딩 리포트 workflowId는 리스닝과 다르다: toefl-mokao.zhan.com 페이지에서 `POST /mokaoapi/api/singleSubject/query_completed_practice_records` `{userId: sessionStorage.userId, platform:'BK', practiceType:1}`(1=리딩, 2=리스닝)로 목록을 받는다. 리포트 URL `newMock/report?paperId=&workflowId=&subject=read`.
+- 지문 표기: C-Test 빈칸 `【n】`(앞 글자는 지문에 있음), 문장 삽입 위치 `[[iA]]`, 문장 고르기 표시 `[[sA]]`. 오답은 앱 리딩 원본과 질문 문장 / C-Test 단어로 연결된다.
+
 ## 배포
 - `main`에 푸시하면 GitHub Pages(https://taebin.link/toefl-coach/)가 자동 갱신된다. 저장소는 공개 — 키·토큰 등 비밀 값을 커밋하지 않는다 (jsonbin 키는 각 기기 브라우저에만 저장).
 - claude.ai 버전은 `artifact.html` + app/* + audio/*를 Artifact로 다시 게시해야 갱신된다 (capabilities: db, user).

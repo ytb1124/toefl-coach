@@ -66,13 +66,13 @@ def kind(title):
     return "other"
 
 
-def app_originals():
-    """앱 '오늘 훈련'의 리스닝 원본 오답 (content/originals.json + content/tests/*.json). 같은 문제를 연결하려고 읽는다."""
+def app_originals(sec="L"):
+    """앱 '오늘 훈련'의 원본 오답 (content/originals.json + content/tests/*.json) 중 sec(L/R). 같은 문제를 연결하려고 읽는다."""
     o = json.loads((ROOT / "content" / "originals.json").read_text())
     o = o if isinstance(o, list) else o.get("originals", [])
     for f in sorted((ROOT / "content" / "tests").glob("*.json")):
         o += json.loads(f.read_text()).get("originals", [])
-    return [x for x in o if x.get("sec") == "L" and x.get("options")]
+    return [x for x in o if x.get("sec") == sec and (x.get("options") or x.get("ctest"))]
 
 
 def norm(t):
