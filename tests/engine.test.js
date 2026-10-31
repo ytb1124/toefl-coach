@@ -15,10 +15,10 @@ const day = n => T0 + n * E.DAY;
 const blank = () => ({ settings: { examDate: '2026-10-26', minutes: 40 }, attempts: [], flags: {} });
 const att = (skill, tier, correct, at, extra) => Object.assign({ skill, tier, correct, at, sid: 's' + Math.floor(at / E.DAY), conf: 2 }, extra);
 
-test('content: 63 originals and evidence counts sum correctly', () => {
-  assert.strictEqual(C.originals.length, 63);
+test('content: 69 originals and evidence counts sum correctly', () => {
+  assert.strictEqual(C.originals.length, 69);
   const primary = C.skills.reduce((s, sk) => s + E.evidence(sk.id, C.originals, C.tests).primary, 0);
-  assert.strictEqual(primary, 62); // + 1 UNKNOWN (TPO3 L10)
+  assert.strictEqual(primary, 69); // TPO3 L10–L16은 소站 공식 기록으로 채움 (UNKNOWN 없음)
   assert.strictEqual(E.evidence('ACT', C.originals, C.tests).primary, 9);
   assert.deepStrictEqual(E.evidence('FORM', C.originals, C.tests).tests, ['TPO2', 'TPO3']);
 });

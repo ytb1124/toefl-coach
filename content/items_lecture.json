@@ -59,11 +59,11 @@
     {
       "id": "TL-G1", "skill": "TARGET", "tier": "guided", "kind": "listen", "audio": "tl-g-noise",
       "steps": [
-        {"type": "choice", "prompt": "강의 첫 문장의 주제 신호는?", "options": ["Today's topic is how city noise changes bird communication", "Traffic noise is mostly low-pitched", "city birds are often less afraid of people"], "answer": 0, "explain": "Today's topic is… = 주제 선언. 나머지는 그 주제의 세부 또는 별개의 효과."}
+        {"type": "choice", "prompt": "강의 첫 문장에서 주제를 알려 주는 표현은?", "options": ["Today's topic is how city noise changes bird communication", "Traffic noise is mostly low-pitched", "city birds are often less afraid of people"], "answer": 0, "explain": "Today's topic is…로 주제를 밝힌다. 나머지는 그 주제의 세부이거나 따로 언급한 효과다."}
       ],
       "qs": [
         {"prompt": "What is the talk mainly about?", "options": ["How birds in cities have adjusted their songs to noise", "Why city birds are less afraid of people", "The pitch of traffic noise in large cities", "Why forest birds sing more than city birds"], "answer": 0,
-         "why": ["✓", "↗ 'separate effect'라고 따로 언급한 세부", "↗ 세부 (원인 설명용)", "✗ 언급 없음"],
+         "why": ["✓", "↗ 'separate effect'라고 따로 언급한 세부", "↗ 원인을 설명하려고 든 세부", "✗ 언급 없음"],
          "evidence": "Today's topic is how city noise changes bird communication"}
       ]
     },
@@ -71,7 +71,7 @@
       "id": "TL-T1", "skill": "TARGET", "tier": "transfer", "kind": "listen", "audio": "tl-traffic",
       "qs": [
         {"prompt": "What is the main topic of the talk?", "options": ["General strategies cities use to reduce traffic", "The fee London charges drivers entering the city", "Why planting trees keeps city streets cooler", "How highway design has improved over time"], "answer": 0,
-         "why": ["✓", "↗ 두 번째 전략의 예시 하나", "↗ By the way로 시작한 곁가지", "✗ 언급 없음 (오히려 도로 확장은 실패)"],
+         "why": ["✓", "↗ 두 번째 전략의 예시 하나", "↗ By the way로 시작한 곁가지", "✗ 언급 없음 (오히려 도로 확장은 실패했다고 함)"],
          "evidence": "I want to sort them into three broad strategies"},
         {"prompt": "According to the professor, what is the problem with adding more road space?", "options": ["More people start driving, so the roads fill up again", "Building new lanes costs more than public transport", "Wider roads make city centers hotter in summer", "Drivers have to pay a fee to use the new lanes"], "answer": 0,
          "why": ["✓", "✗ 비용 비교는 언급 없음", "↗ 나무 이야기와 섞음", "↗ 두 번째 전략(pricing)의 특징"],
@@ -82,10 +82,10 @@
       "id": "TL-T2", "skill": "TARGET", "tier": "transfer", "kind": "listen", "audio": "tl-exoplanet",
       "qs": [
         {"prompt": "What is the talk mainly about?", "options": ["Two indirect ways of detecting planets around other stars", "The discovery of the first planet around a sun-like star", "Why planets around other stars are too faint to see", "How astronomers measure the color of starlight"], "answer": 0,
-         "why": ["✓", "↗ 마지막 'Oh, and' 곁가지", "↗ 도입의 배경 설명", "↗ wobble 방법 안의 세부 단계"],
+         "why": ["✓", "↗ 마지막에 'Oh, and'로 덧붙인 곁가지", "↗ 도입부의 배경 설명", "↗ wobble 방법 안의 세부 단계"],
          "evidence": "Let me describe the two most productive methods"},
         {"prompt": "What does the size of the dip in a star's brightness tell astronomers?", "options": ["How big the planet is", "How massive the planet is", "How far the planet is from Earth", "How often the planet passes the star"], "answer": 0,
-         "why": ["✓", "↗ wobble 방법이 알려 주는 것 (mass)", "✗ 언급 없음", "↗ 반복 간격(regular intervals)은 행성 존재의 신호"],
+         "why": ["✓", "↗ wobble 방법이 알려 주는 것 (mass)", "✗ 언급 없음", "↗ 일정한 간격(regular intervals)으로 반복되면 행성이 있다는 신호"],
          "evidence": "The size of the dip tells us how big the planet is"}
       ]
     },
@@ -93,7 +93,7 @@
       "id": "TL-T3", "skill": "TARGET", "tier": "transfer", "kind": "listen", "audio": "tl-library",
       "qs": [
         {"prompt": "What is the main purpose of the announcement?", "options": ["To explain a new booking rule for group study rooms", "To announce that the library café has changed its hours", "To inform students that the reading room is closing", "To ask students to update their student numbers"], "answer": 0,
-         "why": ["✓", "↗ 마지막 'quick reminder' 세부", "✗ 반대 — 계속 walk-in으로 열림", "✗ 학생 번호는 예약에 필요할 뿐"],
+         "why": ["✓", "↗ 마지막에 'quick reminder'로 덧붙인 세부", "✗ 반대 — 계속 walk-in으로 운영됨", "✗ 학생 번호는 예약에 필요할 뿐"],
          "evidence": "the group study rooms on the third floor of Hartley Library will require a reservation"},
         {"prompt": "What happens if a booked room is not claimed in time?", "options": ["It is given to other students", "The student cannot book again that week", "It becomes a walk-in reading room", "The student must pay a fee"], "answer": 0,
          "why": ["✓", "✗ 언급 없음", "↗ walk-in은 1층 reading room의 특징", "✗ 언급 없음"],
@@ -103,11 +103,11 @@
     {
       "id": "RL-G1", "skill": "ROLE", "tier": "guided", "kind": "listen", "audio": "rl-g-memory",
       "steps": [
-        {"type": "choice", "prompt": "'Imagine watering a plant' 바로 앞의 일반 진술(예시가 보여 주려는 것)은?", "options": ["여러 번 짧게 공부하는 것이 한 번 길게 공부하는 것보다 낫다", "식물은 매일 물을 줘야 건강하다", "물을 한 번에 많이 주면 넘친다"], "answer": 0, "explain": "Imagine… = 비유. 비유는 바로 앞 개념(spacing effect)을 설명하려고 있다."}
+        {"type": "choice", "prompt": "'Imagine watering a plant' 바로 앞에서 말한 일반적인 내용(예시가 보여 주려는 것)은?", "options": ["여러 번 짧게 공부하는 것이 한 번 길게 공부하는 것보다 낫다", "식물은 매일 물을 줘야 건강하다", "물을 한 번에 많이 주면 넘친다"], "answer": 0, "explain": "Imagine…은 비유를 꺼내는 말. 비유는 바로 앞의 개념(spacing effect)을 설명하려고 든 것이다."}
       ],
       "qs": [
         {"prompt": "Why does the speaker talk about watering a plant?", "options": ["To illustrate why several short study sessions work better", "To give advice about caring for houseplants", "To compare how plants and people store water", "To suggest that students study in the morning"], "answer": 0,
-         "why": ["✓", "↗ 비유의 '내용'을 실제 조언으로 읽음", "✗ 비교 대상이 아님 (기억 ↔ 물주기 비유)", "✗ 언급 없음"],
+         "why": ["✓", "↗ 비유의 '내용'을 실제 조언으로 읽음", "✗ 비교하는 게 아님 (기억을 물 주기에 빗댄 비유)", "✗ 언급 없음"],
          "evidence": "Imagine watering a plant"}
       ]
     },
@@ -115,10 +115,10 @@
       "id": "RL-T1", "skill": "ROLE", "tier": "transfer", "kind": "listen", "audio": "rl-camouflage",
       "qs": [
         {"prompt": "Why does the professor mention a zebra in a moving herd?", "options": ["To illustrate how bold patterns make it hard to pick out one animal", "To show that zebras are the most common prey of lions", "To contrast camouflage on land with camouflage in water", "To explain why zebras change their patterns quickly"], "answer": 0,
-         "why": ["✓", "✗ 언급 없음", "↗ 대조는 강의 구조가 아님 — zebra는 disruptive coloration의 예", "↗ 패턴 변화는 cuttlefish의 특징"],
+         "why": ["✓", "✗ 언급 없음", "↗ 강의는 대조 구조가 아님 — zebra는 disruptive coloration의 예", "↗ 무늬를 바꾸는 건 cuttlefish의 특징"],
          "evidence": "a lion has trouble picking out a single target"},
         {"prompt": "Why does the professor mention a stage designer?", "options": ["To help explain how countershading hides an animal's outline", "To suggest that camouflage was first studied in theaters", "To show that people have copied animal camouflage", "To describe a career related to biology"], "answer": 0,
-         "why": ["✓", "✗ It's a bit like… = 비유, 실제 역사 아님", "✗ 실제 모방 관계로 읽은 것", "✗ 언급 없음"],
+         "why": ["✓", "✗ It's a bit like…는 비유일 뿐, 실제 역사가 아님", "✗ 실제로 흉내 낸 관계로 잘못 읽음", "✗ 언급 없음"],
          "evidence": "It's a bit like a stage designer who lights a set so that the edges of objects disappear"},
         {"prompt": "What is true of countershading, according to the professor?", "options": ["An animal's back is darker than its belly", "An animal's stripes blend with others in a group", "An animal changes color within seconds", "An animal's outline is broken up by bold patches"], "answer": 0,
          "why": ["✓", "↗ disruptive coloration(zebra)", "↗ cuttlefish", "↗ disruptive coloration의 정의"],
@@ -132,7 +132,7 @@
          "why": ["✓", "✗ 어느 쪽이 낫다는 주장 없음", "✗ 80달러는 예시 속 숫자일 뿐", "✗ 언급 없음"],
          "evidence": "Every choice has a hidden price"},
         {"prompt": "Why does the professor compare opportunity cost to a road not taken?", "options": ["To show that a cost can affect a decision even if it is not visible", "To suggest that people should travel more often", "To explain why maps are useful in economics", "To describe a decision a business made about an oven"], "answer": 0,
-         "why": ["✓", "✗ 비유를 실제 조언으로 읽음", "✗ 비유의 소재(map)를 주제로 읽음", "↗ bakery는 다른 예시"],
+         "why": ["✓", "✗ 비유를 실제 조언으로 읽음", "✗ 비유에 쓰인 소재(map)를 주제로 착각함", "↗ bakery는 다른 예시"],
          "evidence": "You never see it on the map of where you went, but it shaped every turn"}
       ]
     },
@@ -140,21 +140,21 @@
       "id": "RL-T3", "skill": "ROLE", "tier": "transfer", "kind": "listen", "audio": "rl-cathedral",
       "qs": [
         {"prompt": "Why does the professor mention a person leaning against a bookcase?", "options": ["To help explain how a flying buttress supports a wall", "To show that medieval builders used wooden furniture", "To suggest that cathedral walls often collapsed", "To compare the height of bookcases and windows"], "answer": 0,
-         "why": ["✓", "✗ Imagine… = 비유, 실제 사용 아님", "✗ 과장 — can collapse(가능성)를 often으로", "✗ 언급 없음"],
+         "why": ["✓", "✗ Imagine…은 비유일 뿐, 실제로 쓴다는 말이 아님", "✗ 과장 — can collapse(그럴 수 있다)를 often(자주)으로 바꿈", "✗ 언급 없음"],
          "evidence": "Imagine a person leaning a hand against a wobbly bookcase to keep it upright"},
         {"prompt": "Why does the professor mention Notre-Dame in Paris?", "options": ["To give a known example of a building with flying buttresses", "To explain why stained glass was invented", "To show that Gothic cathedrals were built quickly", "To argue that Notre-Dame is the tallest cathedral"], "answer": 0,
-         "why": ["✓", "✗ 언급 없음", "✗ 언급 없음", "✗ 근거 없는 최상급"],
+         "why": ["✓", "✗ 언급 없음", "✗ 언급 없음", "✗ 근거 없이 최상급을 씀"],
          "evidence": "Notre-Dame in Paris is a well-known example"}
       ]
     },
     {
       "id": "AL-G1", "skill": "AUDIT", "tier": "guided", "kind": "listen", "audio": "al-g-museum",
       "steps": [
-        {"type": "pick", "prompt": "이 선택지에서 대화가 뒷받침하지 않는 단어를 탭하세요.", "sentence": "The man knows the museum is closed on Monday.", "answer": ["knows", "closed"], "explain": "남자는 I'm not sure → 확인해 보겠다. 아는 것도, 닫혔다는 것도 근거 없음."}
+        {"type": "pick", "prompt": "이 선택지에서 대화가 뒷받침하지 않는 단어를 탭하세요.", "sentence": "The man knows the museum is closed on Monday.", "answer": ["knows", "closed"], "explain": "남자는 I'm not sure라며 확인해 보겠다고 함. 안다는 것도, 닫혔다는 것도 근거 없음."}
       ],
       "qs": [
         {"prompt": "What will the man probably do?", "options": ["Check the museum's opening days and tell the woman", "Visit the museum on Monday", "Tell the woman that the museum is closed", "Call the museum right away"], "answer": 0,
-         "why": ["✓", "✗ 방문 계획 언급 없음", "✗ 확인 전 — 확정으로 바꿈", "✗ website tonight, call 아님"],
+         "why": ["✓", "✗ 방문 계획 언급 없음", "✗ 아직 확인 전인데 확정된 것처럼 바꿈", "✗ 오늘 밤 website로 확인한다고 했지 call이 아님"],
          "evidence": "I'll look at their website tonight and let you know"}
       ]
     },
@@ -162,10 +162,10 @@
       "id": "AL-T1", "skill": "AUDIT", "tier": "transfer", "kind": "listen", "audio": "al-sleep",
       "qs": [
         {"prompt": "What did the volunteers not know about the study?", "options": ["That they would be tested again the next morning", "That half of them would stay awake all night", "That their sleep would be recorded with special equipment", "That they would learn the word pairs in the evening"], "answer": 0,
-         "why": ["✓", "✗ 숨긴 정보로 말한 적 없음", "✗ 언급 없음 (그럴듯한 실험 상식)", "✗ 숨긴 정보 아님"],
+         "why": ["✓", "✗ 숨긴 정보라고 말한 적 없음", "✗ 언급 없음 (실험에 대한 그럴듯한 상식일 뿐)", "✗ 숨긴 정보 아님"],
          "evidence": "What the volunteers didn't know was that they would be tested again on the same word pairs the next morning"},
         {"prompt": "What did the researchers conclude?", "options": ["Sleep may help strengthen new memories, especially weak ones", "People need at least eight hours of sleep to remember words", "Staying awake improves memory for easy word pairs", "Mood has a greater effect on memory than sleep"], "answer": 0,
-         "why": ["✓", "✗ 필요한 수면 시간은 '알 수 없다'고 명시", "✗ 방향 뒤집음", "↗ mood는 참가자에게 알려 준 위장 주제"],
+         "why": ["✓", "✗ 필요한 수면 시간은 '알 수 없다'고 분명히 말함", "✗ 방향 뒤집음", "↗ mood는 참가자에게 둘러대려고 알려 준 가짜 주제"],
          "evidence": "sleep may help strengthen new memories, especially weak ones"}
       ]
     },
@@ -176,7 +176,7 @@
          "why": ["✓", "✗ 반대 — 추가 좌석을 열기도 함", "✗ 조언자는 대신 확인하겠다고 함", "✗ 언급 없음"],
          "evidence": "Professor Okafor sometimes opens a few extra seats in the first week"},
         {"prompt": "What does the advisor say she will do?", "options": ["Find out if there is a waiting list for the course", "Add the student's name to a waiting list immediately", "Register the student for introductory geology", "Ask the professor to open more seats"], "answer": 0,
-         "why": ["✓", "✗ 조건부(If she is…)를 확정으로 바꿈", "↗ 학생 본인이 하겠다고 한 행동", "✗ 언급 없음"],
+         "why": ["✓", "✗ 조건(If she is…)이 붙은 말을 확정된 것처럼 바꿈", "↗ 학생 본인이 하겠다고 한 행동", "✗ 언급 없음"],
          "evidence": "Let me check whether she's keeping a waiting list this year"}
       ]
     },
@@ -184,10 +184,10 @@
       "id": "AL-T3", "skill": "AUDIT", "tier": "transfer", "kind": "listen", "audio": "al-invasive",
       "qs": [
         {"prompt": "According to the professor, how does garlic mustard affect native trees?", "options": ["It harms fungi that help the trees take in water and nutrients", "It attacks the roots of the trees directly", "It shades young trees so they get less sunlight", "It attracts deer that eat the young trees"], "answer": 0,
-         "why": ["✓", "✗ 반대 — doesn't attack the trees directly", "✗ 언급 없음 (그럴듯한 상식)", "✗ 방향 뒤집음 — 사슴은 오히려 피함"],
+         "why": ["✓", "✗ 반대 — doesn't attack the trees directly", "✗ 언급 없음 (그럴듯한 상식일 뿐)", "✗ 방향 뒤집음 — 사슴은 오히려 피함"],
          "evidence": "These chemicals harm certain fungi that live on the roots of native trees"},
         {"prompt": "What does the professor say about deer and garlic mustard?", "options": ["Researchers disagree about how important it is that deer avoid the plant", "Deer spread garlic mustard seeds through the forest", "Deer are the main reason garlic mustard spreads", "Deer have stopped eating native seedlings"], "answer": 0,
-         "why": ["✓", "✗ 언급 없음", "✗ 과장 — disagree를 main reason으로", "✗ 언급 없음"],
+         "why": ["✓", "✗ 언급 없음", "✗ 과장 — disagree를 main reason으로 바꿈", "✗ 언급 없음"],
          "evidence": "researchers still disagree about how much that matters"}
       ]
     }

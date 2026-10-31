@@ -260,7 +260,8 @@ def check(data):
                 errs.append(f"{p}: bad my index")
         if "audio" in o and o["audio"] not in audio_sets:
             errs.append(f"{p}: missing audio set {o['audio']}")
-        if o["sec"] == "L" and o["skill"] != "UNKNOWN" and "audio" not in o:
+        # 재구성 음성이 없으면 소站 원본 음원과 연결돼 있어야 한다 (private/zhan/listen.json의 orig)
+        if o["sec"] == "L" and o["skill"] != "UNKNOWN" and "audio" not in o and o["id"] not in zhan_linked():
             errs.append(f"{p}: listening original without audio")
         if o.get("audio") in audio_sets and o.get("evidence"):
             txt = audio_text(audio_sets[o["audio"]])
@@ -401,6 +402,14 @@ def duration(path):
         return None
 
 
+def zhan_linked():
+    """원본 id 중 소站 리스닝 오답과 연결된 것 (비공개 자료가 없는 환경이면 빈 집합)."""
+    f = ROOT / "private" / "zhan" / "listen.json"
+    if not f.exists():
+        return set()
+    return {q["orig"] for s in json.loads(f.read_text())["sets"] for q in s["qs"] if q.get("orig")}
+
+
 def segment_for(cues, evidence):
     """[start, end] of the sentences that contain the evidence (for 'replay only the key part')."""
     if not cues:
@@ -440,6 +449,7 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 <script src="app/listen.js"></script>
 <script src="app/read.js"></script>
 <script src="app/kotrial.js"></script>
+<script src="app/keep.js"></script>
 <script src="app/ui.js"></script>
 """
 

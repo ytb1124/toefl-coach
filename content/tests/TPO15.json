@@ -21,38 +21,38 @@
       20
     ],
     "errors": 9,
-    "note": "출처: tpo오답/2026-10-30_TPO15 캡처 8장 + 진단 보고서(사용자 공유 10-30). 점수는 사용자 제공: Reading 29/35(C-Test 18/20 포함, C-Test 제외 11/15), Listening 42/45. 세트별(캡처로 확인): Listen & Reply 5번 오답(11/12), Linear vs circular economy 1번 오답(3/4), Guerrilla marketing 4번 오답(3/4), Visual Arts C-Test 4·7번 오답(8/10), Play rehearsal email 3번 오답(2/3), Elephants 1·5번 오답(3/5), Deep-sea 5번 오답(4/5). R5(코끼리 보전)는 정답 근거가 약하고 R6(Insert Text)는 삽입 문장·답이 없어 분석 제외. 시험까지 하루(사용자 진술). 풀이 시간·선택 이유에 대한 기록 없음."
+    "note": "출처: tpo오답/2026-10-30_TPO15 캡처 8장 + 진단 보고서(사용자 공유 10-30). 점수는 사용자 제공: Reading 29/35(C-Test 18/20 포함, C-Test 제외 11/15), Listening 42/45. 세트별(캡처로 확인): Listen & Reply 5번 오답(11/12), Linear vs circular economy 1번 오답(3/4), Guerrilla marketing 4번 오답(3/4), Visual Arts C-Test 4·7번 오답(8/10), Play rehearsal email 3번 오답(2/3), Elephants 1·5번 오답(3/5), Deep-sea 5번 오답(4/5). R5(코끼리 보전)는 정답 근거가 약하고 R6(Insert Text)는 10-31에 독점 TPO 공식 기록으로 채움. 시험까지 하루(사용자 진술). 풀이 시간·선택 이유에 대한 기록 없음."
   },
   "report": {
-    "headline": "오답 9개 중 분석 가능한 7개 대부분이 '본문에 있는 정보지만 질문 대상·주장과 다름': rehearsal 3시간을 play에, 다친 개체 돌봄을 부상 예방으로, crowded public space를 crowd control 어려움으로, 과거 성공 여부 질문에 현재 가능 여부로 답함. C-Test는 18/20으로 TPO8(21/30)의 자리 오류가 이번엔 없었고, 틀린 2개는 어휘(narratives·disciplines).",
+    "headline": "오답 9개 중 분석할 수 있는 7개는 대부분 '본문에 있는 정보지만 질문이 묻는 대상·내용과 다른' 선택지였음: rehearsal의 3시간을 play 길이로, 다친 동료 돌봄을 부상 예방으로, crowded public space를 crowd control의 어려움으로 바꿔 읽었고, 과거에 해냈는지 묻는 질문에 지금 가능한지로 답함. C-Test는 18/20으로 TPO8(21/30)에서 보인 자리 실수가 이번엔 없었고, 틀린 2개는 어휘(narratives·disciplines).",
     "findings": [
       {
         "skill": "TARGET",
         "recurrence": "repeat",
-        "text": "R3: 6~9시(3시간)는 rehearsal의 시간인데 play의 길이로 적용. R5: 코끼리 지능은 본문 사실이지만 '보전에 왜 중요한가'에 답하지 않음 — 단, R5는 정답 C의 본문 근거가 약해 약점 증거로 약하게 본다. TPO8에 이어 재발."
+        "text": "R3: 6~9시(3시간)는 rehearsal 시간인데 play의 길이로 봄. R5: 코끼리의 지능은 본문에 있는 사실이지만 '보전에 왜 중요한가'에 대한 답이 아님 — 단, R5는 정답 C도 본문 근거가 약해 약점의 증거로는 가볍게 본다. TPO8에 이어 다시 나옴."
       },
       {
         "skill": "AUDIT",
         "recurrence": "repeat",
-        "text": "R4: care for the injured(사후) → prevents injuries(사전 예방). L3: crowded public space에서 crowd control 어려움을 추론 — 강의가 말한 어려움은 lawsuits·public backlash·측정 어려움. 둘 다 본문 단어와 겹치는 선택지에 근거 없는 주장이 붙음."
+        "text": "R4: 다친 뒤 돌봄(care for the injured)을 다치기 전 예방(prevents injuries)으로 바꿔 읽음. L3: crowded public space에서 군중 관리(crowd control)가 어렵겠다고 짐작함 — 강의가 말한 어려움은 lawsuits·public backlash·효과 측정의 어려움. 둘 다 본문 단어와 겹치는 선택지에 근거 없는 내용이 붙어 있었음."
       },
       {
         "skill": "ACT",
         "recurrence": "repeat",
-        "text": "L1: Were you able to contact the client?(과거 성공 여부) → Sure, I'm available(현재 가능). TPO8의 How did you get here → follow me와 같은 시간축 불일치. able/available 소리 혼동 여부는 사용자 진술 없음."
+        "text": "L1: Were you able to contact the client?(연락에 성공했나)에 Sure, I'm available(지금 시간 돼)로 답함. TPO8에서 How did you get here에 follow me를 고른 것과 같은 시점 불일치. able과 available 소리를 헷갈렸는지는 본인 설명 없음."
       },
       {
         "skill": "CATCH",
         "recurrence": "repeat",
-        "text": "L2: linear → on the other hand → circular 대조 구조인데 '역사'를 고름 — 강의에 역사 내용은 없음. Main Purpose 오답 1개라 반복 약점으로 단정하지 않음."
+        "text": "L2: linear와 circular를 on the other hand로 대조하는 강의인데 '역사'를 고름 — 강의에 역사 이야기는 없음. Main Purpose 오답이 1개뿐이라 반복되는 약점이라고 단정하지 않음."
       },
       {
         "skill": "WORD",
         "recurrence": "repeat",
-        "text": "C-Test 18/20: narrations(→narratives, 행위 vs 내용), disci___ 빈칸 미입력(→disciplines; 몰랐는지 미입력인지 기록 없음). FORM(자리) 오답은 이번엔 0개 — 한 회차라 개선으로 판정하지 않음."
+        "text": "C-Test 18/20: narratives 자리에 narrations를 씀(행위와 내용의 차이), disci___는 빈칸으로 둠(정답 disciplines — 몰랐는지 입력을 안 했는지 기록 없음). 자리(FORM) 오답은 이번엔 없었지만 한 회차뿐이라 나아졌다고 보지 않음."
       }
     ],
-    "next": "선택지 하나를 고르기 전 두 가지만 확인: ① 이 정보의 주인(주어)이 질문 대상과 같은가(play ≠ rehearsal) ② 선택지 동사·주장이 본문 동사와 같은 시점·방향인가(care for ≠ prevent, 장면 ≠ 언급된 어려움). Listen & Reply는 were you able / did you manage → '결과'로 답. 강의는 on the other hand / in contrast가 들리면 Purpose = 대조."
+    "next": "선택지를 고르기 전에 두 가지만 확인: ① 이 정보가 질문한 대상의 것인가 (rehearsal의 시간을 play의 길이로 착각하지 않기) ② 선택지의 동사·내용이 본문과 같은 시점·방향인가 (돌봄과 예방은 다르고, 장면에서 짐작한 것은 언급된 어려움이 아님). Listen & Reply는 were you able / did you manage에 '해냈다/못 했다'로 답한 것을 고른다. 강의에서 on the other hand / in contrast가 들리면 목적은 '대조'."
   },
   "audioSets": {
     "o-t15-client": {
@@ -232,12 +232,12 @@
       },
       "my": "narrations",
       "evidence": "express ideas, emotions, and narra___ — 뒤의 'telling stories'가 뜻을 받쳐 줌",
-      "trap": "narrations도 실제 단어이고 복수형 -s까지 맞아 형태상 자연스러워 보임 (AI 추정)",
-      "diff": "narrative = 이야기·서사(표현되는 내용), narration = 서술 행위·내레이션. 예술이 '표현하는 것'은 이야기 → narratives",
-      "rule": "같은 어근 파생어 후보가 둘이면 문장 속 역할(표현하는 '내용'인지 '행위'인지)로 고르고, 뒤 문장의 재표현(telling stories)과 맞춰 본다",
-      "causeAI": "어근 narra-에서 먼저 떠오른 파생어를 넣고 의미 적합성은 확인하지 않음 (추정)",
+      "trap": "narrations도 실제 있는 단어이고 복수형 -s까지 붙어 있어 자연스러워 보였을 것 (AI 추정)",
+      "diff": "narrative는 이야기(표현되는 내용), narration은 이야기하는 행위(내레이션). 예술이 '표현하는 것'은 이야기이므로 narratives",
+      "rule": "어근이 같은 후보가 둘이면 문장에서 '내용'인지 '행위'인지로 고르고, 뒤 문장에서 바꿔 말한 표현(telling stories)과 맞춰 본다",
+      "causeAI": "narra-로 시작하는 단어 중 먼저 떠오른 것을 넣고 뜻이 맞는지는 확인하지 않음 (추정)",
       "gaps": [
-        "오답 선택 이유에 대한 사용자 진술 없음"
+        "왜 이 답을 골랐는지 본인 설명 없음"
       ]
     },
     {
@@ -256,12 +256,12 @@
       "my": null,
       "evidence": "these disci___ have evolved — 앞 문장의 painting, sculpture, photography를 these로 받는 복수 명사",
       "trap": "UNKNOWN",
-      "diff": "discipline = (여기서) 예술·학문 분야. these + 복수 명사 + have → 앞에 나열한 분야들 = disciplines",
-      "rule": "these/such + 빈칸은 앞 문장의 나열을 묶는 말. 나열 항목(painting, sculpture…)을 한 단어로 부르는 복수 명사를 찾는다",
-      "causeAI": "판단 불가 — 단어를 몰랐는지, 떠올리지 못했는지, 입력하지 않았는지 기록 없음",
+      "diff": "여기서 discipline은 예술·학문 '분야'. 'these + 복수 명사 + have'는 앞에 나열한 분야들을 받으므로 disciplines",
+      "rule": "these/such 뒤 빈칸은 앞 문장에 나열한 것을 묶어 부르는 말이다. painting, sculpture… 를 한 단어로 부르는 복수 명사를 찾는다",
+      "causeAI": "판단할 수 없음 — 단어를 몰랐는지, 떠올리지 못했는지, 입력을 안 했는지 기록 없음",
       "gaps": [
-        "스크린샷상 빈칸이 비어 있음 — 입력값 UNKNOWN (미입력 가능성)",
-        "disciplines를 모른다는 사용자 진술 없음"
+        "캡처에서 빈칸이 비어 있음 — 무엇을 입력했는지 모름 (입력하지 않았을 수 있음)",
+        "disciplines를 몰랐다는 본인 설명은 없음"
       ]
     },
     {
@@ -285,12 +285,12 @@
       "my": 2,
       "correct": 1,
       "evidence": "our first rehearsal for the community theater’s spring production of A Midsummer Night’s Dream",
-      "trap": "6:00 P.M.~9:00 P.M.이 본문에 있어 '3시간'이 계산상 맞아 보임 (AI 추정)",
-      "diff": "3시간(6시~9시)은 rehearsal의 시간이지 play(공연)의 길이가 아님. community theater’s production → community event",
-      "rule": "숫자·시간 선택지는 '그 숫자가 누구/무엇의 것인지' 본문에서 주어를 확인하고, 질문의 대상(the play)과 같을 때만 고른다",
-      "causeAI": "본문에 있는 수치를 질문 대상이 다른데도 적용 (추정)",
+      "trap": "본문에 6:00 P.M.~9:00 P.M.이 있어 계산하면 '3시간'이 맞아 보임 (AI 추정)",
+      "diff": "3시간(6시~9시)은 rehearsal 시간이지 play(공연)의 길이가 아님. 정답 community event는 community theater’s production을 바꿔 말한 것",
+      "rule": "숫자·시간 선택지는 그 숫자가 무엇에 대한 것인지 본문에서 확인하고, 질문한 대상(the play)의 것일 때만 고른다",
+      "causeAI": "본문의 숫자를 다른 대상(rehearsal)의 것인데도 질문 대상에 씀 (추정)",
       "gaps": [
-        "오답 선택 이유에 대한 사용자 진술 없음"
+        "왜 이 답을 골랐는지 본인 설명 없음"
       ]
     },
     {
@@ -314,12 +314,12 @@
       "my": 2,
       "correct": 1,
       "evidence": "when a member of the herd is injured, others assist and care for it.",
-      "trap": "injured가 본문에 그대로 나와 부상 관련 선택지가 근거 있어 보임 (AI 추정)",
-      "diff": "본문은 다친 '뒤' 돌봄(care for the injured). prevent injuries는 다치기 '전' 예방 — 원문에 없음. 정답 B는 offspring and related females(친족 무리)에서 추론 — ensures는 원문보다 강한 표현",
-      "rule": "선택지 동사(prevent / ensure / cause)의 시점과 방향을 원문 동사와 대조한다: 사후 돌봄 ≠ 사전 예방",
-      "causeAI": "본문 단어(injured)와 겹치는 선택지를 동사 의미 확인 없이 받아들임 (추정)",
+      "trap": "injured가 본문에 그대로 나와서 부상 관련 선택지에 근거가 있어 보였을 것 (AI 추정)",
+      "diff": "본문은 다친 '뒤' 돌봐 준다(care for the injured)는 내용이고, prevent injuries는 다치기 '전' 예방이라 원문에 없음. 정답 B는 offspring and related females(친족 무리)에서 추론한 것 — 다만 ensures는 원문보다 강한 표현",
+      "rule": "선택지 동사(prevent / ensure / cause)의 시점과 방향을 원문 동사와 비교한다. 다친 뒤 돌보는 것과 미리 막는 것은 다르다",
+      "causeAI": "본문 단어(injured)와 겹치는 선택지를 동사 뜻을 확인하지 않고 고름 (추정)",
       "gaps": [
-        "오답 선택 이유에 대한 사용자 진술 없음"
+        "왜 이 답을 골랐는지 본인 설명 없음"
       ]
     },
     {
@@ -341,13 +341,13 @@
       "my": 3,
       "correct": 2,
       "evidence": "This level of cooperation is rare among terrestrial mammals and highlights elephants' intelligence and empathy.",
-      "trap": "D(intelligence)는 본문에 실제로 있는 내용 (AI 추정 아님 — 원문 확인)",
-      "diff": "질문은 '보전(conservation)에 왜 중요한가' = 목적. D는 본문 사실이지만 보전과 연결되지 않음. C만 보전 목적(전략)에 답함 — 단, 본문에 보전 관련 문장 자체가 없음",
-      "rule": "Why ... important for X 질문: 선택지가 본문에 있는지보다 X(목적)에 답하는지를 먼저 본다",
-      "causeAI": "본문에 있는 사실을 질문의 목적과 대조하지 않음 (추정) — 문항 근거가 약해 약점으로 단정하지 않음",
+      "trap": "D(intelligence)는 본문에 실제로 있는 내용 (AI 추정 아님 — 원문에서 확인함)",
+      "diff": "질문은 '보전(conservation)에 왜 중요한가'를 묻는다. D는 본문에 있는 사실이지만 보전과 이어지지 않고, C만 보전(전략)에 답함 — 단, 본문에 보전 이야기 자체가 없음",
+      "rule": "Why ... important for X 질문은 선택지가 본문에 있는지보다 X(목적)에 대한 답인지를 먼저 본다",
+      "causeAI": "본문의 사실이 질문(목적)에 맞는지 확인하지 않음 (추정) — 문제 자체의 근거가 약해 약점으로 단정하지 않음",
       "gaps": [
-        "오답 선택 이유에 대한 사용자 진술 없음",
-        "정답 C의 본문 근거가 약함 (보전·전략 문장이 지문에 없음) — 출제 문제 가능성, 약점 증거로 약하게 취급"
+        "왜 이 답을 골랐는지 본인 설명 없음",
+        "정답 C의 본문 근거가 약함 (보전·전략 이야기가 지문에 없음) — 문제가 잘못 나왔을 수 있어 약점의 증거로는 가볍게 봄"
       ]
     },
     {
@@ -356,20 +356,23 @@
       "sec": "R",
       "set": "Academic — Deep-sea exploration",
       "qtype": "Insert Text",
-      "skill": "UNKNOWN",
+      "skill": "ROLE",
       "skills2": [],
       "passage": "Deep-sea exploration has expanded our understanding of the ocean's depths, revealing diverse and often bizarre organisms. The deep sea begins at around 200 meters below the surface and is characterized by high pressure, low temperatures, and complete darkness. Despite this harsh environment, life thrives in various forms.\n\nOne remarkable discovery is hydrothermal vents. ■A These fissures in the ocean floor release heated water rich in minerals, creating unique ecosystems. ■B Organisms near hydrothermal vents, such as tube worms and giant clams, have cell membranes and proteins that are adapted to remain functional under crushing pressure. ■C These organisms also rely on chemosynthesis--a process where bacteria convert the vent's chemicals into energy-rather than photosynthesis. ■D Living in perpetual darkness, vent organisms also do not rely on vision, although vent shrimp can detect faint infrared from vent emissions.\n\nAdvancements in technology have enabled scientists to explore deeper parts of the vehicles (ROVs) and submersibles equipped with cameras and sensors can withstand the pressure and capture images of deep-sea creatures. These explorations have uncovered new species and provided insights into how life can exist under such extreme conditions. However, deep-sea exploration remains challenging and costly, Funding and international collaboration are essential for continuing research.",
-      "stem": "UNKNOWN (5번 탭이 빨간색 — 삽입 문장이 화면에 없음)",
-      "my": null,
-      "correct": null,
-      "gaps": [
-        "삽입할 문장·내가 고른 위치·정답 위치 모두 기록 없음 — 분석에서 제외"
-      ],
-      "evidence": "",
-      "trap": "",
-      "diff": "",
-      "rule": "",
-      "causeAI": "분석 불가"
+      "stem": "Insert: \"This enables the organisms to live without sunlight.\"",
+      "my": 2,
+      "correct": 3,
+      "evidence": "bacteria convert the vent's chemicals into energy-rather than photosynthesis",
+      "trap": "C 앞 문장도 '극한 환경 적응'(압력) 이야기라 '살 수 있게 한다'가 이어져 보임",
+      "diff": "This는 화학합성(광합성 대신 화학물질로 에너지를 얻음)을 가리킨다. '햇빛 없이 살 수 있는' 이유는 C 앞의 압력 적응이 아니라 D 앞의 화학합성",
+      "rule": "This enables ~ 문장은 바로 앞 문장이 그 능력의 '원인'인지 확인하고 넣는다",
+      "causeAI": "This가 가리키는 것을 보지 않고 '적응'이라는 주제가 가까운 곳을 고름",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ]
     },
     {
       "id": "TPO15-L1",
@@ -389,14 +392,14 @@
       ],
       "my": 1,
       "correct": 2,
-      "evidence": "Were you able to contact the client? = 이미 시도한 연락이 성공했는지 묻는 과거 질문",
-      "trap": "able / available 소리가 비슷하고 Sure가 Yes처럼 들림 (AI 추정 — 혼동했다는 사용자 진술 없음)",
-      "diff": "Were you able to(과거, 성공 여부) → 결과로 답: Finally, after multiple tries. I'm available은 지금 시간이 된다는 현재 응답 — 시간축·기능 불일치",
-      "rule": "Were you able to / Did you manage to → '했다/못 했다'의 결과로 답하는 선택지. 현재 가능 여부(available, free)는 제외",
-      "causeAI": "과거 성공 여부 질문을 현재 가능 여부 질문처럼 처리 (추정)",
+      "evidence": "Were you able to contact the client? = 이미 해 본 연락이 됐는지 묻는 과거 질문",
+      "trap": "able과 available 소리가 비슷하고 Sure가 Yes처럼 들림 (AI 추정 — 헷갈렸다는 본인 설명은 없음)",
+      "diff": "Were you able to는 이미 해냈는지 묻는 말이라 결과로 답한다(Finally, after multiple tries). I'm available은 '지금 시간 돼'라는 대답이라 시점과 의도가 맞지 않음",
+      "rule": "Were you able to / Did you manage to에는 '했다/못 했다'로 답한 선택지를 고른다. 지금 가능한지(available, free)를 말하는 대답은 뺀다",
+      "causeAI": "해냈는지 묻는 질문을 지금 가능한지 묻는 질문으로 받아들임 (추정)",
       "gaps": [
-        "원 음성 없음: 화면의 질문 문장으로 TTS 재구성",
-        "오답 선택 이유에 대한 사용자 진술 없음"
+        "원래 음성 없음 — 화면의 질문 문장을 TTS로 다시 만듦",
+        "왜 이 답을 골랐는지 본인 설명 없음"
       ]
     },
     {
@@ -420,12 +423,12 @@
       "my": 0,
       "correct": 3,
       "evidence": "A circular economy, on the other hand, is a production system aimed at eliminating waste and promoting the continual use of resources.",
-      "trap": "강의 후반이 circular economy 설명이라 그 개념이 주제처럼 남음 (AI 추정)",
-      "diff": "linear(take, make, dispose) → on the other hand → circular: 두 생산 모델 대조. 역사(연도·발전 과정)는 강의에 없음",
-      "rule": "Main Purpose: 강의가 두 개념을 on the other hand / unlike / in contrast로 잇는지 듣는다. 두 개가 나오면 '대조'가 목적",
-      "causeAI": "대조 신호 on the other hand를 놓치고 뒤쪽 개념 하나로 목적을 판단 (추정)",
+      "trap": "강의 후반이 circular economy 설명이라 그 개념이 주제처럼 기억에 남았을 것 (AI 추정)",
+      "diff": "linear(take, make, dispose)와 circular를 on the other hand로 대조하는 강의. 역사(연도·발전 과정)는 강의에 없음",
+      "rule": "Main Purpose 문제는 두 개념을 on the other hand / unlike / in contrast로 잇는지 듣는다. 두 개념을 맞세우면 목적은 '대조'",
+      "causeAI": "대조 신호 on the other hand를 놓치고 뒤에 나온 개념 하나로 목적을 정함 (추정)",
       "gaps": [
-        "오답 선택 이유에 대한 사용자 진술 없음"
+        "왜 이 답을 골랐는지 본인 설명 없음"
       ]
     },
     {
@@ -449,12 +452,12 @@
       "my": 1,
       "correct": 3,
       "evidence": "Because it relies on public spaces and unexpected events, it can sometimes face lawsuits or public backlash if not executed carefully.",
-      "trap": "crowded public space에서 행사를 한다는 말이 있어 군중 관리가 어려울 것 같음 — 상식적 추론 (AI 추정)",
-      "diff": "강의가 말한 어려움: lawsuits, public backlash(= poor reaction from the public), 매출로 측정 어려움. crowd control은 언급 없음",
-      "rule": "'mentioned' 문제는 However / challenges 뒤 문장에서 실제로 나온 항목만 고른다. 그럴듯한 추론은 제외",
-      "causeAI": "본문 장면(crowded public space)에서 추론한 어려움을 언급된 것으로 받아들임 (추정)",
+      "trap": "붐비는 공공장소(crowded public space)에서 한다는 말에 군중 관리가 어렵겠다고 상식으로 짐작했을 것 (AI 추정)",
+      "diff": "강의가 말한 어려움은 lawsuits, public backlash(= poor reaction from the public), 매출로 효과를 재기 어렵다는 것. crowd control은 나오지 않음",
+      "rule": "'mentioned' 문제는 However / challenges 뒤에 실제로 나온 것만 고른다. 그럴듯한 짐작은 뺀다",
+      "causeAI": "장면(crowded public space)에서 짐작한 어려움을 강의에서 말한 것으로 착각 (추정)",
       "gaps": [
-        "오답 선택 이유에 대한 사용자 진술 없음"
+        "왜 이 답을 골랐는지 본인 설명 없음"
       ]
     }
   ]

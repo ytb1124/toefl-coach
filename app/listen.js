@@ -175,7 +175,7 @@
     const hist = q => { const i = q.orig ? link.info(q.orig) : null; return i && i.n ? { ok: i.lastOk, at: i.lastAt } : null; };
     function origLine(id) {
       const i = link.info(id); if (!i) return null;
-      return h('p', { class: 'small muted' }, i.skill ? h('span', { class: 'chip' }, i.skill) : null, ` 오늘 훈련 원본 ${id} · 다시 푼 기록 ${i.ok}/${i.n} 맞힘`);
+      return h('p', { class: 'small muted' }, i.skill ? h('span', { class: 'chip' }, i.skill) : null, ` '오늘 훈련' 원본 ${id} · 다시 풀어 ${i.n}번 중 ${i.ok}번 맞힘`);
     }
     const chipFor = st => h('span', { class: 'chip ' + ({ new: '', fixed: 'src-tutor', again: 'rc-repeat' })[st] }, ({ new: '아직 안 풂', fixed: '다시 풀어 맞힘', again: '또 틀림' })[st]);
 
@@ -211,7 +211,7 @@
         h('p', { class: 'small' }, `또 틀림 ${counts.again} · 아직 안 풂 ${counts.new} · 다시 풀어 맞힘 ${counts.fixed}`),
         h('p', { class: 'small muted' }, '오늘 훈련에서 같은 원본 문제를 다시 푼 기록도 함께 셉니다 (가장 최근 결과 기준).'),
         q.length ? h('button', { class: 'primary', onclick: () => go('#/listen/' + q[0].id) }, `다음 세트: ${q[0].title} (${testName(Z, q[0].test)})`) : null,
-        h('p', { class: 'small' }, h('a', { href: '#/ko' }, '한국어로 풀어 보기 →'), h('span', { class: 'muted' }, ' 틀린 이유가 영어인지 판단인지 가르기'))));
+        h('p', { class: 'small' }, h('a', { href: '#/ko' }, '한국어로 풀어 보기 →'), h('span', { class: 'muted' }, ' 영어 때문에 틀렸는지, 판단 때문에 틀렸는지 확인'))));
       for (const t of Z.tests.slice().reverse()) {
         const sets = Z.sets.filter(s => s.test === t.id);
         main.append(h('section', { class: 'card' },
@@ -224,7 +224,7 @@
     function appLine(s) {
       const linked = s.qs.filter(x => x.orig).map(x => link.info(x.orig)).filter(Boolean);
       const tried = linked.filter(i => i.n);
-      return tried.length ? ` · 오늘 훈련 기록 포함 다시 푼 ${tried.length}문항 중 최근 맞힘 ${tried.filter(i => i.lastOk).length}` : '';
+      return tried.length ? ` · '오늘 훈련' 기록까지 합쳐 다시 푼 ${tried.length}문항 중 최근에 맞힌 것 ${tried.filter(i => i.lastOk).length}` : '';
     }
     const testName = (Z, id) => (Z.tests.find(t => t.id === id) || {}).name || id;
 
@@ -297,7 +297,7 @@
             q.wrong && i === q.my ? h('span', { class: 'chip' }, '시험 때 내 답') : null))),
           q.orig ? origLine(q.orig) : null,
           q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
-          q.point ? h('p', { class: 'rule small' }, '다음엔 → ', q.point) : null,
+          q.point ? h('p', { class: 'rule small' }, '다음엔: ', q.point) : null,
           reply && q.audio ? h('button', { class: 'ghost small', onclick: () => player(q.audio).play() }, '▶ 다시 듣기') : null));
       });
       if (!reply) {

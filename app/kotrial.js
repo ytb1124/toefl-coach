@@ -25,7 +25,7 @@
     function save(mut) { const d = load(); mut(d); try { storage.setItem(KEY, JSON.stringify(d)); } catch (e) { toast('저장 실패: ' + e.message); } return d; }
     const lastTry = (d, id) => { const r = d.sets[id]; return r && r.tries.length ? r.tries[r.tries.length - 1] : null; };
     const back = (hash, label) => h('a', { class: 'small', href: hash }, '← ' + label);
-    const DX = { eng: ['영어 이해 문제', 'src-tutor'], judge: ['판단 문제', 'rc-repeat'] };
+    const DX = { eng: ['영어가 원인', 'src-tutor'], judge: ['판단이 원인', 'rc-repeat'] };
     const dxChip = k => k ? h('span', { class: 'chip ' + DX[k][1] }, DX[k][0]) : null;
     const tally = (d, sets) => {
       const c = { eng: 0, judge: 0, open: 0 };
@@ -54,7 +54,7 @@
       main.append(h('section', { class: 'card hero' },
         h('h1', null, '한국어로 풀어 보기'),
         h('p', { class: 'muted' }, `${sets[0].testName}에서 틀린 문제가 있는 리딩·리스닝 세트를 한국어로 풉니다. 시험에서 틀린 문제를 한국어로 맞히면 영어가 원인, 한국어로도 틀리면 문제를 푸는 판단이 원인입니다.`),
-        h('p', { class: 'small' }, `영어 이해 문제 ${c.eng} · 판단 문제 ${c.judge} · 아직 안 풂 ${c.open}`),
+        h('p', { class: 'small' }, `영어가 원인 ${c.eng} · 판단이 원인 ${c.judge} · 아직 안 풂 ${c.open}`),
         h('p', { class: 'small muted' }, '리스닝은 스크립트 번역을 한 번 읽고 문제로 넘어갑니다 (문제를 풀 때는 스크립트가 안 보임). 보기 순서는 매번 섞입니다. 영어로 다시 풀어 본 적이 있으면 답을 기억할 수 있으니, 기억이 아니라 내용으로 고르세요.'),
         next ? h('button', { class: 'primary', onclick: () => go('#/ko/' + next.id) }, `다음 세트: ${next.title}`) : null));
       for (const sec of ['R', 'L']) {
@@ -67,7 +67,7 @@
               h('div', null, h('b', null, s.title), ' ', h('span', { class: 'muted small' }, `Module ${s.module} · ${KIND[s.kind] || s.kind}`), ' ',
                 t ? null : h('span', { class: 'chip' }, '아직 안 풂')),
               h('div', { class: 'small muted' }, `시험에서 틀린 문항 ${s.qs.filter(q => q.wrong).length}/${s.qs.length}`,
-                t ? ` · 한국어 ${t.ok}/${t.n} · 영어 이해 ${dx.filter(x => x === 'eng').length} · 판단 ${dx.filter(x => x === 'judge').length}` : ''));
+                t ? ` · 한국어로 ${t.ok}/${t.n} 맞힘 · 영어가 원인 ${dx.filter(x => x === 'eng').length} · 판단이 원인 ${dx.filter(x => x === 'judge').length}` : ''));
           }))));
       }
     }
@@ -112,7 +112,7 @@
 
       if (cur.phase === 'read') {
         card.append(h('p', { class: 'small muted' }, `${KIND[set.kind] || set.kind} · 문항 ${set.qs.length}개 (시험에서 틀린 것 ${set.qs.filter(q => q.wrong).length}개). 시험에서 한 번 듣듯이 한 번 읽으세요. 문제를 풀 때는 스크립트가 보이지 않습니다.`),
-          script(set), h('button', { class: 'primary', onclick: () => { cur.phase = 'q'; redraw(); } }, '다 읽었음 → 문제 풀기'));
+          script(set), h('button', { class: 'primary', onclick: () => { cur.phase = 'q'; redraw(); } }, '다 읽고 문제 풀기'));
         return;
       }
 
@@ -136,7 +136,7 @@
       const ok = set.qs.filter((x, k) => cur.ans[k] === x.answer).length;
       const dx = set.qs.map((q, k) => diagnose(q, cur.ans[k]));
       card.append(h('h2', null, `${ok} / ${set.qs.length}`, ' ',
-        h('span', { class: 'small muted' }, `시험에서 틀린 문항: 영어 이해 문제 ${dx.filter(x => x === 'eng').length} · 판단 문제 ${dx.filter(x => x === 'judge').length}`)),
+        h('span', { class: 'small muted' }, `시험에서 틀린 문항: 영어가 원인 ${dx.filter(x => x === 'eng').length} · 판단이 원인 ${dx.filter(x => x === 'judge').length}`)),
         h('p', { class: 'small muted' }, '보기는 원래 시험 순서(A–D)로 다시 보여 줍니다.'));
       if (set.sec === 'R') {
         const marks = {};
@@ -146,7 +146,7 @@
       set.qs.forEach((q, k) => {
         const mine = cur.ans[k], right = mine === q.answer;
         card.append(h('div', { class: 'fb ' + (right ? 'good' : 'bad') },
-          h('p', null, h('b', null, `Q${k + 1}. `), q.stem, ' ', q.wrong ? (q.vocab ? h('span', { class: 'chip' }, '어휘 문제 · 진단 제외') : dxChip(dx[k])) : h('span', { class: 'chip' }, '시험 때 맞힘')),
+          h('p', null, h('b', null, `Q${k + 1}. `), q.stem, ' ', q.wrong ? (q.vocab ? h('span', { class: 'chip' }, '어휘 문제라 원인 구분 안 함') : dxChip(dx[k])) : h('span', { class: 'chip' }, '시험 때 맞힘')),
           h('p', { class: 'small muted' }, q.stemEn),
           q.sentence ? h('p', { class: 'small' }, h('b', null, '넣을 문장: '), q.sentence) : null,
           h('ul', { class: 'lchoices' }, q.choices.map((c, i) => h('li', { class: i === q.answer ? 'right' : i === mine ? 'wrong' : '' },
@@ -154,10 +154,10 @@
             i === q.answer ? h('span', { class: 'chip src-tutor' }, '정답') : null,
             i === mine && i !== q.answer ? h('span', { class: 'chip rc-repeat' }, '이번 내 답') : null,
             q.wrong && i === q.my ? h('span', { class: 'chip' }, '시험 때 내 답 (영어)') : null))),
-          dx[k] === 'eng' ? h('p', { class: 'rule small' }, '한국어로는 맞혔으니 영어 지문·음성에서 이 내용을 놓친 것. 영어 원문에서 해당 문장을 다시 확인하세요.') : null,
-          dx[k] === 'judge' ? h('p', { class: 'rule small' }, '한국어로도 틀렸으니 영어보다 정답을 고르는 판단이 원인. 아래 해설의 판단 기준을 익히세요.') : null,
+          dx[k] === 'eng' ? h('p', { class: 'rule small' }, '한국어로는 맞혔으니 영어 지문이나 음성에서 이 내용을 놓친 것입니다. 영어 원문에서 해당 문장을 다시 확인하세요.') : null,
+          dx[k] === 'judge' ? h('p', { class: 'rule small' }, '한국어로도 틀렸으니 영어보다는 정답을 고르는 판단이 원인입니다. 아래 해설의 판단 기준을 익히세요.') : null,
           q.wrong && q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
-          q.wrong && q.point ? h('p', { class: 'rule small' }, '다음엔 → ', q.point) : null));
+          q.wrong && q.point ? h('p', { class: 'rule small' }, '다음엔: ', q.point) : null));
       });
       if (set.sec === 'L') card.append(h('h3', null, '스크립트 (번역)'), script(set));
       const d = load(), nxt = Z().sets.find(s => s.id !== set.id && !lastTry(d, s.id));

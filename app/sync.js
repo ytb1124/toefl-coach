@@ -11,7 +11,7 @@
  */
 (function () {
   'use strict';
-  const SYNCED = k => k === 'toeflcoach.v1' || k.startsWith('toefl-vocab') || k.startsWith('toefl-sw') || k.startsWith('toefl-listen') || k.startsWith('toefl-read') || k.startsWith('toefl-ko');
+  const SYNCED = k => k === 'toeflcoach.v1' || k.startsWith('toefl-vocab') || k.startsWith('toefl-sw') || k.startsWith('toefl-listen') || k.startsWith('toefl-read') || k.startsWith('toefl-ko') || k.startsWith('toefl-keep');
   const META = 'sync:meta';            // this device: { key: {t, dirty} }
   const BIN_CFG = 'sync:jsonbin';      // this device: { k: key, b: {main, srs, meta, misc} }
   const mem = new Map();
@@ -292,7 +292,7 @@
       const dirty = Object.values(meta).some(m => m.dirty);
       if (mode === 'local') return { mode, label: cfg ? '동기화 연결 실패 · 이 기기에만 저장' : '이 기기에만 저장', error: lastError };
       const where = mode === 'cloud' ? 'claude.ai' : 'jsonbin';
-      const label = lastError ? '동기화 오류 · 다시 시도 중' : pending ? '저장 중…' : dirty ? '변경 사항 곧 저장' : '모든 기기와 동기화됨';
+      const label = lastError ? '동기화 오류 · 다시 시도 중' : pending ? '저장 중…' : dirty ? '곧 저장됩니다' : '모든 기기와 동기화됨';
       return { mode, label, where, error: lastError };
     },
   };

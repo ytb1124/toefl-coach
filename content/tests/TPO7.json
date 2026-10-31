@@ -15,15 +15,15 @@
     "note": "출처: tpo오답/2026-10-24_TPO7 캡처 14장 + 진단 보고서(사용자 공유 10-24). 날짜는 기록 공유일 — 실제 풀이 날짜는 기록 없음. Reading 37/42·Listening 25/35는 보고서의 사용자 점수. 세트별: C-Test 8/10·9/10, Read in Daily Life 2/3, Academic Reading 4/5, Listen & Reply 5/7·4/8, Announcement 3세트 3/6, Conversation 1/2. Academic Listening은 사용자 진술상 전부 정답(문항 수 미확인) — Listening 나머지 12문항이 전부 Academic Talk라고 단정하지 않는다. 사용자 진술: 'Listen and Reply는 한국말로 해석하고 봐도 헷갈려.' 시간 부족·재청취·스크립트 열람 여부는 기록 없음. R4(pre-webinar)·L6(next train)은 채점 정답에 모호성이 있어 진단 비중을 낮춘다."
   },
   "report": {
-    "headline": "Listen & Reply 9/15가 가장 큰 손실: 주제는 맞지만 질문이 요구한 기능·대상(출발 vs 도착, 다음 열차 vs 내 표)에 맞지 않는 응답을 고름. 공지·대화에서는 원문에 없는 요소(채점 주체·인턴십·연구 도구)가 붙은 선택지를 고름.",
+    "headline": "Listen & Reply 9/15에서 가장 많이 잃음: 주제는 맞지만 질문의 의도나 대상(출발인지 도착인지, 다음 열차인지 내 표인지)에 맞지 않는 대답을 고름. 공지·대화에서는 원문에 없는 내용(누가 채점하는지·인턴십·연구 도구)이 붙은 선택지를 고름.",
     "findings": [
-      {"skill": "ACT", "recurrence": "repeat", "text": "Listen & Reply 6개 오답(9/15): wrap things up → deadline, revise work schedule → delivery, ready for lunch → I don't think I have yet, help me → Yes, if you have any good ones, flight time → arrival, next train → my ticket. TPO3·TPO5에 이어 재발. 사용자 진술: 한국어로 해석해도 헷갈림 → 청취보다 응답 기능 판단 문제일 가능성 (추정)."},
-      {"skill": "AUDIT", "recurrence": "repeat", "text": "graded by the class, can't attend an event, optional — 원문에 없는 주체·원인·성격이 덧붙은 선택지. (R4 optional은 채점 정답 C의 근거도 약해 비중 낮춤)"},
-      {"skill": "TARGET", "recurrence": "repeat", "text": "interview a professional(과정)을 internship 면접으로, 강연 주제(coral reef)를 Q&A 주제로 — 들은 단어·주제는 맞지만 질문이 가리킨 대상(3주 안 제출물, Q&A)이 아님."},
-      {"skill": "WORD", "recurrence": "repeat", "text": "C-Test respone→respond, sti___→stimuli(입력값 미확인), dynamic→confusing(static ↔ dynamic 대비 미활용). C-Test 17/20."},
-      {"skill": "FORM", "recurrence": "repeat", "text": "takes a bottom-up appr___ → approved: a + 형용사 뒤 명사 자리에 동사 과거형. TPO2·3·5에 이은 자리 판정 오류."}
+      {"skill": "ACT", "recurrence": "repeat", "text": "Listen & Reply 오답 6개(9/15): wrap things up에 deadline, revise work schedule에 delivery, ready for lunch에 I don't think I have yet, help me에 Yes, if you have any good ones, 비행 시각에 도착 시각, next train에 내 표 — TPO3·TPO5에 이어 다시 나옴. 본인 설명: 한국어로 옮겨도 헷갈림. 그래서 듣기보다 '어떤 대답이 맞는지' 판단하는 문제일 수 있음 (추정)."},
+      {"skill": "AUDIT", "recurrence": "repeat", "text": "graded by the class, can't attend an event, optional — 원문에 없는 '누가'·'왜'·'선택 사항' 같은 내용이 덧붙은 선택지. (R4 optional은 정답 C의 근거도 약해 가볍게 봄)"},
+      {"skill": "TARGET", "recurrence": "repeat", "text": "interview a professional(과제 과정)을 인턴십 면접으로, 강연 주제(coral reef)를 Q&A 주제로 읽음 — 들은 단어·주제는 맞지만 질문이 묻는 대상(3주 안에 낼 것, Q&A)이 아님."},
+      {"skill": "WORD", "recurrence": "repeat", "text": "C-Test: respond 자리에 respone, stimuli 빈칸(무엇을 입력했는지 모름), dynamic의 뜻으로 confusing을 고름(static과 반대라는 점을 놓침). C-Test 17/20."},
+      {"skill": "FORM", "recurrence": "repeat", "text": "takes a bottom-up appr___에 approved를 씀: 'a + 형용사' 뒤 명사 자리에 동사 과거형을 넣음. TPO2·3·5에 이어 자리를 잘못 본 실수."}
     ],
-    "next": "Listen & Reply: 질문을 먼저 기능(제안·요청·준비 여부·시간)으로 분류하고, 선택지가 '정확히 그 질문'에 답하는지 확인. 공지·대화: 선택지 단어마다 '원문에 있나?' 체크. C-Test: 자리(품사) → 후보 → 재삽입 → 철자."
+    "next": "Listen & Reply: 질문의 의도(제안·부탁·준비됐는지·시간)부터 가리고, 선택지가 '바로 그 질문'에 답하는지 확인. 공지·대화: 선택지 단어마다 '원문에 있나?' 확인. C-Test: 자리(품사)를 정하고, 후보를 떠올려 다시 넣어 본 뒤 철자를 확인."
   },
   "audioSets": {
     "o-t7-wrapup": {
@@ -108,11 +108,11 @@
       },
       "my": "respone",
       "evidence": "Jagadish Chandra Bose's research demonstrated that plants res___ to sti___ such as light — 주어 plants + 동사 자리, 뒤에 to",
-      "trap": "명사 response와 철자가 가까워 섞였을 가능성 (AI 추정 — 사용자가 혼동했다고 말한 기록은 없음)",
-      "diff": "that절 주어 plants 뒤 동사 자리 → respond (respond to + 대상). respone은 없는 단어, response는 명사",
-      "rule": "that + 주어 + ___ + to → 동사. 완성한 단어를 문장에 다시 넣고 철자를 한 번 더 확인",
-      "causeAI": "동사형 인출 또는 철자 검증 실패 가능 (원인 미확인)",
-      "gaps": ["respone을 고른 이유(철자 실수인지 response 혼동인지) 기록 없음"]
+      "trap": "명사 response와 철자가 비슷해 섞였을 수 있음 (AI 추정 — 헷갈렸다는 본인 설명은 없음)",
+      "diff": "that절 주어 plants 뒤는 동사 자리라 respond (respond to + 대상). respone은 없는 단어, response는 명사",
+      "rule": "'that + 주어 + ___ + to'면 빈칸은 동사. 완성한 단어를 문장에 다시 넣고 철자를 한 번 더 확인",
+      "causeAI": "동사형을 떠올리지 못했거나 철자를 확인하지 않았을 수 있음 (원인은 모름)",
+      "gaps": ["respone을 쓴 이유(철자 실수인지, response와 헷갈렸는지) 기록 없음"]
     },
     {
       "id": "TPO7-R2",
@@ -129,11 +129,11 @@
       },
       "my": null,
       "evidence": "plants res___ to sti___ such as light. tempe[rature].and chem[icals] — such as 뒤에 여러 예 → 복수 명사",
-      "trap": "기록 없음 — sti-로 시작하는 단어(still, stick…)가 많고 stimuli는 불규칙 복수라 떠올리기 어려웠을 가능성 (AI 추정)",
-      "diff": "respond to ___ such as light, temperature, chemicals → 자극들 = stimuli (단수 stimulus, 동사 stimulate)",
-      "rule": "such as A, B, C 앞 빈칸 → A·B·C를 묶는 복수 범주 명사",
-      "causeAI": "stimulus/stimuli 어휘 또는 불규칙 복수형 인출 문제 가능 (입력값 미확인)",
-      "gaps": ["화면에 입력 글자가 보이지 않음(sti 뒤 빨간 밑줄만) — 실제 입력 문자열 기록 없음", "단어를 몰랐다는 사용자 진술 없음"]
+      "trap": "기록 없음 — sti-로 시작하는 단어(still, stick…)가 많고 stimuli는 불규칙 복수라 떠올리기 어려웠을 수 있음 (AI 추정)",
+      "diff": "respond to ___ such as light, temperature, chemicals라 '자극들'인 stimuli (단수 stimulus, 동사 stimulate)",
+      "rule": "'such as A, B, C' 앞 빈칸은 A·B·C를 묶어 부르는 복수 명사",
+      "causeAI": "stimulus/stimuli 단어나 불규칙 복수형을 떠올리지 못했을 수 있음 (무엇을 입력했는지 모름)",
+      "gaps": ["화면에 입력한 글자가 안 보임(sti 뒤 빨간 밑줄만) — 실제로 무엇을 입력했는지 모름", "단어를 몰랐다는 본인 설명은 없음"]
     },
     {
       "id": "TPO7-R3",
@@ -150,10 +150,10 @@
       },
       "my": "approved",
       "evidence": "Microeconomics takes a bottom-up appr___ by focusing on individual decisions",
-      "trap": "appr-로 시작하는 익숙한 단어(approve)를 먼저 완성했을 가능성 (AI 추정)",
-      "diff": "take + a + bottom-up(형용사) + ___ → 명사 자리 = approach. approved는 동사 과거형이라 a 뒤에 올 수 없음. 뒤 문장 'adopts a top-down perspective'와 대칭",
-      "rule": "a/an + (형용사) + ___ → 명사. take an approach / adopt a perspective 쌍으로 확인",
-      "causeAI": "빈칸 자리(명사) 판정 전에 철자 단서로 단어를 만듦 (추정)"
+      "trap": "appr-로 시작하는 익숙한 단어(approve)를 먼저 완성했을 수 있음 (AI 추정)",
+      "diff": "'take + a + bottom-up(형용사) + ___'라 명사 자리, 즉 approach. approved는 동사 과거형이라 a 뒤에 못 옴. 뒤 문장 'adopts a top-down perspective'와 짝을 이룸",
+      "rule": "'a/an + (형용사) + ___'는 명사 자리. take an approach / adopt a perspective처럼 짝으로 확인",
+      "causeAI": "명사 자리인지 정하기 전에 앞 글자만 보고 단어를 만듦 (추정)"
     },
     {
       "id": "TPO7-R4",
@@ -174,11 +174,11 @@
       "my": 3,
       "correct": 2,
       "evidence": "We would also like all participants to review the pre-webinar materials available online",
-      "trap": "'would like'가 강제가 아닌 정중한 부탁이라 '선택 사항'처럼 들림 (AI 추정)",
-      "diff": "would like all participants to review = 모두에게 요청 → optional의 근거 없음. 자료 위치는 'available online' → 이메일 첨부가 아님",
-      "rule": "정중한 요청(would like / kindly)은 '선택'이 아니라 '요청'. 선택지의 성격(optional)이 원문에 있는지 확인",
-      "causeAI": "정중한 요청 표현을 선택 사항으로 해석 (추정)",
-      "gaps": ["문항 주의: '온라인에 있음'이 '첨부하지 않음'을 논리적으로 완전히 보장하지 않음 — 채점 정답 C의 근거가 약해 이 문항으로 추론 능력을 단정하지 않는다"]
+      "trap": "'would like'가 강요가 아닌 정중한 부탁이라 '선택 사항'처럼 들렸을 것 (AI 추정)",
+      "diff": "would like all participants to review는 모두에게 하는 요청이라 optional(선택 사항)의 근거가 없음. 자료는 'available online'이니 이메일 첨부가 아님",
+      "rule": "정중한 표현(would like / kindly)도 '선택'이 아니라 '요청'이다. 선택지의 'optional' 같은 말이 원문에 있는지 확인",
+      "causeAI": "정중한 요청을 선택 사항으로 받아들임 (추정)",
+      "gaps": ["문제 주의: '온라인에 있다'고 해서 '첨부하지 않았다'가 확실하지는 않음 — 정답 C의 근거가 약해 이 문제로 추론 실력을 단정하지 않는다"]
     },
     {
       "id": "TPO7-R5",
@@ -194,10 +194,10 @@
       "my": 3,
       "correct": 1,
       "evidence": "Human memory has long been considered a static repository for information, but recent research suggests that it is far more dynamic.",
-      "trap": "기억 연구 맥락에서 '복잡하다/헷갈린다'가 그럴듯하게 들림 (AI 추정)",
-      "diff": "static(고정된) … but … dynamic → 반대 의미 = changing. confusing은 '이해하기 어려운'으로 static의 반대가 아님",
-      "rule": "but 앞뒤 대비 → 빈칸 단어 뜻은 앞 단어(static)의 반대로 확인",
-      "causeAI": "dynamic 의미 불명확 또는 static↔dynamic 대비 미활용 (추정)"
+      "trap": "기억 연구 이야기라 '복잡하다/헷갈린다'가 그럴듯하게 들렸을 것 (AI 추정)",
+      "diff": "static(고정된) … but … dynamic이라 dynamic은 static의 반대인 changing. confusing은 '이해하기 어려운'이라 static의 반대가 아님",
+      "rule": "but 앞뒤가 대비되면 그 단어 뜻을 앞 단어(static)의 반대로 확인한다",
+      "causeAI": "dynamic의 뜻이 확실하지 않았거나, static과 반대라는 점을 쓰지 못함 (추정)"
     },
     {
       "id": "TPO7-L1",
@@ -218,11 +218,11 @@
       "my": 1,
       "correct": 3,
       "evidence": "Should we wrap things up for today? = 지금 끝낼지 묻는 제안",
-      "trap": "업무·마감이라는 같은 주제라 관련 있어 보임",
-      "diff": "wrap things up(마무리하다) 제안 → 끝내자/조금 더 하자로 답해야 함. deadline 변경은 지금 끝낼지에 대한 답이 아님",
-      "rule": "Should we…? = 제안 → 수락·거절·대안(few more minutes)으로 답한다",
-      "causeAI": "관용 표현 wrap things up 또는 제안 기능 판단 실패 가능 (추정)",
-      "gaps": ["원 음성 없음: 화면의 질문 문장으로 TTS 재구성", "사용자 진술: Listen & Reply는 한국어로 해석해도 헷갈림"]
+      "trap": "업무·마감이라는 같은 주제라서 관련 있어 보임",
+      "diff": "wrap things up(마무리하다)은 제안이라 '끝내자' 또는 '조금만 더 하자'로 답해야 함. 마감 변경은 지금 끝낼지에 대한 답이 아님",
+      "rule": "Should we…?는 제안이라 수락·거절·다른 제안(few more minutes)으로 답한다",
+      "causeAI": "wrap things up이라는 표현을 몰랐거나, 제안이라는 걸 못 알아챘을 수 있음 (추정)",
+      "gaps": ["원래 음성 없음 — 화면의 질문 문장을 TTS로 다시 만듦", "참고(본인 설명): Listen & Reply는 한국어로 옮겨도 헷갈린다고 함"]
     },
     {
       "id": "TPO7-L2",
@@ -243,11 +243,11 @@
       "my": 2,
       "correct": 1,
       "evidence": "We might need to revise the work schedule.",
-      "trap": "schedule이라는 같은 단어가 들어 있음",
-      "diff": "대상은 work schedule(근무 일정) 수정. delivery(배송)는 원문에 없는 새 대상",
-      "rule": "같은 단어가 반복된 선택지 → 대상(무엇의 schedule?)이 같은지 먼저 확인",
-      "causeAI": "단어 반복에 끌려 대상 일치 확인 실패 (추정)",
-      "gaps": ["원 음성 없음: 화면의 질문 문장으로 TTS 재구성"]
+      "trap": "schedule이라는 같은 단어가 들어 있어서",
+      "diff": "고치려는 건 work schedule(근무 일정). delivery(배송)는 원문에 없는 엉뚱한 대상",
+      "rule": "같은 단어가 들어 있는 선택지는 대상(무슨 schedule인지)이 같은지 먼저 확인",
+      "causeAI": "같은 단어에 끌려 대상이 같은지 확인하지 않음 (추정)",
+      "gaps": ["원래 음성 없음 — 화면의 질문 문장을 TTS로 다시 만듦"]
     },
     {
       "id": "TPO7-L3",
@@ -268,11 +268,11 @@
       "my": 2,
       "correct": 3,
       "evidence": "Are you ready for lunch? = 지금 준비 상태(be ready)를 묻는 질문",
-      "trap": "No로 시작해 자연스러운 거절처럼 들림",
-      "diff": "Are you…? → I am / I'm not으로 받는다. 'I have yet'은 완료(have done) 질문에 대한 답 — 시제·조동사 불일치",
-      "rule": "질문 동사(be/do/have)와 응답 조동사를 맞춘다: Are you…? → I am…",
-      "causeAI": "준비 상태 질문과 완료 여부 응답 구별 실패 (추정)",
-      "gaps": ["원 음성 없음: 화면의 질문 문장으로 TTS 재구성", "Listen & Reply 세트 2 중 몇 번인지 화면에 없음 (세트 2 오답 3·4·6·7 중 하나)"]
+      "trap": "No로 시작해서 자연스러운 거절처럼 들림",
+      "diff": "Are you…?는 I am / I'm not으로 받는다. 'I have yet'은 have done(했나?) 질문에 하는 대답이라 시제와 조동사가 맞지 않음",
+      "rule": "질문의 동사(be/do/have)와 대답의 동사를 맞춘다: Are you…?에는 I am…",
+      "causeAI": "'준비됐나'와 '이미 했나'를 구별하지 못함 (추정)",
+      "gaps": ["원래 음성 없음 — 화면의 질문 문장을 TTS로 다시 만듦", "Listen & Reply 세트 2 중 몇 번인지 화면에 없음 (세트 2 오답 3·4·6·7 중 하나)"]
     },
     {
       "id": "TPO7-L4",
@@ -293,11 +293,11 @@
       "my": 3,
       "correct": 1,
       "evidence": "Can you help me with the presentation? = 도움 요청",
-      "trap": "Yes로 시작해 수락처럼 들림",
-      "diff": "도움 요청 → 수락 + 구체화(What would you like me to do?). 'good ones'가 가리킬 복수 명사가 질문에 없음",
-      "rule": "Can you help…? → 돕겠다/무엇을 할지 묻는 응답. Yes 뒤 내용이 질문과 이어지는지 확인",
-      "causeAI": "Yes 형태로 선택, 도움 요청 기능 처리 실패 (추정)",
-      "gaps": ["원 음성 없음: 화면의 질문 문장으로 TTS 재구성"]
+      "trap": "Yes로 시작해서 들어주겠다는 말처럼 들림",
+      "diff": "도움을 부탁받으면 돕겠다고 하고 무엇을 할지 묻는다(What would you like me to do?). 'good ones'가 가리킬 복수 명사가 질문에 없음",
+      "rule": "Can you help…?에는 돕겠다거나 무엇을 할지 묻는 대답. Yes 뒤 내용이 질문과 이어지는지 확인",
+      "causeAI": "Yes로 시작하는 것만 보고 골라, 도움 부탁에 맞는 대답인지 보지 않음 (추정)",
+      "gaps": ["원래 음성 없음 — 화면의 질문 문장을 TTS로 다시 만듦"]
     },
     {
       "id": "TPO7-L5",
@@ -318,11 +318,11 @@
       "my": 3,
       "correct": 0,
       "evidence": "What time is your flight? = 비행기가 언제 (출발)하는지",
-      "trap": "시각(three o'clock)이 들어 있어 시간 질문에 맞는 답처럼 보임",
-      "diff": "질문 = 비행 시각(출발). 선택지 D = 도착 시각 — 같은 주제, 다른 시각",
-      "rule": "시간 질문 → 어떤 시간(출발·도착·소요)인지 확인하고 같은 종류로 답한 것을 고른다",
-      "causeAI": "질문이 요구한 시간의 종류(departure vs arrival) 구분 실패 (추정)",
-      "gaps": ["원 음성 없음: 화면의 질문 문장으로 TTS 재구성"]
+      "trap": "시각(three o'clock)이 들어 있어서 시간 질문의 답처럼 보임",
+      "diff": "질문은 비행기 출발 시각. 선택지 D는 도착 시각 — 주제는 같지만 다른 시각",
+      "rule": "시간 질문은 어떤 시간(출발·도착·걸리는 시간)인지 확인하고, 같은 종류로 답한 것을 고른다",
+      "causeAI": "질문이 묻는 시간이 출발인지 도착인지 구분하지 못함 (추정)",
+      "gaps": ["원래 음성 없음 — 화면의 질문 문장을 TTS로 다시 만듦"]
     },
     {
       "id": "TPO7-L6",
@@ -343,11 +343,11 @@
       "my": 2,
       "correct": 3,
       "evidence": "When does the next train leave? = '다음' 열차의 출발 시각",
-      "trap": "열차 시각(3:00 p.m.)이 직접 들어 있음",
-      "diff": "질문은 next train. 내 표의 열차가 다음 열차라는 보장 없음 → 정보가 없다는 응답(D)이 채점 정답",
-      "rule": "질문의 제한어(next, first, your)를 선택지가 만족하는지 확인",
-      "causeAI": "제한 조건 next 확인 실패 가능 (추정)",
-      "gaps": ["원 음성 없음: 화면의 질문 문장으로 TTS 재구성", "문항 주의: C도 현실에서는 자연스러운 응답일 수 있어 다소 애매 — 진단 비중을 낮춘다"]
+      "trap": "열차 시각(3:00 p.m.)이 직접 들어 있어서",
+      "diff": "질문은 '다음' 열차(next train). 내 표의 열차가 다음 열차라는 보장이 없어서, 정보가 없다는 대답(D)이 정답",
+      "rule": "질문의 범위를 정하는 말(next, first, your)에 선택지가 맞는지 확인",
+      "causeAI": "next라는 조건을 확인하지 않았을 수 있음 (추정)",
+      "gaps": ["원래 음성 없음 — 화면의 질문 문장을 TTS로 다시 만듦", "문제 주의: C도 실제로는 자연스러운 대답일 수 있어 다소 애매함 — 진단에서 가볍게 본다"]
     },
     {
       "id": "TPO7-L7",
@@ -368,10 +368,10 @@
       "my": 0,
       "correct": 1,
       "evidence": "Make sure you practice your presentation and time yourselves to stay within the fifteen-minute limit.",
-      "trap": "'answer any questions from the class' — class가 실제로 등장",
-      "diff": "class는 질문하는 쪽일 뿐 채점 주체라는 말은 없음. 직접 근거 = fifteen-minute limit → strict time limit",
-      "rule": "선택지의 주체·행동(graded by)이 원문에 있는지 확인. 숫자 제한(15분)은 정답 신호",
-      "causeAI": "명시된 시간 조건을 놓치고 근거 없는 채점 정보를 덧붙임 (추정)"
+      "trap": "'answer any questions from the class'에 class가 실제로 나와서",
+      "diff": "class는 질문하는 쪽일 뿐 채점한다는 말은 없음. 직접 근거는 fifteen-minute limit, 즉 strict time limit",
+      "rule": "선택지의 '누가 무엇을'(graded by)이 원문에 있는지 확인. 15분 같은 숫자 제한은 정답 단서",
+      "causeAI": "분명히 나온 시간 제한을 놓치고 근거 없는 채점 내용을 덧붙임 (추정)"
     },
     {
       "id": "TPO7-L8",
@@ -392,10 +392,10 @@
       "my": 2,
       "correct": 1,
       "evidence": "Also, she asked me to bring some games, but I don't think I have any.",
-      "trap": "파티 대화라 '참석 못함'이 실망의 흔한 이유로 그럴듯함",
-      "diff": "인과: 게임을 가져오라고 부탁받음 → 게임이 없음 → 실망시킬까 걱정. 참석 불가는 대화에 없음",
-      "rule": "Why 질문 → 마지막 감정(disappoint) 바로 앞 문제 상황(but I don't…)을 찾는다",
-      "causeAI": "직접 원인과 마지막 감정 표현 연결 실패 (추정)"
+      "trap": "파티 이야기라 '참석을 못 해서 실망'이 흔한 이유로 그럴듯함",
+      "diff": "게임을 가져오라는 부탁을 받았는데 게임이 없어서 실망시킬까 걱정하는 것. 참석을 못 한다는 말은 대화에 없음",
+      "rule": "Why 질문은 마지막 감정(disappoint) 바로 앞의 문제 상황(but I don't…)을 찾는다",
+      "causeAI": "바로 앞에 나온 원인을 마지막 감정과 연결하지 못함 (추정)"
     },
     {
       "id": "TPO7-L9",
@@ -416,10 +416,10 @@
       "my": 2,
       "correct": 1,
       "evidence": "you will have to turn in a paper three weeks from today",
-      "trap": "interview가 실제로 들림 (interviewing a professional)",
-      "diff": "3주 안에 할 일 = paper 제출(summarize your findings in your written report). interview는 과정이고, 전문가를 인터뷰하는 것 — 인턴십 면접이 아님",
-      "rule": "기한 질문(within three weeks) → 기한과 같은 문장의 동사(turn in a paper)를 찾는다",
-      "causeAI": "인터뷰의 주체·목적 혼동 + 제출물 정보 누락 (추정)"
+      "trap": "interview가 실제로 들려서 (interviewing a professional)",
+      "diff": "3주 안에 할 일은 paper 제출(summarize your findings in your written report). interview는 과제 과정에서 전문가를 인터뷰하는 것이지 인턴십 면접이 아님",
+      "rule": "기한을 묻는 질문(within three weeks)은 그 기한이 나온 문장의 동사(turn in a paper)를 찾는다",
+      "causeAI": "누가 왜 인터뷰하는지 헷갈렸고, 제출물 정보를 놓침 (추정)"
     },
     {
       "id": "TPO7-L10",
@@ -440,10 +440,10 @@
       "my": 3,
       "correct": 1,
       "evidence": "There will also be a dedicated question-and-answer session focused on career paths and employment options in marine science and conservation.",
-      "trap": "해양 과학자 강연이라 '연구 도구'가 주제처럼 그럴듯함",
-      "diff": "강연 주제 = coral reef ecosystems, Q&A 주제 = career paths and employment options ≈ job opportunities",
-      "rule": "질문이 가리킨 부분(Q&A)의 focused on 뒤를 찾고 paraphrase로 연결",
-      "causeAI": "강연 전체 주제와 Q&A 주제 구분 실패 (추정)"
+      "trap": "해양 과학자 강연이라 '연구 도구'가 주제로 그럴듯해 보임",
+      "diff": "강연 주제는 coral reef ecosystems, Q&A 주제는 career paths and employment options(= job opportunities)",
+      "rule": "질문이 묻는 부분(Q&A)에서 focused on 뒤를 찾고, 바꿔 말한 선택지와 연결한다",
+      "causeAI": "강연 전체 주제와 Q&A 주제를 구분하지 못함 (추정)"
     }
   ]
 }

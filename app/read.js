@@ -27,7 +27,7 @@
     const testName = id => (Z().tests.find(t => t.id === id) || {}).name || id;
     function origLine(id) {
       const i = link.info(id); if (!i) return null;
-      return h('p', { class: 'small muted' }, i.skill ? h('span', { class: 'chip' }, i.skill) : null, ` 오늘 훈련 원본 ${id} · 다시 푼 기록 ${i.ok}/${i.n} 맞힘`);
+      return h('p', { class: 'small muted' }, i.skill ? h('span', { class: 'chip' }, i.skill) : null, ` '오늘 훈련' 원본 ${id} · 다시 풀어 ${i.n}번 중 ${i.ok}번 맞힘`);
     }
 
     let cur = null;
@@ -58,7 +58,7 @@
         h('p', { class: 'small' }, `또 틀림 ${counts.again} · 아직 안 풂 ${counts.new} · 다시 풀어 맞힘 ${counts.fixed}`),
         h('p', { class: 'small muted' }, '오늘 훈련에서 같은 원본 문제를 다시 푼 기록도 함께 셉니다 (가장 최근 결과 기준).'),
         q.length ? h('button', { class: 'primary', onclick: () => go('#/read/' + q[0].id) }, `다음 세트: ${q[0].title} (${testName(q[0].test)})`) : null,
-        h('p', { class: 'small' }, h('a', { href: '#/ko' }, '한국어로 풀어 보기 →'), h('span', { class: 'muted' }, ' 틀린 이유가 영어인지 판단인지 가르기'))));
+        h('p', { class: 'small' }, h('a', { href: '#/ko' }, '한국어로 풀어 보기 →'), h('span', { class: 'muted' }, ' 영어 때문에 틀렸는지, 판단 때문에 틀렸는지 확인'))));
       for (const t of Z().tests.slice().reverse()) {
         const sets = Z().sets.filter(s => s.test === t.id);
         main.append(h('section', { class: 'card' },
@@ -123,7 +123,7 @@
         card.append(passage(set),
           h('p', { class: 'small muted' }, `문항 ${cur.qi + 1} / ${set.qs.length}`),
           h('p', { class: 'stem' }, q.stem),
-          q.sentence ? h('p', { class: 'insert-s' }, h('b', null, '넣을 문장: '), q.sentence) : null,
+          q.sentence ? h('p', { class: 'insert-s' }, h('b', null, '넣을 문장: '), q.sentence) : '',   // DOM append(null)은 'null' 글자를 넣는다
           h('div', { class: 'opts' }, q.choices.map((c, i) => h('button', { class: 'opt', onclick: () => {
             cur.ans[cur.qi] = i;
             if (cur.qi + 1 < set.qs.length) { cur.qi++; redraw(); } else finish();
@@ -161,7 +161,7 @@
         card.append(h('div', { class: 'fb ' + (right ? 'good' : 'bad') }, body,
           q.orig ? origLine(q.orig) : null,
           q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
-          q.point ? h('p', { class: 'rule small' }, '다음엔 → ', q.point) : null));
+          q.point ? h('p', { class: 'rule small' }, '다음엔: ', q.point) : null));
       });
       const d = load();
       const nxt = queue(setsForCore(), d.sets, Z().tests.map(t => t.id), hist).find(s => s.id !== set.id);

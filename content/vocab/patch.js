@@ -107,6 +107,13 @@ function resumeSession() {
 const __api = {
   hasData() { return QUIZ_MODES.some(m => Object.keys(srsState[m] || {}).length > 0); },
   wordCount() { return WORDS.length; },
+  // 단어 킵: 단어장에 있는 단어면 핵심 뜻 (복수·과거·진행형은 원형으로도 찾아 본다)
+  lookup(word) {
+    const w = String(word || '').toLowerCase().trim();
+    const tries = [w, w.replace(/ies$/, 'y'), w.replace(/es$/, ''), w.replace(/s$/, ''), w.replace(/ied$/, 'y'), w.replace(/ed$/, ''), w.replace(/d$/, ''), w.replace(/ing$/, ''), w.replace(/ing$/, 'e'), w.replace(/ly$/, '')];
+    for (const t of tries) { const hit = WORDS.find(x => x.en.toLowerCase() === t); if (hit) return { en: hit.en, ko: getCoreMeaning(hit) }; }
+    return null;
+  },
   reviewCounts, bestReviewMode,
   plan: loadChunkPlan,
   createPlan: createChunkPlan,

@@ -79,10 +79,10 @@
           ],
           "answer": 1,
           "why": [
-            "2시간은 orientation의 시간 — 질문 대상(festival)과 다름",
+            "2시간은 orientation이 걸리는 시간 — 질문은 festival에 대한 것",
             "✓ the city library's summer reading festival",
             "Room 204는 orientation 장소",
-            "Saturday는 orientation 날짜. 축제는 다음 월요일 시작"
+            "Saturday는 orientation 날짜. 축제는 다음 월요일에 시작함"
           ],
           "evidence": "The volunteer orientation for the city library's summer reading festival will be held on Saturday from 10:00 A.M. to noon in Room 204."
         }
@@ -105,7 +105,7 @@
           ],
           "answer": 1,
           "why": [
-            "부화 '후' 먹이 주기만 나옴 — 부화 시기 조절(사전 예방)은 원문에 없음",
+            "부화한 '뒤' 먹이를 주는 이야기만 나옴 — 부화 시기를 미리 조절한다는 내용은 원문에 없음",
             "✓ nurse bees feed it until it can care for itself",
             "반대: older workers forage outside",
             "반대: 나이에 따라 일을 나눔"
@@ -125,7 +125,7 @@
         "answer": "narration",
         "slot": 0
       },
-      "explain": "a calm ___ by the director guides viewers = 감독이 '말로 설명하는 행위·목소리' → narration (단수, a 뒤). narrative(이야기 내용)는 by the director가 '읽어 주는' 행위와 맞지 않음"
+      "explain": "a calm ___ by the director guides viewers는 감독이 '말로 설명해 주는 것(목소리)'이므로 narration (a 뒤라 단수). narrative(이야기 내용)는 감독이 '읽어 주는' 행위와 맞지 않음"
     },
     {
       "id": "W-T15-2",
@@ -138,7 +138,7 @@
         "answer": "pursuits",
         "slot": 0
       },
-      "explain": "each of these + 복수 명사 = 앞에 나열한 dance, theater, music을 묶는 말 → pursuits(활동·분야)"
+      "explain": "each of these + 복수 명사는 앞에 나열한 dance, theater, music을 묶는 말이므로 pursuits(활동·분야)"
     },
     {
       "id": "AC-T15-1",
@@ -157,10 +157,10 @@
           ],
           "answer": 0,
           "why": [
-            "✓ Did you manage to = 성공 여부 → 결과(했다)+과정으로 답함",
-            "현재 가능 여부(free) — 과거 성공 질문과 시간축 불일치",
-            "시작 시각 — concert 단어 함정",
-            "초대 수락 — 질문은 초대가 아님"
+            "✓ Did you manage to는 해냈는지를 묻는 말 — 했다는 결과와 과정으로 답함",
+            "지금 시간이 되는지(free)를 말함 — 과거에 해냈는지 묻는 질문과 시점이 안 맞음",
+            "시작 시각 — concert만 겹치는 함정",
+            "초대를 받아들이는 말 — 질문은 초대가 아님"
           ]
         }
       ]
@@ -183,9 +183,9 @@
           "answer": 1,
           "why": [
             "앞으로 하겠다는 제안 — 이미 시도한 결과를 묻는 질문에 답하지 않음",
-            "✓ Were you able to → 못 했다(결과) + 다음 조치",
-            "프린터 기능 — printer 단어 함정",
-            "available — able과 소리가 비슷한 현재 가능 여부 함정"
+            "✓ Were you able to에 못 했다는 결과와 다음 조치로 답함",
+            "프린터 기능 이야기 — printer만 겹치는 함정",
+            "available은 able과 소리만 비슷한 함정 — 지금 가능한지를 말함"
           ]
         }
       ]
@@ -208,10 +208,10 @@
           ],
           "answer": 0,
           "why": [
-            "✓ conventional farming → in contrast → crop rotation: 두 방식 대조",
+            "✓ conventional farming을 설명한 뒤 in contrast로 crop rotation과 대조함",
             "역사(연도·발전 과정)는 강의에 없음",
-            "machines는 장점 설명의 세부",
-            "fertilizer 금지 주장은 없음 — 과잉 추론"
+            "machines는 장점을 설명하는 세부 내용",
+            "fertilizer를 금지하자는 주장은 없음 — 지나친 추론"
           ],
           "evidence": "Crop rotation, in contrast, changes what is grown in a field from one year to the next."
         },
@@ -226,10 +226,10 @@
           ],
           "answer": 1,
           "why": [
-            "기계가 새로 필요하다는 말은 없음 — 그럴듯한 추론",
+            "기계가 새로 필요하다는 말은 없음 — 그럴듯하지만 추측일 뿐",
             "✓ in the first few years their income can be less predictable",
             "반대: beans return nitrogen",
-            "반대: 다음 작물은 비료가 덜 필요"
+            "반대: 다음 작물은 비료가 덜 필요함"
           ],
           "evidence": "in the first few years their income can be less predictable"
         }

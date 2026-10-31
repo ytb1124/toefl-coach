@@ -53,7 +53,9 @@ def match_orig(q, origs, used):
             ok = c and norm(c["answer"]) == norm(q["prefix"] + q["answer"]) and norm(c["prefix"]) and norm(c["answer"]).startswith(norm(q["prefix"])[:2])
         else:
             ok = not o.get("ctest") and (norm(o["stem"]) == norm(q["stem"]) or
-                 (q["type"] == "mc" and o.get("correct") is not None and o.get("options") and norm(o["options"][o["correct"]]) == norm(q["choices"][q["answer"]])))
+                 (q["type"] == "mc" and o.get("correct") is not None and o.get("options") and norm(o["options"][o["correct"]]) == norm(q["choices"][q["answer"]])) or
+                 # 문장 삽입: 원본 stem은 'Insert: "<삽입 문장>"'
+                 (q["type"] == "insert" and norm(q.get("sentence")) and norm(q["sentence"]) in norm(o["stem"])))
         if ok:
             used.add(o["id"])
             return o["id"]

@@ -51,14 +51,14 @@
     function refresh() {
       const left = maxPlays - plays;
       if (maxPlays === Infinity) info.textContent = plays ? `${plays}회 들음 · 다시 듣기 가능` : '연습 모드 · 다시 듣기 가능';
-      else info.textContent = left > 0 ? '실전 조건 · 1회만 재생' : '재생 완료 (실전 조건)';
+      else info.textContent = left > 0 ? '실전처럼 한 번만 재생' : '재생이 끝났습니다 (실전처럼 한 번만)';
       btn.disabled = maxPlays === Infinity ? false : (!audio.paused || left <= 0);
     }
     btn.onclick = () => {
       if (!meta) return;
       if (!audio.paused) { audio.pause(); btn.textContent = '▶'; return; }
       if (audio.ended || audio.currentTime === 0) { if (plays >= maxPlays) return; plays++; opts.onPlay && opts.onPlay(plays); }
-      audio.play().catch(() => { info.textContent = '재생 실패 — audio 폴더를 확인하세요'; });
+      audio.play().catch(() => { info.textContent = '재생하지 못했습니다. audio 폴더를 확인하세요'; });
       btn.textContent = maxPlays === Infinity ? '❚❚' : '♪';
       refresh(); // exam condition: button stays disabled while playing (no pause / re-listen)
     };
@@ -109,6 +109,7 @@
     else if (view === 'listen') listenApp().view(main, (location.hash || '').split('/').slice(2), render);
     else if (view === 'read') readApp().view(main, (location.hash || '').split('/').slice(2));
     else if (view === 'ko') koApp().view(main, (location.hash || '').split('/').slice(2));
+    else if (view === 'keep') keepApp().view(main, render);
     else viewToday(main);
   }
   function nav(cur) {
@@ -120,7 +121,7 @@
   // ---------- sync status ----------
   function syncLabel() {
     const st = window.Sync ? Sync.status() : { mode: 'local', label: '이 기기에만 저장' };
-    const title = st.mode === 'cloud' ? 'claude.ai 계정에 저장되어 어느 기기에서 열어도 이어집니다' : st.mode === 'jsonbin' ? 'jsonbin에 저장되어 동기화 코드를 넣은 모든 기기에서 이어집니다' : '설정 → 기기 동기화에서 연결할 수 있습니다';
+    const title = st.mode === 'cloud' ? 'claude.ai 계정에 저장되어 어느 기기에서 열어도 이어집니다' : st.mode === 'jsonbin' ? 'jsonbin에 저장되어 동기화 코드를 넣은 모든 기기에서 이어집니다' : '설정의 기기 동기화에서 연결할 수 있습니다';
     return h('a', { href: '#/settings', class: 'sync sync-' + st.mode + (st.error ? ' sync-err' : ''), id: 'sync-label', title }, st.label);
   }
 
@@ -142,7 +143,7 @@
       const code = J.code();
       return h('section', { class: 'card' }, h('h2', null, '기기 동기화', h('span', { class: 'muted small' }, 'jsonbin')),
         h('p', { class: 'small' }, '상태: ', h('b', null, st.label), st.error ? h('span', { class: 'warn' }, ' · ' + st.error) : null),
-        h('p', { class: 'small muted' }, '다른 기기에서는 이 페이지의 설정 → 기기 동기화에 아래 동기화 코드를 한 번 붙여넣으면 같은 기록으로 이어집니다. 코드에는 jsonbin 키가 들어 있으니 다른 사람에게 보내지 마세요.'),
+        h('p', { class: 'small muted' }, '다른 기기에서 설정의 기기 동기화에 아래 동기화 코드를 한 번 붙여넣으면 같은 기록으로 이어집니다. 코드에는 jsonbin 키가 들어 있으니 다른 사람에게 보내지 마세요.'),
         h('details', null, h('summary', null, '동기화 코드 보기'), h('textarea', { id: 'sync-code-out', class: 'databox', rows: 3, readonly: true }, code), copyButton(() => code, '코드 복사')),
         h('div', { class: 'row' },
           h('button', { class: 'ghost', onclick: () => Sync.flush().then(() => { msg.textContent = Sync.status().error ? '저장 실패: ' + Sync.status().error : '저장했습니다.'; }) }, '지금 저장'),
@@ -162,7 +163,7 @@
         J.connectWithCode(codeIn.value).then(() => location.reload()).catch(err => { b.disabled = false; msg.textContent = '연결 실패: ' + err.message; });
       } }, '동기화 코드로 연결'),
       h('h3', null, '처음 설정하는 기기라면'),
-      h('p', { class: 'small muted' }, 'jsonbin.io에 로그인 → API Keys에서 X-Master-Key를 복사해 넣으세요. 이 기기의 지금 기록으로 저장소를 만들고, 다른 기기에 넣을 동기화 코드를 보여 줍니다.'),
+      h('p', { class: 'small muted' }, 'jsonbin.io에 로그인한 뒤 API Keys에서 X-Master-Key를 복사해 넣으세요. 이 기기에 있는 기록으로 저장소를 만들고, 다른 기기에 넣을 동기화 코드를 보여 줍니다.'),
       keyIn,
       h('button', { class: 'ghost', onclick: e => {
         const b = e.currentTarget; b.disabled = true; msg.textContent = '저장소를 만드는 중…';
@@ -170,7 +171,7 @@
           msg.textContent = '';
           keyIn.value = '';
           created.replaceChildren(h('div', { class: 'fb good' },
-            h('p', null, h('b', null, '연결했습니다.'), ' 다른 기기에서는 설정 → 기기 동기화에 이 코드를 한 번 붙여넣으세요.'),
+            h('p', null, h('b', null, '연결했습니다.'), ' 다른 기기에서는 설정의 기기 동기화에 이 코드를 한 번 붙여넣으세요.'),
             h('textarea', { id: 'sync-code-new', class: 'databox', rows: 3, readonly: true }, code),
             h('div', { class: 'row' }, copyButton(() => code, '코드 복사'), h('button', { class: 'primary', onclick: () => location.reload() }, '완료'))));
         }).catch(err => { b.disabled = false; msg.textContent = '만들기 실패: ' + err.message; });
@@ -209,6 +210,10 @@
   const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
   let RD = null;
   const readApp = () => RD || (RD = ReadApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
+  // 단어 킵: 어느 화면에서든 영어 단어를 선택해 저장 (app/keep.js). 단어장에 있으면 뜻을 채운다.
+  let KP = null;
+  const keepApp = () => KP || (KP = KeepWords.create({ h, toast, storage: window.Sync || localStorage,
+    lookup: w => { const api = vocabApp(); return api && api.lookup ? api.lookup(w) : null; } }));
   let KO = null;
   const koApp = () => KO || (KO = KoTrialApp.create({ h, toast, go, storage: window.Sync || localStorage }));
 
@@ -236,7 +241,11 @@
       return;
     }
     main.append(h('h1', null, '단어 암기'),
-      h('p', { class: 'muted small' }, `원본 단어장(${api.wordCount().toLocaleString()}개)의 '오늘 암기 시작'과 같은 방식으로 복습 단어를 30개씩 암기합니다: 먼저 의미 연결 → 6개 묶음 → 간격을 둔 철자 회상 → 최종 재시험.`));
+      h('p', { class: 'muted small' }, `원본 단어장(${api.wordCount().toLocaleString()}개)의 '오늘 암기 시작'과 같은 방식으로 복습 단어를 30개씩 외웁니다. 뜻 연결하기, 6개씩 묶어 익히기, 시간을 두고 철자 떠올리기, 마지막 재시험 순서로 진행합니다.`));
+    const kept = keepApp().count();
+    main.append(h('section', { class: 'card keep-card', onclick: () => go('#/keep') },
+      h('strong', null, `킵한 단어 ${kept}개 →`),
+      h('p', { class: 'muted small' }, '문제를 풀다가 모르는 단어를 선택해 저장한 목록입니다.')));
     if (!api.hasData()) { main.append(vocabImportCard(api, true)); return; }
 
     const r = api.resumable();
@@ -313,7 +322,7 @@
       const mins = h('select', null, [30, 40, 45, 60].map(m => h('option', { value: m, selected: m === D.settings.minutes }, m + '분')));
       main.append(h('section', { class: 'card hero' },
         h('h1', null, '시험 날짜를 알려주세요'),
-        h('p', { class: 'muted' }, '남은 날에 맞춰 복습 간격과 새 문제 비중을 매일 다시 계산합니다.'),
+        h('p', { class: 'muted' }, '남은 날짜에 맞춰 복습 간격과 새 문제 비율을 매일 다시 정합니다.'),
         h('label', { class: 'field' }, '시험일', date),
         h('label', { class: 'field' }, '하루 학습 시간', mins),
         h('button', { class: 'primary', onclick: () => {
@@ -331,7 +340,7 @@
       const total = s.steps.length - 1;
       main.append(h('section', { class: 'card hero' },
         h('h1', null, '이어서 하기'),
-        h('p', { class: 'muted' }, `${Math.min(s.cursor + 1, total)} / ${total} 단계 · 저장된 곳부터 다시 시작합니다.`),
+        h('p', { class: 'muted' }, `${Math.min(s.cursor + 1, total)} / ${total} 단계 · 멈춘 곳부터 이어서 합니다.`),
         focusList(s), h('button', { class: 'primary', onclick: () => go('#/session') }, '이어하기')));
     } else if (s && s.date === today && s.done) {
       main.append(h('section', { class: 'card hero' },
@@ -345,13 +354,13 @@
       main.append(h('section', { class: 'card hero' },
         h('h1', null, '오늘의 훈련'),
         h('p', { class: 'muted' }, `약 ${Math.max(plan.estMinutes, 10)}분 · ${plan.steps.filter(x => x.type === 'item').length}문항` +
-          (left != null && left <= 4 ? ' · 시험 직전: 새 유형 대신 섞어 풀기 비중↑' : '')),
+          (left != null && left <= 4 ? ' · 시험 직전이라 새 유형보다 섞어 풀기를 더 합니다' : '')),
         plan.focus.length ? h('ol', { class: 'focus' }, plan.focus.map(id => h('li', null,
           h('div', { class: 'fname' }, SKILL[id].name, ' ', chip(row(id).st.state)),
           h('div', { class: 'muted small' }, whyLine(row(id)))))) : h('p', null, '오늘은 섞어 풀기로 전체 점검만 합니다.'),
         plan.retention.length ? h('p', { class: 'small' }, '+ 유지 확인: ', plan.retention.map(id => SKILL[id].name).join(', ')) : null,
         h('button', { class: 'primary', onclick: () => startSession(false) }, '시작하기')));
-      if (plan.freshLeft < 25) main.append(h('p', { class: 'notice' }, `처음 보는 새 문제가 ${plan.freshLeft}개 남았습니다. 소진되면 이미 푼 문제가 "다시 풀기"로 나오며 전이 지표에서는 빠집니다. content/items_*.json에 문제를 추가하면 늘어납니다.`));
+      if (plan.freshLeft < 25) main.append(h('p', { class: 'notice' }, `처음 보는 새 문제가 ${plan.freshLeft}개 남았습니다. 다 쓰면 이미 푼 문제가 "다시 풀기"로 나오고, 새 문제 정답률에는 들어가지 않습니다. content/items_*.json에 문제를 추가하면 늘어납니다.`));
     }
 
     // Compact state list — "am I actually improving?"
@@ -361,7 +370,7 @@
       h('ul', { class: 'skills' }, table.map(r => h('li', { onclick: () => go('#/skill/' + r.skill.id) },
         h('span', { class: 'sname' }, r.skill.name), chip(r.st.state), dots(r.st.recent))))));
 
-    if (Store.lastError) main.append(h('p', { class: 'notice' }, '이 브라우저에 기록을 저장하지 못하고 있습니다 (사생활 보호 모드 등). 설정 → 내보내기로 백업하세요. ', Store.lastError));
+    if (Store.lastError) main.append(h('p', { class: 'notice' }, '이 브라우저에 기록을 저장하지 못하고 있습니다 (사생활 보호 모드 등). 설정의 내보내기로 백업하세요. ', Store.lastError));
     if (D.attempts.length >= 20 && (!D.lastBackup || now() - D.lastBackup > 7 * E.DAY)) {
       main.append(h('p', { class: 'notice' }, '학습 기록을 7일 넘게 백업하지 않았어요. ', h('a', { href: '#/settings' }, '내보내기')));
     }
@@ -403,7 +412,7 @@
     const s = D.session; s.cursor = Math.min(s.cursor + 1, s.steps.length - 1); s.sub = null; save(); render();
   }
   function tierLabel(tier) {
-    return { guided: '연습 · 단계별 안내', transfer: '새 문제 · 실전 조건', mixed: '섞어 풀기 · 새 문제', delayed: '유지 확인 · 새 문제', repeat: '유지 확인 · 다시 풀기 (전이 지표 제외)' }[tier] || '';
+    return { guided: '연습 · 단계별 안내', transfer: '새 문제 · 실전 조건', mixed: '섞어 풀기 · 새 문제', delayed: '유지 확인 · 새 문제', repeat: '유지 확인 · 다시 풀기 (새 문제 정답률 제외)' }[tier] || '';
   }
   function logAttempt(a) {
     const rec = Object.assign({ at: now(), sid: D.session ? D.session.id : null }, a);
@@ -419,8 +428,8 @@
   }
   function ruleLine(skill) {
     const r = myRules(skill)[0];
-    return r ? h('p', { class: 'rule mine' }, '내 규칙 → ', r.rule, h('span', { class: 'muted small' }, ` (${r.id})`))
-      : h('p', { class: 'rule' }, '다음엔 → ', SKILL[skill].warning);
+    return r ? h('p', { class: 'rule mine' }, '내 규칙: ', r.rule, h('span', { class: 'muted small' }, ` (${r.id})`))
+      : h('p', { class: 'rule' }, '다음엔: ', SKILL[skill].warning);
   }
 
   // ---------- replay only the key sentence(s) ----------
@@ -443,7 +452,7 @@
   }
 
   // After a wrong answer: (listening) where did it break down? → replay the key part → (new questions) did the same cause recur?
-  const STUCK = [['sound', '안 들렸다', '소리 인식'], ['memory', '들었는데 잊었다', '기억 유지'], ['judge', '기억했지만 선택지에서 헷갈렸다', '선택 판단'], ['vocab', '들었지만 뜻을 몰랐다', '어휘·표현']];
+  const STUCK = [['sound', '안 들렸다', '소리 듣기'], ['memory', '들었는데 잊었다', '기억하기'], ['judge', '기억했지만 선택지에서 헷갈렸다', '선택지 고르기'], ['vocab', '들었지만 뜻을 몰랐다', '어휘·표현']];
   const RECUR = [['same', '같은 원인으로 또 틀림'], ['rulefail', '규칙은 알았는데 적용 못함'], ['other', '다른 원인'], ['unknown', '모르겠음']];
   function wrongFollowup(rec, opts, onDone) {
     const wrap = h('div', { class: 'follow' });
@@ -452,7 +461,7 @@
       const rules = myRules(rec.skill);
       wrap.append(h('div', { class: 'ask' },
         h('p', { class: 'stem' }, '이번 오답은?'),
-        rules.length ? h('p', { class: 'small' }, '내가 정한 규칙: ', h('b', null, rules[0].rule)) : h('p', { class: 'small muted' }, '이 능력에 아직 내 규칙이 없습니다 (원본 오답을 확인할 때 만들 수 있어요).'),
+        rules.length ? h('p', { class: 'small' }, '내가 정한 규칙: ', h('b', null, rules[0].rule)) : h('p', { class: 'small muted' }, '이 능력에는 아직 내 규칙이 없습니다. 원본 오답을 확인할 때 만들 수 있습니다.'),
         h('div', { class: 'row' }, RECUR.map(([k, label]) => h('button', { class: 'tagb', onclick: e => {
           rec.recur = k; save(); e.currentTarget.parentNode.querySelectorAll('.tagb').forEach(x => { x.disabled = true; }); e.currentTarget.classList.add('sel'); onDone();
         } }, label)))));
@@ -479,7 +488,7 @@
   function stepOriginal(main, step) {
     const o = ORIG[step.ref];
     main.append(h('p', { class: 'kicker' }, `원본 오답 · ${o.test} · ${o.sec === 'R' ? 'Reading' : 'Listening'} · ${o.set}`));
-    main.append(h('p', { class: 'muted small' }, '먼저 다시 판단해 보세요. 원본은 답을 기억해서 맞힐 수 있으므로 숙달 판정에는 쓰지 않습니다.'));
+    main.append(h('p', { class: 'muted small' }, '먼저 다시 풀어 보세요. 원본 문제는 답을 기억해서 맞힐 수도 있어서, 실력이 늘었는지 판단할 때는 쓰지 않습니다.'));
     renderOriginalCard(main, o, true, () => next());
   }
 
@@ -488,17 +497,21 @@
     const myVal = edit.my !== undefined ? edit.my : o.my;
     const box = h('section', { class: 'card' });
     main.append(box);
-    if (o.audio) {
-      const p = Player(o.audio, { onPlay: () => {} });
-      activePlayers.push(p);
-      const note = h('div', { class: 'small muted' }, C.audio[o.audio].note || '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).');
-      box.append(note, p);
+    // 재구성 음성(audioSets)이 없는 리스닝 원본은 소站 원본 음원만 쓴다 (불러올 수 있는 기기에서)
+    if (o.audio || o.sec === 'L') {
+      const p = o.audio ? Player(o.audio, { onPlay: () => {} }) : null;
+      if (p) activePlayers.push(p);
+      const note = h('div', { class: 'small muted' }, o.audio ? (C.audio[o.audio].note || '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).')
+        : '원본 음원은 독점 TPO 자료를 불러올 수 있는 기기에서만 재생됩니다.');
+      box.append(note);
+      if (p) box.append(p);
       // 소站 원본 음원이 이 기기에서 열리면 (로컬 파일 또는 GitHub 토큰) 재구성 음성 대신 원본을 보여 준다
       if (o.sec === 'L' && window.ListenApp) listenApp().origSource(o.id, src => {
         if (!box.isConnected) return;
         const a = h('audio', { controls: true, preload: 'auto', src, class: 'orig-audio' });
         a.playbackRate = listenApp().rate();
         activePlayers.push({ stop: () => a.pause() });
+        if (!p) { note.textContent = '원본 음원 (세트 전체)'; note.after(a); return; }
         p.stop(); p.style.display = 'none';
         note.replaceChildren('원본 음원 (세트 전체) · ', h('a', { href: 'javascript:void 0', onclick: () => { a.pause(); a.remove(); p.style.display = ''; note.textContent = '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).'; } }, '재구성 음성으로 듣기'));
         note.after(a);
@@ -546,7 +559,7 @@
     const optText = v => v == null ? '기록 없음' : o.ctest ? String(v) : `${LETTERS[v]}. ${o.options[v]}`;
     const right = o.ctest ? o.ctest.answer : `${LETTERS[o.correct]}. ${o.options[o.correct]}`;
     const rows = [
-      ['당시 내 답', optText(myVal), D.edits[o.id] && D.edits[o.id].my !== undefined ? '사용자 수정' : '기록'],
+      ['당시 내 답', optText(myVal), D.edits[o.id] && D.edits[o.id].my !== undefined ? '직접 수정' : '기록'],
       now_ ? ['지금 내 답', o.ctest ? (now_.answer || '(빈칸)') : optText(now_.answer), now_.correct ? '정답' : '오답'] : null,
       ['정답', right, ''],
     ].filter(Boolean);
@@ -555,7 +568,7 @@
       o.evidence && !holdBack ? h('p', null, h('span', { class: 'lbl' }, '근거'), ' ', h('q', null, o.evidence)) : null,
       h('p', null, h('span', { class: 'lbl' }, '결정적 차이'), ' ', o.diff),
       o.trap && o.trap !== 'UNKNOWN' ? h('p', null, h('span', { class: 'lbl ai' }, '왜 그럴듯했나 · AI 추정'), ' ', o.trap) : null,
-      h('p', { class: 'rule' }, '다음엔 → ', o.rule),
+      h('p', { class: 'rule' }, '다음엔: ', o.rule),
       (o.gaps || []).length ? h('p', { class: 'muted small' }, '기록 없음: ', o.gaps.join(' / ')) : null,
       o.audio && !holdBack ? transcript(o.audio, [o.evidence]) : null);
   }
@@ -567,11 +580,11 @@
     const pick = cause => { D.origState[o.id] = { cause, note: note.value.trim(), myRule: rule.value.trim(), at: now() }; save(); onDone(); };
     return h('div', { class: 'cause' },
       h('p', null, h('span', { class: 'lbl ai' }, 'AI 추정 원인'), ' ', o.causeAI),
-      h('p', { class: 'small muted' }, '이 분석이 당시 내 경우와 맞나요? (사용자가 확인한 원인과 AI 추정은 따로 저장됩니다)'),
+      h('p', { class: 'small muted' }, '이 분석이 그때 내 생각과 맞나요? (내가 확인한 원인과 AI 추정은 따로 저장됩니다)'),
       note,
-      h('p', { class: 'small' }, h('b', null, '내 규칙'), ' — 다음에 이 유형이 나오면 나는 무엇을 할까? 내 말로 한 줄. 새 문제를 틀릴 때마다 이 규칙을 보여주고 "같은 원인인지" 묻습니다.'),
+      h('p', { class: 'small' }, h('b', null, '내 규칙'), ' — 다음에 이런 문제가 나오면 무엇을 할지 내 말로 한 줄 적으세요. 새 문제를 틀릴 때마다 이 규칙을 보여 주고, 같은 원인으로 틀렸는지 묻습니다.'),
       rule,
-      h('button', { class: 'link small', onclick: () => { rule.value = o.rule; } }, 'AI 규칙을 출발점으로 가져오기'),
+      h('button', { class: 'link small', onclick: () => { rule.value = o.rule; } }, 'AI 규칙을 가져와 고쳐 쓰기'),
       h('div', { class: 'row' },
         h('button', { class: 'ghost', onclick: () => pick('confirm') }, '맞아요'),
         h('button', { class: 'ghost', onclick: () => pick('other') }, '다른 이유'),
@@ -581,7 +594,7 @@
   // --- move card ---
   function stepMove(main, step) {
     const sk = SKILL[step.skill];
-    main.append(h('p', { class: 'kicker' }, '이번 훈련의 판단 순서'),
+    main.append(h('p', { class: 'kicker' }, '이번 훈련에서 따라 할 풀이 순서'),
       h('section', { class: 'card move' },
         h('h1', null, sk.name),
         h('p', null, sk.oneLine),
@@ -589,13 +602,13 @@
         h('p', { class: 'warn' }, sk.warning),
         myRules(step.skill).length ? h('div', { class: 'mine-list' }, h('p', { class: 'small' }, h('b', null, '내가 만든 규칙')),
           h('ul', null, myRules(step.skill).slice(0, 4).map(r => h('li', null, r.rule)))) : null),
-      h('button', { class: 'primary', onclick: next }, '이 순서로 풀어볼게요'));
+      h('button', { class: 'primary', onclick: next }, '이 순서로 풀어 볼게요'));
   }
 
   function stepMixedIntro(main) {
     main.append(h('section', { class: 'card move' },
       h('h1', null, '섞어 풀기'),
-      h('p', null, '서로 다른 유형이 섞여 나옵니다. 문제마다 "이건 어떤 함정이 있는 문제인가"를 먼저 스스로 판단하세요. 실전과 같은 조건입니다.')),
+      h('p', null, '여러 유형이 섞여 나옵니다. 문제마다 어떤 함정이 있는지 먼저 스스로 알아차려 보세요. 실전과 같은 조건입니다.')),
       h('button', { class: 'primary', onclick: next }, '시작'));
   }
 
@@ -621,7 +634,7 @@
       activePlayers.push(p);
       box.append(p);
       if (it.kind === 'listen') {
-        box.append(h('textarea', { class: 'notes', rows: 3, placeholder: '노트 (실전처럼 대상 → 특징 2단어씩)', oninput: e => { sub.notes = e.target.value; save(); } }, sub.notes));
+        box.append(h('textarea', { class: 'notes', rows: 3, placeholder: '노트 (실전처럼 대상과 특징을 2단어씩)', oninput: e => { sub.notes = e.target.value; save(); } }, sub.notes));
       }
       if (sub.phase === 'start') {
         box.append(h('p', { class: 'muted small' }, exam ? '끝까지 들으면 문제가 나옵니다. 실전처럼 한 번만 재생됩니다.' : '끝까지 들으면 문제가 나옵니다.'),
@@ -648,7 +661,7 @@
       sub.phase = 'done';
     }
     // done
-    box.append(h('p', { class: 'muted' }, '이 문항 완료.'));
+    box.append(h('p', { class: 'muted' }, '이 문항을 마쳤습니다.'));
     if (it.audio) box.append(transcript(it.audio, (it.qs || []).map(q => q.evidence)));
     box.append(flagLink(it));
     main.append(h('button', { class: 'primary', onclick: next }, '다음'));
@@ -656,14 +669,14 @@
 
   // In-page form instead of prompt(): the artifact viewer blocks browser dialogs.
   function flagLink(it) {
-    if (D.flags[it.id]) return h('p', { class: 'small muted' }, '신고됨 — 이 문항은 지표에서 제외됩니다');
+    if (D.flags[it.id]) return h('p', { class: 'small muted' }, '신고했습니다. 이 문항은 통계에서 빠집니다');
     const wrap = h('div', { class: 'flag' });
     const open = h('button', { class: 'link small muted', onclick: () => {
       const inp = h('input', { id: 'flag-' + it.id, placeholder: '문제점 (정답이 둘, 근거 부족 등)' });
       open.replaceWith(h('div', { class: 'row' }, inp, h('button', { class: 'ghost', onclick: () => {
         if (!inp.value.trim()) { inp.focus(); return; }
         D.flags[it.id] = inp.value.trim(); save();
-        wrap.replaceChildren(h('p', { class: 'small muted' }, '신고됨 — 이 문항은 지표에서 제외됩니다'));
+        wrap.replaceChildren(h('p', { class: 'small muted' }, '신고했습니다. 이 문항은 통계에서 빠집니다'));
       } }, '신고')));
       inp.focus();
     } }, '문제 오류 신고');
@@ -704,8 +717,8 @@
       } }, t))));
       checkFn = () => { wrap.querySelectorAll('.opt').forEach((x, i) => { x.disabled = true; if (i === answer) x.classList.add('right'); else if (i === sel) x.classList.add('wrong'); }); return sel === answer; };
     };
-    if (st.type === 'slot') single('먼저 빈칸의 자리는? (단어를 떠올리기 전에)', C.slotOptions, st.answer);
-    else if (st.type === 'act') single('들은 문장의 기능은?', C.actOptions, st.answer);
+    if (st.type === 'slot') single('단어를 떠올리기 전에, 빈칸은 어떤 자리인가요?', C.slotOptions, st.answer);
+    else if (st.type === 'act') single('들은 말은 어떤 의도인가요?', C.actOptions, st.answer);
     else if (st.type === 'choice') single(st.prompt, st.options, st.answer);
     else if (st.type === 'tag') {
       const q = it.qs[0];
@@ -761,7 +774,7 @@
 
   function confRow(onPick) {
     let v = null;
-    const row = h('div', { class: 'conf' }, h('span', { class: 'small muted' }, '확신도'), CONF.map(([k, label]) => h('button', { class: 'tagb', onclick: e => {
+    const row = h('div', { class: 'conf' }, h('span', { class: 'small muted' }, '얼마나 확신했나요'), CONF.map(([k, label]) => h('button', { class: 'tagb', onclick: e => {
       v = +k; row.querySelectorAll('.tagb').forEach(x => x.classList.remove('sel')); e.currentTarget.classList.add('sel'); onPick(v);
     } }, label)));
     return row;
@@ -843,7 +856,7 @@
       box.append(h('div', { class: 'fb ' + (correct ? 'good' : 'bad') },
         h('p', null, correct ? '✓ 정답 ' : '✗ ', h('b', null, it.ctest.answer), correct ? '' : `  (내 답: ${it.ctest.prefix}${val.trim().replace(new RegExp('^' + it.ctest.prefix, 'i'), '')})`),
         h('p', null, it.explain || ''),
-        !correct && it.skill === 'FORM' ? h('p', { class: 'rule' }, '자리부터: ', C.slotOptions[it.ctest.slot]) : null,
+        !correct && it.skill === 'FORM' ? h('p', { class: 'rule' }, '빈칸 자리: ', C.slotOptions[it.ctest.slot]) : null,
         !correct ? ruleLine(it.skill) : null));
       sub.phase = 'after'; sub.si = 0; save();
       const nextBtn = () => box.append(flagLink(it), h('button', { class: 'primary', onclick: next }, '다음'));
@@ -898,7 +911,7 @@
         !correct ? h('p', null, h('span', { class: 'lbl' }, '내 답'), ' ', optLine(sel), h('br'), h('span', { class: 'why' }, q.why[sel])) : null,
         h('p', null, h('span', { class: 'lbl' }, '정답'), ' ', optLine(q.answer), whyOk(q.why[q.answer]) ? [h('br'), h('span', { class: 'why' }, whyOk(q.why[q.answer]))] : null),
         q.evidence && (correct || !it.audio) ? h('p', null, h('span', { class: 'lbl' }, '근거'), ' ', h('q', null, q.evidence)) : null,
-        !correct && prior > 0 ? h('p', { class: 'warn' }, `같은 함정(${key === 'off-target' ? '사실이지만 표적 밖' : key === 'unsupported' ? '근거 없는 요소' : '같은 오답 유형'}) ${prior + 1}번째`) : null,
+        !correct && prior > 0 ? h('p', { class: 'warn' }, `같은 함정(${key === 'off-target' ? '사실이지만 질문과 무관' : key === 'unsupported' ? '근거 없는 요소' : '같은 오답 유형'})에 ${prior + 1}번째 걸림`) : null,
         !correct ? ruleLine(skill) : null,
         it.explain && !correct ? h('p', { class: 'muted small' }, it.explain) : null));
       const last = sub.qi >= it.qs.length - 1;
@@ -923,10 +936,10 @@
     const after = Object.fromEntries(E.skillTable(D, C, now()).map(r => [r.skill.id, r]));
     const changes = Object.keys(after).filter(k => s.before && s.before[k] && s.before[k] !== after[k].st.state);
     main.append(h('section', { class: 'card hero' },
-      h('h1', null, '오늘 세션 끝'),
+      h('h1', null, '오늘 훈련 끝'),
       h('p', null, `새 문제 ${scored.filter(a => a.correct).length} / ${scored.length} 정답` + (mine.filter(a => a.tier === 'original').length ? ` · 원본 오답 ${mine.filter(a => a.tier === 'original').length}개 확인` : '')),
       changes.length ? h('ul', { class: 'changes' }, changes.map(k => h('li', null, SKILL[k].name, ': ', chip(s.before[k]), ' → ', chip(after[k].st.state)))) :
-        h('p', { class: 'muted' }, '상태 변화 없음 — 개선 판정에는 새 문제 5개 중 4개 이상, 2번 이상의 세션이 필요합니다.'),
+        h('p', { class: 'muted' }, '상태 변화는 없습니다. "개선"이 되려면 최근 새 문제 5개 중 4개 이상을 맞히고, 2번 이상의 훈련에 걸쳐 풀어야 합니다.'),
       (() => {
         const due = Object.values(after).filter(r => r.st.dueAt && ['IMPROVED', 'RETAINED'].includes(r.st.state));
         return due.length ? h('p', { class: 'small' }, '유지 확인 예정: ', due.map(r => `${r.skill.name} (${fmtDate(r.st.dueAt)})`).join(', ')) : null;
@@ -936,32 +949,32 @@
 
   // ---------- PROGRESS ----------
   function metricTile(label, val, sub, enough) {
-    return h('div', { class: 'tile' }, h('div', { class: 'tl' }, label), h('div', { class: 'tv' }, enough ? val : '—'), h('div', { class: 'ts muted' }, enough ? sub : sub + ' · 데이터 부족'));
+    return h('div', { class: 'tile' }, h('div', { class: 'tl' }, label), h('div', { class: 'tv' }, enough ? val : '—'), h('div', { class: 'ts muted' }, enough ? sub : sub + ' · 기록 부족'));
   }
   function viewProgress(main) {
     const m = E.metrics(D);
-    main.append(h('h1', null, '내가 실제로 나아지고 있나'));
-    main.append(h('p', { class: 'muted small' }, '활동량은 실력이 아닙니다. 실력 판단은 처음 보는 문제(새 문제·지연 확인)로만 합니다.'));
+    main.append(h('h1', null, '실력이 실제로 늘고 있을까'));
+    main.append(h('p', { class: 'muted small' }, '많이 풀었다고 실력이 는 것은 아닙니다. 실력은 처음 보는 문제(새 문제·유지 확인)로만 판단합니다.'));
     main.append(h('div', { class: 'tiles' },
-      metricTile('새 문제 정답률', m.transfer.pct + '%', `${m.transfer.n}문항 · 전이`, m.transfer.n >= 5),
-      metricTile('지연 확인 유지율', m.retention.pct + '%', `${m.retention.n}문항 · 유지`, m.retention.n >= 3),
-      metricTile('같은 함정 재발', m.recurrence.repeats + '회', `함정 오답 ${m.recurrence.trapMisses}회 중`, m.transfer.n >= 5),
+      metricTile('새 문제 정답률', m.transfer.pct + '%', `${m.transfer.n}문항`, m.transfer.n >= 5),
+      metricTile('유지 확인 정답률', m.retention.pct + '%', `${m.retention.n}문항`, m.retention.n >= 3),
+      metricTile('같은 함정에 또 걸림', m.recurrence.repeats + '회', `함정 오답 ${m.recurrence.trapMisses}회 중`, m.transfer.n >= 5),
       metricTile('확신하고 틀림', m.confidentMiss.n + '회', `새 문제 ${m.confidentMiss.of}개 중`, m.transfer.n >= 5),
-      metricTile('원본 재정답 (참고)', m.originalRedo.pct + '%', `${m.originalRedo.n}개 · 기억일 수 있음`, m.originalRedo.n >= 1),
+      metricTile('원본 다시 맞힘 (참고)', m.originalRedo.pct + '%', `${m.originalRedo.n}개 · 답을 기억했을 수 있음`, m.originalRedo.n >= 1),
       metricTile('활동', m.activity.attempts + '문항', `${m.activity.days}일 · ${Math.round(m.activity.ms / 60000)}분`, true)));
 
     // Old-site strengths: my own recurrence verdicts + where listening breaks down.
     const rc = m.recur, nRc = Object.values(rc).reduce((a, b) => a + b, 0);
     const st = m.stuck, nSt = Object.values(st).reduce((a, b) => a + b, 0);
     const bar = (label, n, of) => h('div', { class: 'hbar' }, h('span', null, label), h('div', { class: 'hb' }, h('div', { style: `width:${of ? 100 * n / of : 0}%` })), h('b', null, n));
-    main.append(h('section', { class: 'card' }, h('h2', null, '새 문제를 틀렸을 때 — 내 판정'),
-      nRc ? [bar('같은 원인으로 또', rc.same, nRc), bar('규칙 알았지만 적용 실패', rc.rulefail, nRc), bar('다른 원인', rc.other, nRc), bar('모르겠음', rc.unknown, nRc),
-        h('p', { class: 'small muted' }, '"같은 원인"이 줄고 "적용 실패"가 남아 있다면 규칙은 이해했고 실전 적용 연습이 더 필요하다는 뜻입니다.')]
-        : h('p', { class: 'muted small' }, '아직 기록 없음 — 새 문제를 틀리면 "같은 원인인지" 묻습니다.')),
-      h('section', { class: 'card' }, h('h2', null, '리스닝 오답 — 어디서 막혔나'),
+    main.append(h('section', { class: 'card' }, h('h2', null, '새 문제를 틀렸을 때 내가 고른 원인'),
+      nRc ? [bar('같은 원인으로 또', rc.same, nRc), bar('규칙은 알았는데 적용 못함', rc.rulefail, nRc), bar('다른 원인', rc.other, nRc), bar('모르겠음', rc.unknown, nRc),
+        h('p', { class: 'small muted' }, '"같은 원인"은 줄었는데 "적용 못함"이 남아 있다면, 규칙은 이해했으니 실전에서 적용하는 연습이 더 필요하다는 뜻입니다.')]
+        : h('p', { class: 'muted small' }, '아직 기록이 없습니다. 새 문제를 틀리면 같은 원인으로 틀렸는지 묻습니다.')),
+      h('section', { class: 'card' }, h('h2', null, '리스닝 오답: 어디서 막혔나'),
         nSt ? [STUCK.map(([k, label, tag]) => bar(`${label} (${tag})`, st[k], nSt)),
-          h('p', { class: 'small muted' }, `근거 구간을 다시 들었을 때: 들린다 ${m.reheard.clear} · 여전히 안 들린다 ${m.reheard.still}. "안 들렸다 + 다시 들어도 안 들림"이 많으면 소리 인식, "잊었다"가 많으면 노트·기억 유지가 우선입니다.`)]
-          : h('p', { class: 'muted small' }, '아직 기록 없음 — 리스닝 문제를 틀리면 어디서 막혔는지 묻습니다.')));
+          h('p', { class: 'small muted' }, `근거 구간을 다시 들었을 때: 들린다 ${m.reheard.clear} · 여전히 안 들린다 ${m.reheard.still}. "안 들렸다"인데 다시 들어도 안 들리는 경우가 많으면 소리 듣기를, "잊었다"가 많으면 노트와 기억하기를 먼저 연습하세요.`)]
+          : h('p', { class: 'muted small' }, '아직 기록이 없습니다. 리스닝 문제를 틀리면 어디서 막혔는지 묻습니다.')));
 
     const table = E.skillTable(D, C, now());
     main.append(h('section', { class: 'card' }, h('h2', null, '능력별 상태'),
@@ -972,11 +985,11 @@
           h('td', null, dots(r.st.recent), ' ', r.st.recent.length ? `${r.st.recent.filter(a => a.correct).length}/${r.st.recent.length}` : ''),
           h('td', null, `${r.st.reviewed}/${r.st.originals}`))))));
 
-    main.append(h('section', { class: 'card' }, h('h2', null, 'TPO 기록 (확인된 수치 · 공식 점수 환산 아님)'),
+    main.append(h('section', { class: 'card' }, h('h2', null, 'TPO 기록 (확인된 숫자만 · 공식 점수로 환산하지 않음)'),
       h('table', { class: 'grid' }, h('tr', null, h('th', null, ''), h('th', null, 'Reading'), h('th', null, 'C-Test'), h('th', null, 'Listening'), h('th', null, '오답')),
         C.tests.map(t => h('tr', null, h('td', null, `${t.id} (${t.date.slice(5)})`),
-          h('td', null, frac(t.reading)), h('td', null, frac(t.ctest)), h('td', null, t.listening ? frac(t.listening) : '분모 미상'), h('td', null, t.errors)))),
-      h('p', { class: 'small muted' }, '다음 TPO를 풀면 오답을 같은 8개 능력으로 분류해 content/originals.json에 추가하세요. 앱 안의 새 문제 결과와 실제 TPO 결과가 같은 방향인지가 최종 검증입니다.')));
+          h('td', null, frac(t.reading)), h('td', null, frac(t.ctest)), h('td', null, t.listening ? frac(t.listening) : '전체 문항 수 모름'), h('td', null, t.errors)))),
+      h('p', { class: 'small muted' }, '다음 TPO를 풀면 오답을 같은 8개 능력으로 분류해 content/originals.json에 추가하세요. 앱의 새 문제 결과와 실제 TPO 결과가 같은 방향으로 움직이는지가 가장 확실한 확인입니다.')));
   }
   function frac(x) { return x ? `${x[0]}/${x[1]} (${Math.round(100 * x[0] / x[1])}%)` : '—'; }
 
@@ -986,15 +999,15 @@
     const matrix = E.testMatrix(C);
     const table = Object.fromEntries(E.skillTable(D, C, now()).map(r => [r.skill.id, r]));
     main.append(h('h1', null, '모의고사별 오답'),
-      h('p', { class: 'muted small' }, '능력별 주 오답 개수. 회차마다 문항 수가 달라서 개수만으로 실력 변화를 단정할 수 없습니다 — 같은 능력에서 2회 이상 연속 줄어드는지를 보세요.'));
+      h('p', { class: 'muted small' }, '능력별 오답 개수입니다 (주 능력 기준). 회차마다 문항 수가 달라 개수만으로 실력 변화를 단정할 수 없으니, 같은 능력의 오답이 2회 이상 연속으로 줄어드는지 보세요.'));
     main.append(h('section', { class: 'card scroll' }, h('table', { class: 'grid matrix' },
       h('tr', null, h('th', null, '능력'), tests.map(t => h('th', null, t.id, h('br'), h('span', { class: 'muted' }, t.date.slice(5))))),
       matrix.map(r => h('tr', null, h('td', null, SKILL[r.skill].name, ' ', chip(table[r.skill].st.state)),
         r.counts.map((n, i) => h('td', { class: 'num' + (n && i && r.counts[i - 1] ? ' hot' : '') + (!n && i && r.counts[i - 1] ? ' cool' : '') }, n || '·')))),
       h('tr', null, h('td', { class: 'muted' }, '합계 (분석 불가 포함)'), tests.map(t => h('td', { class: 'num' }, C.originals.filter(o => o.test === t.id).length))))));
     const relapsed = Object.values(table).filter(r => r.st.realRelapses && r.st.realRelapses.length);
-    if (relapsed.length) main.append(h('p', { class: 'notice' }, '개선 판정 이후 실제 모의고사에서 다시 틀린 능력: ',
-      relapsed.map(r => `${r.skill.name} (${r.st.realRelapses.join(', ')})`).join(' · '), ' → 오늘 훈련에 다시 포함됩니다.'));
+    if (relapsed.length) main.append(h('p', { class: 'notice' }, '"개선"이 된 뒤 실제 모의고사에서 다시 틀린 능력: ',
+      relapsed.map(r => `${r.skill.name} (${r.st.realRelapses.join(', ')})`).join(' · '), '. 오늘 훈련에 다시 넣습니다.'));
     for (const t of tests.slice().reverse()) {
       const rep = t.report || {};
       const list = C.originals.filter(o => o.test === t.id);
@@ -1005,7 +1018,7 @@
         rep.headline ? h('p', { class: 'headline' }, rep.headline) : null,
         (rep.findings || []).length ? h('ul', { class: 'findings' }, rep.findings.map(f => h('li', null,
           h('b', null, f.skill ? SKILL[f.skill].name : '기타'), tag(f.recurrence) ? h('span', { class: 'chip rc-' + f.recurrence }, tag(f.recurrence)) : null, ' ', f.text))) : null,
-        rep.next ? h('p', { class: 'rule' }, '다음 훈련 → ', rep.next) : null,
+        rep.next ? h('p', { class: 'rule' }, '다음 훈련: ', rep.next) : null,
         h('details', null, h('summary', null, `오답 ${list.length}개 보기`),
           h('ul', { class: 'olist' }, list.map(o => h('li', { onclick: () => go('#/orig/' + o.id) },
             h('div', null, h('b', null, o.id), ' ', o.set, ' · ', h('span', { class: 'muted' }, o.qtype), ' ', SKILL[o.skill] ? h('span', { class: 'chip' }, SKILL[o.skill].name) : h('span', { class: 'chip' }, '분석 불가')),
@@ -1021,12 +1034,12 @@
     main.append(h('p', { class: 'kicker' }, h('a', { href: '#/progress' }, '← 변화')),
       h('h1', null, sk.name, ' ', chip(r.st.state)),
       h('p', null, sk.oneLine),
-      h('section', { class: 'card move' }, h('h2', null, '판단 순서'), h('ol', null, sk.move.map(m => h('li', null, m))), h('p', { class: 'warn' }, sk.warning)),
+      h('section', { class: 'card move' }, h('h2', null, '풀이 순서'), h('ol', null, sk.move.map(m => h('li', null, m))), h('p', { class: 'warn' }, sk.warning)),
       h('section', { class: 'card' }, h('h2', null, '근거와 현재 기록'),
-        h('p', null, `원본 오답: 주 ${r.ev.primary}개 · 관련 ${r.ev.secondary}개 · ${r.ev.tests.join(', ')}`),
+        h('p', null, `원본 오답: 주 원인 ${r.ev.primary}개 · 관련 ${r.ev.secondary}개 · ${r.ev.tests.join(', ')}`),
         h('p', null, '새 문제 (최근): ', dots(r.st.recent), ` 누적 ${r.st.mastery}문항`),
         r.st.dueAt ? h('p', null, `다음 유지 확인: ${fmtDate(r.st.dueAt)}`) : null,
-        h('p', { class: 'small muted' }, '개선 판정: 힌트 없이 새 문제 최근 5개 중 4개 이상 + 2개 이상의 세션 + 확신 오답 없음. 이후 지연 확인을 통과하면 "유지됨".')));
+        h('p', { class: 'small muted' }, '"개선" 기준: 힌트 없이 최근 새 문제 5개 중 4개 이상 맞힘, 2번 이상의 훈련에 걸쳐 풂, 확신하고 틀린 문제 없음. 그 뒤 유지 확인까지 통과하면 "유지됨"이 됩니다.')));
     const list = C.originals.filter(o => o.skill === id || (o.skills2 || []).includes(id));
     main.append(h('section', { class: 'card' }, h('h2', null, `원본 오답 ${list.length}개`),
       h('ul', { class: 'olist' }, list.map(o => {
@@ -1052,7 +1065,7 @@
       : h('input', { placeholder: '당시 입력한 단어', value: edit.my || '' });
     const note = h('textarea', { rows: 2, placeholder: '메모 / 실제 사고 과정' }, (st && st.note) || edit.note || '');
     main.append(h('section', { class: 'card' }, h('h2', null, '기록 수정'),
-      h('p', { class: 'small muted' }, '원본 데이터는 보존되고, 수정 내용은 따로 저장되어 화면에 "사용자 수정"으로 표시됩니다.'),
+      h('p', { class: 'small muted' }, '원본 기록은 그대로 두고, 고친 내용은 따로 저장해 화면에 "직접 수정"으로 표시합니다.'),
       st ? h('p', null, '확인한 원인: ', ({ confirm: 'AI 분석과 같음', other: '다른 이유', unknown: '기억 안 남' })[st.cause]) : null,
       h('label', { class: 'field' }, '당시 내 답', sel), note,
       h('button', { class: 'ghost', onclick: () => {
@@ -1076,7 +1089,7 @@
         const d = Store.parseImport(text);
         msg.replaceChildren(`가져올 기록: 시도 ${d.attempts.length}건. 현재 기록(${D.attempts.length}건)을 대체합니다. `,
           confirmButton('가져오기 실행', '한 번 더 누르면 대체됩니다', 'ghost', () => { D = d; save(); render(); }));
-      } catch (err) { msg.textContent = '가져오기 실패: ' + err.message + ' — 이 앱의 "내보내기"로 만든 JSON인지 확인하세요.'; }
+      } catch (err) { msg.textContent = '가져오기 실패: ' + err.message + '. 이 앱의 "내보내기"로 만든 JSON인지 확인하세요.'; }
     };
     const file = h('input', { id: 'data-file', type: 'file', accept: 'application/json', hidden: true, onchange: async e => {
       const f = e.target.files[0]; if (f) offerImport(await f.text());
@@ -1092,7 +1105,7 @@
         } }, '저장')),
       syncCard(),
       h('section', { class: 'card' }, h('h2', null, '데이터'),
-        h('p', { class: 'small muted' }, `학습 기록은 이 브라우저에만 저장됩니다 (시도 ${D.attempts.length}건). 다른 기기·브라우저로 옮기거나 백업할 때는 내보내기한 내용을 복사해 두었다가 거기서 가져오기에 붙여넣으세요.`),
+        h('p', { class: 'small muted' }, `학습 기록은 이 브라우저에만 저장됩니다 (시도 ${D.attempts.length}건). 다른 기기나 브라우저로 옮기거나 백업하려면, 내보내기로 복사한 내용을 그쪽의 가져오기 칸에 붙여넣으세요.`),
         h('div', { class: 'row' },
           h('button', { class: 'ghost', onclick: async () => {
             const json = JSON.stringify(Object.assign({ exportedAt: new Date().toISOString(), app: 'toefl-coach' }, D));
@@ -1116,7 +1129,7 @@
         box, msg,
         D.lastBackup ? h('p', { class: 'small muted' }, '마지막 내보내기: ' + new Date(D.lastBackup).toLocaleString()) : null),
       h('section', { class: 'card' }, h('h2', null, '오늘 계획 다시 만들기'),
-        h('p', { class: 'small muted' }, '진행 중인 오늘 세션을 버리고 현재 기록으로 다시 계획합니다. 이미 푼 기록은 유지됩니다.'),
+        h('p', { class: 'small muted' }, '진행 중인 오늘 훈련을 버리고 지금까지의 기록으로 계획을 다시 짭니다. 이미 푼 기록은 그대로 남습니다.'),
         h('button', { class: 'ghost', onclick: () => { D.session = null; save(); go('#/'); } }, '다시 계획')),
       h('section', { class: 'card' }, h('h2', null, '초기화'),
         h('p', { class: 'small muted' }, '모든 학습 기록을 지웁니다. 되돌릴 수 없으니 먼저 내보내기를 하세요.'),
@@ -1126,7 +1139,7 @@
 
   // ---------- boot: wait for the synced record (claude.ai) before the first real render ----------
   app.append(h('main', { class: 'page' }, h('p', { class: 'muted' }, '기록을 불러오는 중…')));
-  const boot = () => { D = Store.load(); render(); };
+  const boot = () => { D = Store.load(); keepApp().mount(); render(); };
   if (window.Sync) {
     Sync.ready.then(boot);
     Sync.onChange((what, key) => {
@@ -1135,6 +1148,7 @@
       const view = (location.hash || '#/').split('/')[1];
       if (key === 'toeflcoach.v1' && view !== 'session') { D = Store.load(); if (view !== 'sw') render(); }
       if (key.startsWith('toefl-sw') && view === 'sw' && !swApp().busy()) render();
+      if (key.startsWith('toefl-keep') && view === 'keep') render();
       if (key.startsWith('toefl-vocab') && vocabMode !== 'flow') { if (V) V.deactivate(); V = null; if (view === 'vocab') render(); }
     });
   } else boot();
