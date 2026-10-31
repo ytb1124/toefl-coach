@@ -1,6 +1,6 @@
 /* 스피킹·라이팅 파트 — 튜터 피드백(Taebin TOEFL Classes.pdf)에서 반복된 오류로 만든 별도 훈련.
  * 기록은 'toefl-sw-v1' 한 키에만 저장한다 (오늘 훈련 'toeflcoach.v1'·단어 'toefl-vocab-*'와 분리, Sync로 기기 동기화).
- * Routes: #/sw · #/sw/drill · #/sw/lr[/id] · #/sw/bs · #/sw/idea · #/sw/iv[/id] · #/sw/em[/id] · #/sw/ad[/id] · #/sw/log */
+ * Routes: #/sw · #/sw/drill · #/sw/lr[/id] · #/sw/bs · #/sw/bsz · #/sw/idea · #/sw/iv[/id] · #/sw/em[/id] · #/sw/ad[/id] · #/sw/log */
 (function () {
   'use strict';
   const KEY = 'toefl-sw-v1';
@@ -190,7 +190,7 @@
 
       const lrDone = S.lr.filter(s => (d.lr[s.id] || []).length).length;
       const mastered = Object.values(d.g).filter(c => c.box >= K.MASTER).length;
-      const bsOk = Object.values(d.bs).filter(b => b.lastOk).length;
+      const bsOk = Object.entries(d.bs).filter(([id, b]) => !/^Z\d+-BS/.test(id) && b.lastOk).length;
       const ideaOk = Object.values(d.idea).filter(b => b.lastOk).length;
       const count = k => d.log.filter(l => l.kind === k).length;
       put(main, h('section', { class: 'sw-tiles' },
@@ -198,6 +198,7 @@
         tile('#/sw/iv', '스피킹', '인터뷰 (45초)', `${count('iv')}개 답변`),
         tile('#/sw/drill', '공통', '교정 문장', `${mastered}/${S.grammar.length} 마스터`),
         tile('#/sw/bs', '라이팅', 'Build a Sentence', `${bsOk}/${S.buildSentence.length} 맞힘`),
+        tile('#/sw/bsz', '라이팅', 'Build a Sentence 오답', `독점 TPO 모의고사에서 틀린 문제 · 다시 맞힘 ${Object.entries(d.bs).filter(([id, b]) => /^Z\d+-BS/.test(id) && b.lastOk).length}`),
         tile('#/sw/em', '라이팅', '이메일 (7분)', `${count('em')}개 씀`),
         tile('#/sw/ad', '라이팅', '토론 (10분)', `${count('ad')}개 씀`),
         tile('#/sw/idea', '라이팅', '아이디어 전환 (1분)', `${ideaOk}/${S.ideas.length} 새 관점`)));
@@ -414,13 +415,24 @@
     // =====================================================================
     // Build a Sentence
     // =====================================================================
+    // source 'base' = 튜터 수업 문제(content/sw.json) · 'zhan' = 독점 TPO 모의고사에서 틀린 문제 (비공개 자료, window.ZhanData)
     let bs = null;
-    function viewBs(main) {
-      if (!bs || bs.done) {
+    function viewBs(main, source = 'base') {
+      if (source === 'zhan' && !window.ZHAN_WRITE) {
+        const ZD = window.ZhanData;
+        if (!ZD) return put(main, h('p', null, '자료를 불러올 수 없습니다.'));
+        return ZD.load('writing', 'ZHAN_WRITE', () => {
+          if (window.ZHAN_WRITE) return render();
+          put(main, ...ZD.tokenCard(h, { title: 'Build a Sentence 오답 (독점 TPO)', lead: '이 기기에 GitHub 토큰을 한 번 넣으면 모의고사에서 틀린 문제로 풀 수 있습니다 (리스닝·리딩 탭과 같은 토큰).',
+            retry: done => ZD.load('writing', 'ZHAN_WRITE', () => { done(!!window.ZHAN_WRITE); if (window.ZHAN_WRITE) { toast('연결했습니다'); render(); } }) }));
+        });
+      }
+      if (!bs || bs.done || bs.source !== source) {
         const d = load();
         const rank = b => { const r = d.bs[b.id]; return !r ? 0 : r.lastOk ? 2 + (r.ok || 0) : 1; };
-        const list = S.buildSentence.slice().sort((a, b) => rank(a) - rank(b) || (Math.random() - 0.5)).slice(0, 10);
-        bs = { list, idx: 0, ok: 0, start: now(), placed: [] };
+        const pool = source === 'zhan' ? window.ZHAN_WRITE.items : S.buildSentence;
+        const list = pool.slice().sort((a, b) => rank(a) - rank(b) || (Math.random() - 0.5)).slice(0, 10);
+        bs = { list, idx: 0, ok: 0, start: now(), placed: [], source };
       }
       if (bs.idx >= bs.list.length) return bsEnd(main);
       const q = bs.list[bs.idx];
@@ -435,8 +447,8 @@
       put(main, card);
       const sentence = h('p', { class: 'bs-sentence' }), pool = h('div', { class: 'bs-pool' }), fb = h('div');
       const checkBtn = h('button', { class: 'primary', disabled: true, onclick: check }, '확인');
-      put(card, h('div', { class: 'row tight' }, srcChip(q.src), h('span', { class: 'chip cat' }, q.point)),
-        h('p', { class: 'bs-ctx' }, h('span', { class: 'lbl' }, 'A'), ' ', q.context),
+      put(card, h('div', { class: 'row tight' }, srcChip(q.src), bs.source === 'zhan' ? h('span', { class: 'chip rc-repeat' }, '시험에서 틀린 문제') : h('span', { class: 'chip cat' }, q.point)),
+        h('p', { class: 'bs-ctx' }, h('span', { class: 'lbl' }, q.first ? 'B' : 'A'), ' ', q.context || h('span', { class: 'muted' }, '(앞 말풍선이 기록에 없음)')),
         h('p', { class: 'small muted' }, 'B의 대답을 완성하세요. 타일을 누르면 빈칸에 들어가고, 빈칸을 누르면 빠집니다. 쓰지 않는 단어가 하나 있을 수 있습니다.'),
         sentence, pool, checkBtn, fb);
       let locked = false;
@@ -466,17 +478,20 @@
         put(fb, h('div', { class: 'fb ' + (ok ? 'good' : 'bad') }, h('p', { class: 'rule' }, ok ? '✓ 정답 (1점)' : '✗ 0점 — 한 칸이라도 틀리면 0점'),
           h('p', null, h('span', { class: 'lbl' }, '정답'), ' ', answerText.charAt(0).toUpperCase() + answerText.slice(1)),
           (q.extra || []).length ? h('p', { class: 'small muted' }, '남는 단어: ' + q.extra.join(', ')) : null,
-          h('p', { class: 'small' }, q.point),
+          q.my ? h('p', { class: 'small' }, h('span', { class: 'lbl' }, '시험 때 내 답'), ' ', fillT(q.template, q.my)) : null,
+          q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
+          q.point ? h('p', { class: q.whyKo ? 'rule small' : 'small' }, q.whyKo ? '다음엔 → ' : '', q.point) : null,
           h('button', { class: 'primary', onclick: () => { bs.idx++; render(); } }, '다음')));
       }
     }
+    function fillT(template, tiles) { let k = 0; return template.replace(/_/g, () => tiles[k++] || '___'); }
     function bsEnd(main) {
       bs.done = true;
       const secs = (now() - bs.start) / 1000;
       put(main, back('#/sw', '스피킹·라이팅'), h('section', { class: 'card' }, h('h1', null, `Build a Sentence ${bs.ok} / ${bs.list.length}`),
         h('p', null, `걸린 시간 ${mmss(secs)} (실전 10문제 7분)`),
         h('p', { class: 'small muted' }, '자주 나오는 문법: 부정문, 의문문 도치, wh-의문문의 조동사, 간접의문문(도치 취소), 관계절.'),
-        h('button', { class: 'primary', onclick: () => { bs = null; render(); } }, '10문제 더'),
+        h('button', { class: 'primary', onclick: () => { bs = null; render(); } }, bs.source === 'zhan' ? '다시 섞어서 풀기' : '10문제 더'),
         h('a', { class: 'ghost wide as-btn', href: '#/sw' }, '스피킹·라이팅 홈으로')));
     }
 
@@ -782,6 +797,7 @@
       if (mode === 'drill') return viewDrill(main);
       if (mode === 'lr') return id ? viewLr(main, id) : viewLrList(main);
       if (mode === 'bs') return viewBs(main);
+      if (mode === 'bsz') return viewBs(main, 'zhan');
       if (mode === 'idea') return viewIdea(main);
       if (mode === 'iv') return id ? viewIv(main, id) : viewIvList(main);
       if (mode === 'em' || mode === 'ad') return id ? viewW(main, mode, id) : viewWList(main, mode);

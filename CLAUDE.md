@@ -85,6 +85,11 @@ node --test tests/engine.test.js
 - 리딩 리포트 workflowId는 리스닝과 다르다: toefl-mokao.zhan.com 페이지에서 `POST /mokaoapi/api/singleSubject/query_completed_practice_records` `{userId: sessionStorage.userId, platform:'BK', practiceType:1}`(1=리딩, 2=리스닝)로 목록을 받는다. 리포트 URL `newMock/report?paperId=&workflowId=&subject=read`.
 - 지문 표기: C-Test 빈칸 `【n】`(앞 글자는 지문에 있음), 문장 삽입 위치 `[[iA]]`, 문장 고르기 표시 `[[sA]]`. 오답은 앱 리딩 원본과 질문 문장 / C-Test 단어로 연결된다.
 
+## Build a Sentence 오답 (독점 TPO 라이팅 Task 1, `#/sw/bsz`)
+- 말하기·쓰기 탭의 Build a Sentence 드릴을 `source: 'zhan'`으로 연다 (`app/sw.js` viewBs). 기록은 같은 `toefl-sw-v1`의 `bs`에 `Z<N>-BS<n>` 키로.
+- 자료: 라이팅 리포트(`subject=write`, 목록은 practiceType 4)의 WritingTab props `tasks[0].questions` → `private/zhan/writing/Mock_Test_<N>_<wf>.json` (+ `writing/ko.json`) → `python3 tools/zhan_write.py` → `private/zhan/writing.js`·`writing.json`.
+- 말풍선 A가 데이터에 없으면 해설 첫 줄/题干에서 영어 문장을 찾고, 정답 문장 자체면 버린다 (없으면 '기록 없음' 표시).
+
 ## 배포
 - `main`에 푸시하면 GitHub Pages(https://taebin.link/toefl-coach/)가 자동 갱신된다. 저장소는 공개 — 키·토큰 등 비밀 값을 커밋하지 않는다 (jsonbin 키는 각 기기 브라우저에만 저장).
 - claude.ai 버전은 `artifact.html` + app/* + audio/*를 Artifact로 다시 게시해야 갱신된다 (capabilities: db, user).
