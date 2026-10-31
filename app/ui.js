@@ -285,7 +285,29 @@
         h('ul', { class: 'wordlist' }, api.chunkWords(next).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko))))));
       main.append(sec);
     }
+    main.append(h('details', { class: 'card' }, h('summary', null, '단어 기록 내보내기 (파일 저장)'), vocabExportCard(api)));
     main.append(h('details', { class: 'card' }, h('summary', null, '단어장 기록 다시 가져오기'), vocabImportCard(api, false)));
+  }
+
+  // The same code the import box accepts, saved as a file (Safari keeps its storage out of reach of other apps).
+  function vocabExportCard(api) {
+    const msg = h('p', { class: 'small', role: 'status' });
+    const name = () => `vocab-export-${E.dayStr(now())}.txt`;
+    const save = () => {
+      try {
+        const a = h('a', { href: URL.createObjectURL(new Blob([api.exportCode()], { type: 'text/plain' })), download: name() });
+        document.body.append(a); a.click(); a.remove();
+        msg.textContent = `${name()} 을(를) 다운로드 폴더에 저장했습니다.`;
+      } catch (e) { msg.textContent = '저장 실패: ' + e.message; }
+    };
+    const copy = async () => {
+      try { await navigator.clipboard.writeText(api.exportCode()); msg.textContent = '코드를 복사했습니다.'; }
+      catch (e) { msg.textContent = '복사 실패: ' + e.message; }
+    };
+    return h('section', null,
+      h('p', { class: 'muted small' }, '단어별 학습 기록(찍음/애매/마스터, 틀린 횟수·날짜)을 코드 파일로 저장합니다. 다른 브라우저의 "단어장 기록 다시 가져오기"에 붙여넣으면 그대로 옮겨집니다. 기록은 바뀌지 않습니다.'),
+      h('div', { class: 'row' }, h('button', { class: 'primary', onclick: save }, '파일로 저장'), h('button', { class: 'ghost', onclick: copy }, '코드 복사')),
+      msg);
   }
 
   function vocabImportCard(api, first) {
