@@ -90,6 +90,11 @@ node --test tests/engine.test.js
 - 자료: 라이팅 리포트(`subject=write`, 목록은 practiceType 4)의 WritingTab props `tasks[0].questions` → `private/zhan/writing/Mock_Test_<N>_<wf>.json` (+ `writing/ko.json`) → `python3 tools/zhan_write.py` → `private/zhan/writing.js`·`writing.json`.
 - 말풍선 A가 데이터에 없으면 해설 첫 줄/题干에서 영어 문장을 찾고, 정답 문장 자체면 버린다 (없으면 '기록 없음' 표시).
 
+## 한국어로 풀어 보기 (`#/ko`, 오답 원인 가르기)
+- 시험에서 틀린 독점 TPO 리딩·리스닝 세트를 한국어 번역으로 푼다. 한국어로 맞히면 '영어 이해 문제', 또 틀리면 '판단 문제' (어휘 문제는 진단 제외). 코드 `app/kotrial.js` (`tests/kotrial.test.js`), 기록 키 `toefl-ko-v1` (오늘 훈련 원본 기록과 섞지 않음).
+- 자료: `private/zhan/kotrial/ko.json` (세트 id → 번역; 스크립트 줄·문항·보기 순서는 영어와 같게) → `python3 tools/zhan_ko.py` → `private/zhan/kotrial.js`·`kotrial.json`. 번역도 비공개 저장소에만.
+- 번역 규칙: 정답 보기와 지문/스크립트의 표면 어휘가 영어보다 더 겹치지 않게 (정답이 드러나지 않게), 영어의 단서는 빠뜨리지 않게. 번역 후 독립 검토를 한 번 받는다.
+
 ## 배포
 - `main`에 푸시하면 GitHub Pages(https://taebin.link/toefl-coach/)가 자동 갱신된다. 저장소는 공개 — 키·토큰 등 비밀 값을 커밋하지 않는다 (jsonbin 키는 각 기기 브라우저에만 저장).
 - claude.ai 버전은 `artifact.html` + app/* + audio/*를 Artifact로 다시 게시해야 갱신된다 (capabilities: db, user).

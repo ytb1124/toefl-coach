@@ -108,6 +108,7 @@
     else if (view === 'sw') swApp().view(main, (location.hash || '').split('/').slice(2), render);
     else if (view === 'listen') listenApp().view(main, (location.hash || '').split('/').slice(2), render);
     else if (view === 'read') readApp().view(main, (location.hash || '').split('/').slice(2));
+    else if (view === 'ko') koApp().view(main, (location.hash || '').split('/').slice(2));
     else viewToday(main);
   }
   function nav(cur) {
@@ -208,6 +209,8 @@
   const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
   let RD = null;
   const readApp = () => RD || (RD = ReadApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
+  let KO = null;
+  const koApp = () => KO || (KO = KoTrialApp.create({ h, toast, go, storage: window.Sync || localStorage }));
 
   // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
   let V = null, vocabMode = 'home';

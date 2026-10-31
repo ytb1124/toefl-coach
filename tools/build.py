@@ -439,6 +439,7 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 <script src="app/sw.js"></script>
 <script src="app/listen.js"></script>
 <script src="app/read.js"></script>
+<script src="app/kotrial.js"></script>
 <script src="app/ui.js"></script>
 """
 

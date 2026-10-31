@@ -210,7 +210,8 @@
         h('p', { class: 'muted' }, `독점 TPO ${Z.tests.length}회에서 틀린 ${wrongTotal}문항이 들어 있는 ${Z.sets.length}세트. 원본 음원으로 시험처럼 한 번 듣고 풀고, 끝나면 스크립트·해설을 봅니다.`),
         h('p', { class: 'small' }, `또 틀림 ${counts.again} · 아직 안 풂 ${counts.new} · 다시 풀어 맞힘 ${counts.fixed}`),
         h('p', { class: 'small muted' }, '오늘 훈련에서 같은 원본 문제를 다시 푼 기록도 함께 셉니다 (가장 최근 결과 기준).'),
-        q.length ? h('button', { class: 'primary', onclick: () => go('#/listen/' + q[0].id) }, `다음 세트: ${q[0].title} (${testName(Z, q[0].test)})`) : null));
+        q.length ? h('button', { class: 'primary', onclick: () => go('#/listen/' + q[0].id) }, `다음 세트: ${q[0].title} (${testName(Z, q[0].test)})`) : null,
+        h('p', { class: 'small' }, h('a', { href: '#/ko' }, '한국어로 풀어 보기 →'), h('span', { class: 'muted' }, ' 틀린 이유가 영어인지 판단인지 가르기'))));
       for (const t of Z.tests.slice().reverse()) {
         const sets = Z.sets.filter(s => s.test === t.id);
         main.append(h('section', { class: 'card' },
