@@ -95,6 +95,11 @@ node --test tests/engine.test.js
 - 자료: `private/zhan/kotrial/ko.json` (세트 id → 번역; 스크립트 줄·문항·보기 순서는 영어와 같게) → `python3 tools/zhan_ko.py` → `private/zhan/kotrial.js`·`kotrial.json`. 번역도 비공개 저장소에만.
 - 번역 규칙: 정답 보기와 지문/스크립트의 표면 어휘가 영어보다 더 겹치지 않게 (정답이 드러나지 않게), 영어의 단서는 빠뜨리지 않게. 번역 후 독립 검토를 한 번 받는다.
 
+## 단어 킵 (`#/keep`)
+- 어느 화면에서든 영어 단어(1~4단어)를 선택하면 "+ 단어 킵" 버튼이 뜨고, 그 문장과 함께 저장한다. 단어장(`content/vocab`)에 있으면 뜻을 자동으로 채운다 (`VocabApp.lookup`, `content/vocab/patch.js`).
+- 코드 `app/keep.js` (`tests/keep.test.js`), 기록 키 `toefl-keep-v1` (Sync로 동기화). '단어' 탭 위 카드에서 목록으로 간다.
+- `app/vocab.js`는 빌드 생성 파일이다: 단어 화면 문구는 `content/vocab/source.html`·`patch.js`에서 고친다.
+
 ## 배포
 - `main`에 푸시하면 GitHub Pages(https://taebin.link/toefl-coach/)가 자동 갱신된다. 저장소는 공개 — 키·토큰 등 비밀 값을 커밋하지 않는다 (jsonbin 키는 각 기기 브라우저에만 저장).
 - claude.ai 버전은 `artifact.html` + app/* + audio/*를 Artifact로 다시 게시해야 갱신된다 (capabilities: db, user).
