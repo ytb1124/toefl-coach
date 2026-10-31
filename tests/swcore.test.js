@@ -6,6 +6,11 @@ const path = require('path');
 const K = require('../app/swcore.js');
 
 const SW = JSON.parse(fs.readFileSync(path.join(__dirname, '../content/sw.json'), 'utf8'));
+// 소站 원문과 같은 문제 문장은 비공개 저장소(private/zhan/sw_private.json)에 있다: 있으면 합치고, 없으면 그 문제는 검사에서 뺀다.
+const SWP = path.join(__dirname, '../private/zhan/sw_private.json');
+if (fs.existsSync(SWP)) { const pv = JSON.parse(fs.readFileSync(SWP, 'utf8')); for (const k of Object.keys(pv)) for (const it of SW[k] || []) Object.assign(it, pv[k][it.id] || {}); }
+for (const k of ['email', 'discussion']) SW[k] = SW[k].filter(it => !it.private || it.prof || it.tasks);
+SW.ideas = SW.ideas.filter(q => !q.ad || SW.discussion.some(d => d.id === q.ad));
 const T0 = new Date(2026, 9, 22, 9).getTime();
 
 test('tokens: digits, times, contractions and punctuation normalize like the TTS script', () => {

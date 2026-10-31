@@ -4,7 +4,7 @@
 
   const DAY = 86400000;
   // Mastery-relevant tiers: only new questions answered without hints.
-  const MASTERY_TIERS = ['transfer', 'mixed', 'delayed'];
+  const MASTERY_TIERS = ['transfer', 'mixed', 'delayed', 'verify-twin'];
   const STATE_LABEL = {
     NEW: '새로움', UNDERSTOOD: '이해함', PRACTICING: '훈련 중', VERIFYING: '검증 중',
     IMPROVED: '개선됨', RETAINED: '유지됨', RELAPSED: '재발',
@@ -63,7 +63,9 @@
     // A real mock-test error is an event too: if it happens after the skill was judged improved, that is a relapse.
     const dates = testDates(content.tests);
     const realTest = origs.filter(o => dates[o.test]).map(o => ({ tier: 'realtest', ref: o.id, test: o.test, at: dayStart(dates[o.test]) + DAY / 2 })).filter(e => !now || e.at <= now);
-    const events = data.attempts.filter(a => a.skill === skillId).concat(realTest).sort((a, b) => a.at - b.at);
+    // 숙달 판정은 소站 새 문제로만: 없어진 AI 연습 문제의 시도는 기록에 남지만 판정에서 뺀다 (legacyAttempts로 셀 수 있음).
+    const idx = content.pool ? poolIndex(content) : null;
+    const events = data.attempts.filter(a => a.skill === skillId && !(idx && a.item && !idx[a.item])).concat(realTest).sort((a, b) => a.at - b.at);
     const realRelapses = [];
     let state = 'NEW'; let interval = 0; let dueAt = null; let since = null;
     const mastery = []; const guided = []; let relapseStreak = 0;
@@ -145,11 +147,69 @@
     });
   }
 
-  // ---------- item pools ----------
-  function seenItems(data, tiers) {
-    const m = new Map();
-    for (const a of data.attempts) if (a.item && (!tiers || tiers.includes(a.tier))) m.set(a.item, Math.max(m.get(a.item) || 0, a.at));
+  // ---------- practice pool: 소站 TPO独家 문항 (content.pool = 공개 메타데이터; 원문은 비공개 ZHAN_POOL) ----------
+  // Unit of practice ('item'): a reading set (C-Test passage, daily/academic passage), a listening set
+  // (conversation/announcement/lecture), or one Listen & Reply question (each has its own audio).
+  const ITEM_MIN = { ctest: 6, daily: 1.6, academic: 2, reply: 0.6, conversation: 2.5, announcement: 2, lecture: 5 };
+  const poolCache = new WeakMap();
+  function dominant(qs) {
+    const c = {}; for (const q of qs) if (q.skill) c[q.skill] = (c[q.skill] || 0) + 1;
+    return Object.keys(c).sort((a, b) => c[b] - c[a])[0] || null;
+  }
+  function poolItems(content) {
+    const pool = content.pool;
+    if (!pool) return [];
+    if (poolCache.has(pool)) return poolCache.get(pool);
+    const out = [];
+    for (const s of pool.sets) {
+      if (s.sec !== 'R' && s.sec !== 'L') continue;
+      const base = { sec: s.sec, kind: s.kind, paper: s.paper, held: !!s.held, zdate: s.zdate || null, set: s.id };
+      if (s.kind === 'reply') {
+        for (const q of s.qs) out.push(Object.assign({}, base, { id: q.id, skill: q.skill, skills: [q.skill], qs: [q], z: q.z || 0, minutes: ITEM_MIN.reply }));
+      } else {
+        const skills = [...new Set(s.qs.map(q => q.skill).filter(Boolean))];
+        const z = s.qs.some(q => q.z === -1) ? -1 : s.qs.some(q => q.z === 1) ? 1 : 0;
+        const m = s.kind === 'daily' || s.kind === 'academic' ? ITEM_MIN[s.kind] * s.qs.length + (s.kind === 'academic' ? 3 : 1) : (ITEM_MIN[s.kind] || 2);
+        out.push(Object.assign({}, base, { id: s.id, skill: dominant(s.qs), skills, qs: s.qs, z, minutes: m }));
+      }
+    }
+    poolCache.set(pool, out);
+    return out;
+  }
+  function itemMinutes(item) { return item.minutes || 1.5; }
+  const idxCache = new WeakMap();
+  function poolIndex(content) {
+    if (content.pool && idxCache.has(content.pool)) return idxCache.get(content.pool);
+    const m = {}; for (const i of poolItems(content)) m[i.id] = i;
+    if (content.pool) idxCache.set(content.pool, m);
     return m;
+  }
+
+  function seenItems(data, extra) {
+    const m = new Map();
+    for (const a of data.attempts) if (a.item && a.tier !== 'original') m.set(a.item, Math.max(m.get(a.item) || 0, a.at));
+    if (extra) for (const [id, at] of extra) m.set(id, Math.max(m.get(id) || 0, at || 0));
+    return m;
+  }
+
+  // New questions for a skill: never answered in this app, not held back for the mock modules, not flagged.
+  // Order: sets I never answered on 소站 first, then those I got right there longest ago; sets I got wrong
+  // on 소站 are my original errors (re-solved elsewhere), so they come last.
+  function freshPool(content, data, opts) {
+    const o = opts || {};
+    const seen = o.seen || seenItems(data);
+    const flagged = data.flags || {};
+    const rank = i => (i.z === -1 ? 2 : i.z === 1 ? 1 : 0);
+    return poolItems(content)
+      .filter(i => !i.held && !seen.has(i.id) && !flagged[i.id] && !(o.exclude && o.exclude.has(i.id)))
+      .filter(i => (!o.skill || i.skills.includes(o.skill)) && (!o.sec || i.sec === o.sec) && (!o.kinds || o.kinds.includes(i.kind)))
+      .sort((a, b) => rank(a) - rank(b) || (a.zdate || '').localeCompare(b.zdate || '') || a.paper - b.paper || (a.id < b.id ? -1 : 1));
+  }
+
+  // Kept for callers: new items for a skill (section alternates with where the latest real errors were).
+  function pickItems(content, data, skillId, tier, n, exclude) {
+    const fresh = freshPool(content, data, { skill: skillId, exclude });
+    return interleaveBySection(fresh, latestSection(content, skillId)).slice(0, n).map(i => ({ item: i, repeat: false }));
   }
 
   // Section ('R' | 'L') where this skill's errors in the most recent mock test that had any were concentrated.
@@ -161,42 +221,16 @@
     const recent = origs.filter(o => dates[o.test] === last);
     return recent.filter(o => o.sec === 'L').length > recent.length / 2 ? 'L' : 'R';
   }
-
-  // Alternate reading / listening items, starting with `first`, so a skill tested in both sections
-  // isn't drilled only in whichever section happens to come first in the item files.
   function interleaveBySection(items, first) {
-    const L = items.filter(i => i.audio); const R = items.filter(i => !i.audio);
+    const L = items.filter(i => i.sec === 'L'); const R = items.filter(i => i.sec !== 'L');
     const [a, b] = first === 'L' ? [L, R] : [R, L];
     const out = [];
     for (let k = 0; k < Math.max(a.length, b.length); k++) { if (a[k]) out.push(a[k]); if (b[k]) out.push(b[k]); }
     return out;
   }
 
-  function pickItems(content, data, skillId, tier, n, exclude) {
-    const flagged = data.flags || {};
-    const pool = content.items.filter(i => i.skill === skillId && i.tier === tier && i.qa === 'pass' && !flagged[i.id] && !exclude.has(i.id));
-    const seen = seenItems(data, tier === 'guided' ? ['guided'] : MASTERY_TIERS.concat(['repeat']));
-    const fresh = interleaveBySection(pool.filter(i => !seen.has(i.id)), latestSection(content, skillId));
-    const out = fresh.slice(0, n).map(i => ({ item: i, repeat: false }));
-    if (out.length < n && tier === 'guided') {
-      // Guided items may be reused (they only scaffold, never count for mastery).
-      const old = pool.filter(i => seen.has(i.id)).sort((a, b) => seen.get(a.id) - seen.get(b.id));
-      for (const i of old) { if (out.length >= n) break; out.push({ item: i, repeat: true }); }
-    }
-    return out;
-  }
-
-  function oldestSeenTransfer(content, data, skillId, exclude) {
-    const seen = seenItems(data, MASTERY_TIERS.concat(['repeat']));
-    const pool = content.items.filter(i => i.skill === skillId && i.tier === 'transfer' && seen.has(i.id) && !exclude.has(i.id))
-      .sort((a, b) => seen.get(a.id) - seen.get(b.id));
-    return pool[0] || null;
-  }
-
-  function itemMinutes(item) { return (MINUTES[item.kind] || 1.5) * (item.kind === 'listen' ? 1 : (item.qs ? item.qs.length : 1)); }
-
   // ---------- every original error, spread over the days left ----------
-  // fresh = never re-solved (here or in the 리딩·리스닝 tabs), newest test first · again = latest re-solve was wrong (not today).
+  // fresh = never re-solved or diagnosed (here or in the 리딩·리스닝 tabs), newest test first · again = latest full re-solve was wrong (not today).
   function originalQueue(content, data, now) {
     const dates = testDates(content.tests);
     const last = {};
@@ -204,36 +238,32 @@
     const origs = content.originals.filter(analyzable);
     const fresh = origs.filter(o => !last[o.id])
       .sort((a, b) => (dates[b.test] || '').localeCompare(dates[a.test] || '') || (b.my != null) - (a.my != null));
-    const again = origs.filter(o => last[o.id] && !last[o.id].correct && last[o.id].at < dayStart(dayStr(now)))
+    const again = origs.filter(o => last[o.id] && !last[o.id].diag && last[o.id].correct === false && last[o.id].at < dayStart(dayStr(now)))
       .sort((a, b) => last[a.id].at - last[b.id].at);
     return { fresh, again, total: origs.length };
   }
-  // How many originals today: enough to finish every unseen one by the day before the exam, capped at ~45% of the daily time.
-  function originalQuota(nFresh, nAgain, left, minutes) {
-    const cap = Math.max(4, Math.round(minutes * 0.45 / MINUTES.original));
+  function originalQuota(nFresh, nAgain, left, cap) {
     const days = left == null ? 7 : Math.max(1, left - 1);
-    // Unseen ones first (they must all be covered); still-wrong ones get at least 2 and whatever room is left.
     const needFresh = Math.min(nFresh, Math.ceil(nFresh / days));
-    const again = Math.min(nAgain, Math.max(2, cap - needFresh));
-    return { again, fresh: Math.max(0, Math.min(cap - again, needFresh)) };
+    const again = Math.min(nAgain, Math.max(1, Math.round(cap / 3)));
+    return { again, fresh: Math.max(0, Math.min(Math.max(cap - again, needFresh), needFresh)) };
   }
 
-  // ---------- "did I know it, or was it luck?": re-ask questions answered right a few days ago ----------
-  const VERIFY_RATIO = 0.25; // one re-check per four other questions
-  // Latest run of each item / original that ended correct, ≥ gap days ago, and not yet confirmed (correct + 보통/확신 on a re-check).
+  // ---------- "did I know it, or was it luck?": things answered right a few days ago ----------
+  // Latest run of each item / original that ended correct, ≥ gap days ago, and not yet confirmed.
   function verifyPool(content, data, now, gap) {
     const cutoff = dayStart(dayStr(now)) - (gap - 1) * DAY;
-    const runs = {};   // key → attempts of the latest day
+    const runs = {};
     for (const a of data.attempts) {
-      const key = a.item ? 'i:' + a.item : a.tier === 'original' && a.ref ? 'o:' + a.ref : null;
-      if (!key || a.tier === 'guided') continue;
+      const key = a.item ? 'i:' + a.item : a.tier === 'original' && a.ref && !a.diag ? 'o:' + a.ref : null;
+      if (!key || a.tier === 'guided' || a.twin) continue;
       const d = dayStr(a.at);
       const r = runs[key];
       if (!r || d > r.day) runs[key] = { day: d, at: a.at, list: [a] };
       else if (d === r.day) { r.list.push(a); r.at = Math.max(r.at, a.at); }
     }
-    const confirmed = new Set(data.attempts.filter(a => a.verify && a.correct && a.conf >= 2).map(a => a.item ? 'i:' + a.item : 'o:' + a.ref));
-    const items = Object.fromEntries(content.items.map(i => [i.id, i]));
+    const confirmed = new Set(data.attempts.filter(a => a.verify && a.correct && a.conf >= 2).map(a => a.verifyOf || (a.item ? 'i:' + a.item : 'o:' + a.ref)));
+    const items = poolIndex(content);
     const origs = Object.fromEntries(content.originals.map(o => [o.id, o]));
     const flagged = data.flags || {};
     const out = [];
@@ -243,174 +273,286 @@
       const conf = Math.min(...r.list.map(a => a.conf || 2));
       if (key[0] === 'i') {
         const it = items[id];
-        if (!it || it.tier !== 'transfer' || flagged[id]) continue;
-        out.push({ kind: 'item', id, skill: it.skill, minutes: itemMinutes(it), conf, at: r.at });
+        if (!it || flagged[id]) continue;     // old AI practice items no longer exist → skipped (their attempts stay in the log)
+        out.push({ kind: 'item', key, id, skill: it.skill, type: it.kind, sec: it.sec, conf, at: r.at });
       } else if (origs[id] && analyzable(origs[id])) {
-        out.push({ kind: 'original', id, skill: origs[id].skill, minutes: MINUTES.original, conf, at: r.at });
+        const o = origs[id];
+        out.push({ kind: 'original', key, id, skill: o.skill, type: origKind(o), sec: o.sec, conf, at: r.at });
       }
     }
-    // Guesses (찍음) first, then the oldest.
     return out.sort((a, b) => a.conf - b.conf || a.at - b.at);
   }
+  // Pool kind that matches an original error (for twins).
+  function origKind(o) {
+    if (o.ctest || /c-test/i.test(o.qtype || '')) return 'ctest';
+    if (o.sec === 'L') return /reply|response/i.test((o.qtype || '') + ' ' + (o.set || '')) ? 'reply' : /lecture|talk/i.test((o.qtype || '') + ' ' + (o.set || '')) ? 'lecture' : 'conversation';
+    return /academic|passage/i.test((o.qtype || '') + ' ' + (o.set || '')) ? 'academic' : 'daily';
+  }
+  // Twin check: instead of re-asking the same question, a new 소站 question of the same skill and type.
+  // If the pool has none left, the same question again (only when ≥ 3 days have passed).
+  function twinFor(v, content, data, now, exclude) {
+    const seen = seenItems(data);
+    let pool = freshPool(content, data, { seen, skill: v.skill, kinds: [v.type], exclude });
+    if (!pool.length) pool = freshPool(content, data, { seen, skill: v.skill, sec: v.sec, exclude });
+    if (pool.length) return { twin: true, item: pool[0] };
+    if (v.at <= dayStart(dayStr(now)) - 2 * DAY) return { twin: false, item: v.kind === 'item' ? poolIndex(content)[v.id] : null, ref: v.kind === 'original' ? v.id : null };
+    return null;
+  }
 
-  // ---------- daily session ----------
-  function buildSession(data, content, now) {
-    const minutes = (data.settings && data.settings.minutes) || 40;
+  // ---------- why a wrong answer happened → what comes next (모든 화면 공통) ----------
+  // cause: sound 안 들렸다 · memory 들었는데 잊었다 · vocab 뜻을 몰랐다 · judge 선택지에서 헷갈렸다 ·
+  //        time (리딩) 시간 부족 · omit (L&R) 빠뜨림 · grammar (말하기·쓰기) 문법 · structure (쓰기) 구조·아이디어
+  // Old records used `stuck` (sound/memory/judge/vocab) for listening — read as the same cause.
+  const CAUSES = ['sound', 'memory', 'vocab', 'judge', 'time', 'omit', 'grammar', 'structure'];
+  function causeOf(a) { return a.cause || a.stuck || null; }
+  // Queues for the next days, from wrong answers with a cause that have not been followed up yet.
+  function causeQueues(data, now, extra) {
+    const done = data.followups || {};   // key → at (dictation done, two-pass listen done, …)
+    const q = { dictation: [], twoPass: [], judge: [], timed: [], shadow: [], fix: [], outline: [] };
+    const seenKey = new Set();
+    const list = data.attempts.concat((extra && extra.attempts) || []).filter(a => !a.correct && causeOf(a)).sort((a, b) => a.at - b.at);
+    for (const a of list) {
+      const target = a.item || a.ref; if (!target) continue;
+      const c = causeOf(a);
+      const route = c === 'sound' ? 'dictation' : c === 'memory' ? 'twoPass' : c === 'judge' ? 'judge' : c === 'time' ? 'timed' : c === 'omit' ? 'shadow' : c === 'grammar' ? 'fix' : c === 'structure' ? 'outline' : null;
+      if (!route) continue;
+      const key = route + ':' + target + (a.q != null ? '#' + a.q : '');
+      if (seenKey.has(key) || (done[key] && done[key] >= a.at)) continue;
+      seenKey.add(key);
+      q[route].push({ key, item: a.item || null, ref: a.ref || null, q: a.q == null ? null : a.q, skill: a.skill, at: a.at, missed: a.missed, cats: a.cats });
+    }
+    return q;
+  }
+
+  // ---------- daily plan: 6 blocks, minutes = total × weight ----------
+  const BLOCKS = ['vocab', 'listen', 'read', 'speak', 'write', 'wrap'];
+  const BASE_WEIGHTS = { vocab: 10, listen: 30, read: 15, speak: 15, write: 20, wrap: 10 };
+  function weekKey(t) {
+    const d = new Date(dayStart(dayStr(t))); const day = (d.getDay() + 6) % 7; d.setDate(d.getDate() - day + 3);
+    const y = d.getFullYear(); const w1 = new Date(y, 0, 4);
+    return y + '-W' + String(1 + Math.round(((d - w1) / DAY - 3 + ((w1.getDay() + 6) % 7)) / 7)).padStart(2, '0');
+  }
+  // Weights in percent. settings.weights: values the learner fixed (those never auto-change).
+  // data.weightAuto = {week, adj}: once a week, an area whose leading indicator did not improve gets +5%p.
+  function weights(data) {
+    const fixed = (data.settings && data.settings.weights) || {};
+    const adj = (data.weightAuto && data.weightAuto.adj) || {};
+    const w = {};
+    for (const k of BLOCKS) w[k] = fixed[k] != null ? +fixed[k] : BASE_WEIGHTS[k] + (adj[k] || 0);
+    const free = BLOCKS.filter(k => fixed[k] == null);
+    const sum = BLOCKS.reduce((s, k) => s + w[k], 0);
+    if (sum !== 100 && free.length) {
+      const fixedSum = BLOCKS.filter(k => fixed[k] != null).reduce((s, k) => s + w[k], 0);
+      const freeSum = free.reduce((s, k) => s + w[k], 0) || 1;
+      for (const k of free) w[k] = Math.max(0, (100 - fixedSum) * w[k] / freeSum);
+    }
+    return w;
+  }
+  // indicators: {area: {now, prev, higherIsBetter}} for the last 7 days vs the 7 before (null = not enough data).
+  function weeklyAdjust(data, now, indicators) {
+    const wk = weekKey(now);
+    const cur = data.weightAuto || { week: null, adj: {} };
+    if (cur.week === wk) return cur;
+    const fixed = (data.settings && data.settings.weights) || {};
+    const adj = Object.assign({}, cur.adj);
+    const notImproved = [];
+    for (const k of ['listen', 'read', 'vocab', 'speak', 'write']) {
+      const ind = indicators && indicators[k];
+      if (fixed[k] != null || !ind || ind.now == null || ind.prev == null) continue;
+      const better = ind.higherIsBetter === false ? ind.now < ind.prev : ind.now > ind.prev;
+      if (!better) { adj[k] = Math.min(20, (adj[k] || 0) + 5); notImproved.push(k); }
+    }
+    return { week: wk, adj, raised: notImproved, at: now };
+  }
+  // Accuracy of new questions (R / L) in a window of days ending today — the leading indicator for those areas.
+  function areaAccuracy(data, content, now, sec, fromDay, toDay) {
+    const idx = poolIndex(content);
+    const t0 = dayStart(dayStr(now)) - fromDay * DAY; const t1 = dayStart(dayStr(now)) - toDay * DAY;
+    const xs = data.attempts.filter(a => a.item && idx[a.item] && idx[a.item].sec === sec && ['transfer', 'mixed', 'delayed'].includes(a.tier) && a.at >= t0 && a.at < t1);
+    return xs.length >= 5 ? xs.filter(a => a.correct).length / xs.length : null;
+  }
+
+  // ctx (from the UI, all optional): seen (Map item→at from the 리딩·리스닝 tabs), vocab {hard, due},
+  // speak {lrSets:[ids], interview:[ids]}, write {tasks:[{id,kind}], errorCats:[cat]}, extraAttempts.
+  function buildPlan(data, content, now, ctx) {
+    ctx = ctx || {};
+    const minutes = Math.max(10, +((data.settings && data.settings.minutes) || 60));
     const left = daysLeft(data.settings && data.settings.examDate, now);
-    const table = skillTable(data, content, now);
+    const w = weights(data);
+    const mins = Object.fromEntries(BLOCKS.map(k => [k, Math.round(minutes * w[k] / 100)]));
+    const seen = seenItems(data, ctx.seen);
     const used = new Set();
-    const steps = [];
-    let budget = 0;
-    const add = (s, m) => { steps.push(s); budget += m; };
-    const reviewedOrig = new Set(data.attempts.filter(a => a.tier === 'original').map(a => a.ref));
-    const dates = testDates(content.tests);
+    const table = skillTable(data, content, now);
+    const prio = Object.fromEntries(table.map(r => [r.skill.id, r.pr]));
+    const cq = causeQueues(data, now, { attempts: ctx.extraAttempts });
+    const blocks = Object.fromEntries(BLOCKS.map(k => [k, { key: k, minutes: mins[k], tasks: [], carried: 0 }]));
+    const take = (blk, task, m) => { const b = blocks[blk]; b.tasks.push(Object.assign({ min: m }, task)); if (task.item) used.add(task.item); };
+    const room = blk => blocks[blk].minutes - blocks[blk].tasks.reduce((s, t) => s + (t.min || 0), 0);
+    // Within a block, the skill with the longest queue / most frequent errors comes first.
+    const byPrio = (a, b) => (prio[b.skill] || 0) - (prio[a.skill] || 0);
+    const freshOf = o => freshPool(content, data, Object.assign({ seen, exclude: used }, o));
 
-    // 1. Retention checks for improved skills that are due.
-    const dueSkills = table.filter(r => ['IMPROVED', 'RETAINED'].includes(r.st.state) && r.due).sort((a, b) => a.st.dueAt - b.st.dueAt);
-    for (const r of dueSkills.slice(0, 3)) {
-      let pick = pickItems(content, data, r.skill.id, 'transfer', 1, used)[0];
-      let tier = 'delayed';
-      if (!pick) { const it = oldestSeenTransfer(content, data, r.skill.id, used); if (it) { pick = { item: it }; tier = 'repeat'; } }
-      if (!pick) continue;
-      used.add(pick.item.id);
-      add({ type: 'item', skill: r.skill.id, item: pick.item.id, tier, block: 'retention' }, itemMinutes(pick.item));
+    // 0. Carry over unfinished tasks from an earlier day's plan (same block, first).
+    const prev = data.plan;
+    if (prev && prev.date && prev.date < dayStr(now) && prev.blocks) {
+      for (const b of prev.blocks) {
+        if (!blocks[b.key]) continue;
+        const rest = (b.tasks || []).slice(b.cursor || 0).filter(t => !t.carriedFrom || t.carriedFrom >= dayStr(now - 3 * DAY));
+        const fu = data.followups || {};
+        for (const t of rest) {
+          if (t.item && (seen.has(t.item) || used.has(t.item))) continue;
+          // 다른 화면에서 이미 한 것은 넘기지 않는다 (원본 진단·다시 확인, 받아쓰기 등 후속 훈련)
+          if (t.ref && data.attempts.some(a => a.ref === t.ref && a.tier === 'original' && a.at >= prev.createdAt)) continue;
+          if (t.key && fu[t.key] && fu[t.key] >= prev.createdAt) continue;
+          take(b.key, Object.assign({}, t, { carriedFrom: t.carriedFrom || prev.date }), t.min || 1); blocks[b.key].carried++;
+        }
+      }
     }
 
-    // 2. Focus skills.
-    const finalDay = left != null && left <= 1;
+    // ① 단어: 자주 틀린 단어 → 오늘 복습 (학습 방식은 단어 탭 그대로).
+    const vc = ctx.vocab || {};
+    if ((vc.hard || 0) > 0) take('vocab', { type: 'vocab', mode: 'hard', n: vc.hard }, Math.min(room('vocab'), Math.max(2, Math.round(vc.hard * 0.3))));
+    if (room('vocab') > 0) take('vocab', { type: 'vocab', mode: 'review', n: vc.due || null }, Math.max(1, room('vocab')));
+
+    // ② 리스닝: 받아쓰기→쉐도잉 대기열 · 2단계 듣기 · 강의/대화 1세트(실전 조건) · 응답 문제.
+    for (const d of cq.dictation.slice(0, 3)) take('listen', { type: 'dictation', item: null, of: d.item, ref: d.ref, q: d.q, key: d.key, skill: d.skill }, 4);
+    for (const d of cq.shadow.slice(0, 3)) take('listen', { type: 'shadow', of: d.item, key: d.key, missed: d.missed }, 1.5);
+    for (const d of cq.twoPass.slice(0, 1)) if (room('listen') >= 5) take('listen', { type: 'twopass', of: d.item, ref: d.ref, key: d.key, skill: d.skill }, 5);
+    const lset = freshOf({ sec: 'L', kinds: ['lecture', 'conversation', 'announcement'] }).sort((a, b) => (b.kind === 'lecture') - (a.kind === 'lecture') || byPrio(a, b))[0];
+    if (lset && room('listen') >= 2) take('listen', { type: 'item', item: lset.id, tier: 'transfer', skill: lset.skill, exam: true }, lset.minutes);
+    for (const it of freshOf({ sec: 'L', kinds: ['reply'] }).sort(byPrio)) { if (room('listen') < 1) break; take('listen', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes); }
+    for (const it of freshOf({ sec: 'L', kinds: ['conversation', 'announcement'] }).sort(byPrio)) { if (room('listen') < it.minutes) break; take('listen', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes); }
+
+    // ③ 리딩: 학술 지문 timed reading(wpm) · C-Test · 일상 지문.
+    const timedFirst = cq.timed.length > 0;
+    const acad = freshOf({ sec: 'R', kinds: ['academic'] }).sort(byPrio)[0];
+    if (acad) take('read', { type: 'item', item: acad.id, tier: 'transfer', skill: acad.skill, timed: true, exam: true }, acad.minutes);
+    const ct = freshOf({ sec: 'R', kinds: ['ctest'] }).sort(byPrio)[0];
+    if (ct && (room('read') >= 3 || !timedFirst)) take('read', { type: 'item', item: ct.id, tier: 'transfer', skill: ct.skill, exam: true }, ct.minutes);
+    for (const it of freshOf({ sec: 'R', kinds: ['daily'] }).sort(byPrio)) { if (room('read') < it.minutes * 0.6) break; take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes); }
+
+    // ④ 말하기: Listen & Repeat 1세트 · Interview 1문제 4/3/2.
+    const sp = ctx.speak || {};
+    if (sp.lr) take('speak', { type: 'lr', set: sp.lr }, Math.round(blocks.speak.minutes * 0.5) || 4);
+    if (sp.interview) take('speak', { type: 'interview', q: sp.interview, rounds: [45, 34, 23] }, Math.max(3, room('speak')));
+
+    // ⑤ 쓰기: 2분 계획 카드 → 1편 또는 개요 드릴 3개 · 반복 오류 2~3범주 고쳐 쓰기.
+    const wr = ctx.write || {};
+    const wm = blocks.write.minutes;
+    // 구조·아이디어 원인이 남아 있으면 개요 드릴을 먼저.
+    const needOutline = cq.outline.length > 0;
+    if (wr.task && wm >= 12 && !(needOutline && wm < 18)) take('write', { type: 'write', task: wr.task, kind: wr.kind, plan: true }, wr.kind === 'email' ? 7 : 10);
+    if (needOutline || !wr.task || wm < 12) take('write', { type: 'outline', n: 3, key: needOutline ? cq.outline[0].key : undefined }, 6);
+    const fixCats = [...new Set((wr.errorCats || []).concat(cq.fix.flatMap(f => f.cats || [])))].slice(0, 3);
+    if (fixCats.length && room('write') >= 2) take('write', { type: 'fix', cats: fixCats, key: cq.fix.length ? cq.fix[0].key : undefined }, Math.max(3, room('write')));
+
+    // ⑥ 마무리: 섞어 풀기 · 다시 확인(전에 맞힌 문제 → 쌍둥이) · 원본 빠른 진단 카드.
     const nearExam = left != null && left <= 4;
-    // A skill with no unseen transfer questions cannot produce new evidence today → not a focus skill.
-    const fresh = id => pickItems(content, data, id, 'transfer', 1, used).length > 0;
-    let candidates = table.filter(r => !['IMPROVED', 'RETAINED'].includes(r.st.state) && fresh(r.skill.id)).sort((a, b) => b.pr - a.pr);
-    if (nearExam) candidates = candidates.filter((r, i) => r.st.state !== 'NEW' || i === 0);
-    let nFocus = finalDay ? 0 : (minutes >= 60 ? 3 : 2);
-    let focus = candidates.slice(0, nFocus);
-    // Spread fatigue: avoid two listening-only skills when a reading skill is nearly as urgent.
-    if (focus.length === 2 && focus.every(r => r.skill.area === 'L')) {
-      const alt = candidates.find(r => r.skill.area !== 'L');
-      if (alt && alt.pr >= 0.85 * focus[1].pr) focus[1] = alt;
-    }
-    const focusIds = focus.map(r => r.skill.id);
-
-    // Every original error is re-solved before the exam: reserve today's share of the time now,
-    // so focus blocks fit around it (originals shown inside a focus block count toward the share).
     const oq = originalQueue(content, data, now);
-    const quota = originalQuota(oq.fresh.length, oq.again.length, left, minutes);
-    let freshShown = 0;
-    const reserved = (quota.fresh + quota.again) * MINUTES.original;
-    budget += reserved;
-
-    const perFocus = Math.max(8, (minutes - budget - (nearExam ? 8 : 5)) / Math.max(1, focus.length));
-    for (const r of focus) {
-      const sid = r.skill.id; let b = 0;
-      const blockAdd = (s, m) => { add(s, m); b += m; };
-      const st = r.st.state;
-      // a. Original errors: confirm what went wrong (only analyzable, not yet reviewed).
-      const origs = content.originals.filter(o => o.skill === sid && analyzable(o) && !reviewedOrig.has(o.id))
-        .sort((a, b) => (dates[b.test] || '').localeCompare(dates[a.test] || '') || (b.my != null) - (a.my != null));
-      const nOrig = st === 'NEW' ? 3 : st === 'RELAPSED' ? 2 : (st === 'UNDERSTOOD' || st === 'PRACTICING' ? 1 : 0);
-      for (const o of origs.slice(0, nOrig)) {
-        // Already paid for by the reserved share, unless the share is used up.
-        blockAdd({ type: 'original', skill: sid, ref: o.id, block: sid }, freshShown < quota.fresh ? 0 : MINUTES.original);
-        b += MINUTES.original; freshShown++;
-      }
-      // b. The move (procedure) card.
-      if (['NEW', 'UNDERSTOOD', 'PRACTICING', 'RELAPSED'].includes(st)) blockAdd({ type: 'move', skill: sid, block: sid }, MINUTES.move);
-      // c. Guided practice.
-      const nGuided = ['NEW', 'UNDERSTOOD', 'PRACTICING'].includes(st) ? 2 : (st === 'RELAPSED' ? 1 : 0);
-      for (const g of pickItems(content, data, sid, 'guided', nGuided, used)) {
-        used.add(g.item.id); blockAdd({ type: 'item', skill: sid, item: g.item.id, tier: 'guided', block: sid }, itemMinutes(g.item));
-      }
-      // d. Transfer: new questions, no scaffolds — the evidence that counts.
-      for (const t of pickItems(content, data, sid, 'transfer', 5, used)) {
-        if (b + itemMinutes(t.item) > perFocus && steps.filter(s => s.block === sid && s.tier === 'transfer').length >= 2) break;
-        used.add(t.item.id); blockAdd({ type: 'item', skill: sid, item: t.item.id, tier: 'transfer', block: sid }, itemMinutes(t.item));
-      }
+    const diagCap = Math.max(4, Math.round(blocks.wrap.minutes * 0.5 / 1));
+    const quota = originalQuota(oq.fresh.length, oq.again.length, left, diagCap);
+    const vPool = verifyPool(content, data, now, nearExam ? 1 : 3);
+    // 'judge' cause → a new question of the same skill + a twin check.
+    for (const j of cq.judge.slice(0, 2)) {
+      const it = freshOf({ skill: j.skill })[0];
+      if (it) take('wrap', { type: 'item', item: it.id, tier: 'mixed', skill: j.skill, exam: true, because: 'judge', key: j.key }, it.minutes);
     }
-
-    // 3. The rest of today's original errors (all skills, not just focus): still-wrong ones, then unseen ones.
-    const shownOrig = new Set(steps.filter(x => x.type === 'original').map(x => x.ref));
-    const origBlock = oq.again.slice(0, quota.again)
-      .concat(oq.fresh.filter(o => !shownOrig.has(o.id)).slice(0, Math.max(0, quota.fresh - freshShown)));
-    if (origBlock.length) {
-      steps.push({ type: 'origIntro', n: origBlock.length });
-      for (const o of origBlock) steps.push({ type: 'original', skill: o.skill, ref: o.id, block: 'orig', again: reviewedOrig.has(o.id) || undefined });
+    // Retention: improved skills that are due get one new question of that skill.
+    for (const r of table.filter(r => ['IMPROVED', 'RETAINED'].includes(r.st.state) && r.due).slice(0, 2)) {
+      const it = freshOf({ skill: r.skill.id })[0];
+      if (it) take('wrap', { type: 'item', item: it.id, tier: 'delayed', skill: r.skill.id, exam: true }, Math.min(it.minutes, 3));
     }
-    // Replace the reservation with what was actually scheduled (focus-block originals inside the share were added at 0).
-    budget += (origBlock.length + Math.min(freshShown, quota.fresh)) * MINUTES.original - reserved;
-
-    // 4. Interleaved mixed block (different skills shuffled together).
-    const nMixed = finalDay ? 8 : nearExam ? 6 : 3;
-    const mixedFrom = table.slice().sort((a, b) => (focusIds.includes(a.skill.id) - focusIds.includes(b.skill.id)) || b.pr - a.pr);
-    const mixed = [];
-    for (let round = 0; mixed.length < nMixed && round < 3; round++) {
-      for (const r of mixedFrom) {
-        if (mixed.length >= nMixed || budget > minutes + 3) break;
-        const t = pickItems(content, data, r.skill.id, 'transfer', 1, used)[0];
-        if (!t || t.item.kind === 'listen' && budget + 4 > minutes) continue;
-        used.add(t.item.id); mixed.push(t.item); budget += itemMinutes(t.item);
-      }
+    let nVerify = 0;
+    for (const v of vPool) {
+      if (nVerify >= 3) break;
+      const t = twinFor(v, content, data, now, used);
+      if (!t) continue;
+      nVerify++;
+      if (t.item) take('wrap', { type: 'item', item: t.item.id, tier: t.twin ? 'verify-twin' : 'verify', skill: v.skill, verifyOf: v.key, exam: true }, Math.min(itemMinutes(t.item), 3));
+      else take('wrap', { type: 'original', ref: t.ref, verify: true, verifyOf: v.key, skill: v.skill }, 2);
     }
-    // Pool exhausted: fill with the oldest already-seen questions, logged as 'repeat' (retention only, never transfer).
-    const repeats = [];
+    for (const o of oq.again.slice(0, quota.again).concat(oq.fresh.slice(0, quota.fresh))) take('wrap', { type: 'diag', ref: o.id, skill: o.skill, again: oq.again.includes(o) || undefined }, 1);
+    const mixedFrom = table.slice().sort((a, b) => b.pr - a.pr);
     for (const r of mixedFrom) {
-      if (mixed.length + repeats.length >= nMixed || budget > minutes) break;
-      const it = oldestSeenTransfer(content, data, r.skill.id, used);
-      if (!it || it.kind === 'listen') continue;
-      used.add(it.id); repeats.push(it); budget += itemMinutes(it);
+      if (room('wrap') < 1.5) break;
+      const it = freshOf({ skill: r.skill.id, kinds: ['daily', 'reply', 'conversation', 'announcement'] })[0];
+      if (it && it.minutes <= room('wrap') + 1) take('wrap', { type: 'item', item: it.id, tier: 'mixed', skill: r.skill.id, exam: true }, it.minutes);
     }
-    // 5. Re-checks: questions answered right ≥ 3 days ago (1 day near the exam), mixed in so they don't stand out.
-    const counted = steps.filter(x => x.type === 'item' && x.tier !== 'guided' || x.type === 'original').length + mixed.length + repeats.length;
-    const gap = nearExam ? 1 : 3;
-    const vPool = verifyPool(content, data, now, gap).filter(v => v.kind === 'original' ? !steps.some(x => x.ref === v.id) : !used.has(v.id));
-    const nVerify = Math.min(vPool.length, Math.max(1, Math.round(counted * VERIFY_RATIO)), 6);
-    const verify = [];
-    // Spread over skills: one per skill per round.
-    for (let round = 0; verify.length < nVerify && round < 6; round++) {
-      const taken = new Set();
-      for (const v of vPool) {
-        if (verify.length >= nVerify) break;
-        if (verify.includes(v) || taken.has(v.skill)) continue;
-        taken.add(v.skill); verify.push(v); budget += v.minutes;
-      }
-    }
-    const mixedSteps = mixed.map(it => ({ type: 'item', skill: it.skill, item: it.id, tier: 'mixed', block: 'mixed' }))
-      .concat(repeats.map(it => ({ type: 'item', skill: it.skill, item: it.id, tier: 'repeat', block: 'mixed' })));
-    // Deterministic interleave: re-checks slot in after every few mixed questions.
-    verify.forEach((v, k) => {
-      const s = v.kind === 'item' ? { type: 'item', skill: v.skill, item: v.id, tier: 'verify', block: 'mixed' } : { type: 'original', skill: v.skill, ref: v.id, verify: true, block: 'mixed' };
-      const pos = Math.min(mixedSteps.length, Math.round((k + 1) * (mixedSteps.length + verify.length) / (verify.length + 1)));
-      mixedSteps.splice(pos, 0, s);
-    });
-    if (mixedSteps.length) steps.push({ type: 'mixedIntro' }, ...mixedSteps);
-    steps.push({ type: 'end' });
 
+    const out = BLOCKS.map(k => Object.assign(blocks[k], { cursor: 0, done: false, weight: Math.round(w[k]) }));
     return {
-      id: 's' + now.toString(36),
+      v: 2,
+      id: 'p' + now.toString(36),
       date: dayStr(now),
       createdAt: now,
-      focus: focusIds,
-      retention: steps.filter(x => x.block === 'retention').map(x => x.skill),
-      originals: { total: oq.total, left: oq.fresh.length, again: oq.again.length, today: steps.filter(x => x.type === 'original' && !x.verify).length },
-      verifyCount: verify.length,
-      freshLeft: content.items.filter(i => i.tier === 'transfer' && !seenItems(data, MASTERY_TIERS.concat(['repeat'])).has(i.id) && !(data.flags || {})[i.id]).length,
+      minutes,
       daysLeft: left,
-      estMinutes: Math.round(budget),
-      steps,
-      cursor: 0,
-      sub: null,
-      done: false,
+      blocks: out,
+      originals: { total: oq.total, left: oq.fresh.length, again: oq.again.length, today: blocks.wrap.tasks.filter(t => t.type === 'diag').length },
+      freshLeft: freshPool(content, data, { seen }).length,
+      held: (content.pool && content.pool.papers || []).filter(p => p.held).map(p => ({ paper: p.n, date: p.held })),
+      queues: { dictation: cq.dictation.length, twoPass: cq.twoPass.length, judge: cq.judge.length, timed: cq.timed.length, shadow: cq.shadow.length, fix: cq.fix.length, outline: cq.outline.length },
     };
   }
 
+  function legacyAttempts(data, content) {
+    const idx = poolIndex(content);
+    return data.attempts.filter(a => a.item && !idx[a.item]).length;
+  }
+
+  // ---------- 변화 탭 지표 (OVERHAUL.md 측정 표): 최근 7일 vs 그 전 7일, 기록이 적으면 null ----------
+  function areaMetrics(data, content, now, extra) {
+    const t = dayStart(dayStr(now)) + DAY;
+    const win = (list, from, to) => (list || []).filter(x => x.at >= t - from * DAY && x.at < t - to * DAY);
+    const avg = (xs, f, min) => { const v = xs.map(f).filter(x => x != null && !isNaN(x)); return v.length >= (min || 1) ? Math.round(10 * v.reduce((a, b) => a + b, 0) / v.length) / 10 : null; };
+    const pct = (xs, min) => xs.length >= (min || 3) ? Math.round(100 * xs.filter(a => a.correct).length / xs.length) : null;
+    const idx = poolIndex(content);
+    const newQ = sec => a => a.item && idx[a.item] && idx[a.item].sec === sec && ['transfer', 'mixed', 'delayed', 'verify-twin'].includes(a.tier);
+    const ctest = a => a.item && idx[a.item] && idx[a.item].kind === 'ctest' && a.tier !== 'mock';
+    const two = (f) => ({ now: f(7, 0), prev: f(14, 7) });
+    const mockLast = sec => { const m = (data.mock || []).filter(x => x.sec === sec).slice(-1)[0]; return m ? { pct: m.total ? Math.round(100 * m.correct / m.total) : null, n: m.total, paper: m.paper, at: m.at } : null; };
+    const speak = data.speak || [], writing = data.writing || [];
+    const lr = x => x.kind === 'lr' && x.stt;
+    const iv = x => x.kind === 'interview' && x.stt && (x.rounds || []).length;
+    const essays = x => x.kind === 'email' || x.kind === 'discussion';
+    const ex = extra || {};
+    return {
+      L: { dictation: two((a, b) => avg(win(data.dictation, a, b), x => x.pct)), newQ: two((a, b) => pct(win(data.attempts, a, b).filter(newQ('L')))), mock: mockLast('L') },
+      R: { wpm: two((a, b) => avg(win(data.readSpeed, a, b).filter(x => x.wpm && x.wpm < 1000), x => x.wpm)), newQ: two((a, b) => pct(win(data.attempts, a, b).filter(newQ('R')))),
+        ctest: two((a, b) => pct(win(data.attempts, a, b).filter(ctest), 10)), mock: mockLast('R') },
+      V: { frequent: ex.vocabNow == null ? null : { now: ex.vocabNow, prev: ex.vocabPrev == null ? null : ex.vocabPrev }, known: ex.knownRatio == null ? null : ex.knownRatio },
+      S: { lr: two((a, b) => avg(win(speak, a, b).filter(lr), x => x.pct)),
+        wpm: two((a, b) => avg(win(speak, a, b).filter(iv), x => avg(x.rounds, r => r.wpm))),
+        pauses: two((a, b) => avg(win(speak, a, b).filter(iv), x => avg(x.rounds, r => r.pauses))) },
+      W: { planSec: two((a, b) => avg(win(writing, a, b).filter(x => x.planMs), x => Math.round(x.planMs / 1000))),
+        structure: two((a, b) => avg(win(writing, a, b).filter(essays).filter(x => x.structure), x => Math.round(100 * x.structure.filter(c => c[1]).length / x.structure.length))),
+        errors: two((a, b) => avg(win(writing, a, b).filter(essays), x => (x.cats || []).length)) },
+    };
+  }
+  // 주간 비중 자동 조정용 선행 지표 (영역별 하나): 리스닝 새 문제 정답률, 리딩 새 문제 정답률, 단어 자주 틀린 수(낮을수록 좋음), 말하기 L&R 일치율, 쓰기 구조 체크.
+  function weeklyIndicatorsFrom(m) {
+    return { listen: m.L.newQ, read: m.R.newQ, vocab: m.V.frequent && Object.assign({ higherIsBetter: false }, m.V.frequent), speak: m.S.lr, write: m.W.structure };
+  }
+
+  // Old plan/session records (v1 'session' with steps of removed AI items) are kept as-is under
+  // data.legacySession and never rendered; nothing in the attempt log is touched.
+  function migrateRecord(d) {
+    if (d.session && d.session.steps && !d.legacySession) { d.legacySession = d.session; d.session = null; }
+    if (!d.followups) d.followups = {};
+    return d;
+  }
+
   // ---------- metrics (activity vs accuracy vs retention vs transfer vs recurrence) ----------
-  function metrics(data) {
-    const A = data.attempts;
+  // content를 주면 없어진 AI 연습 문제의 시도는 정답률 지표에서 뺀다 (활동량에는 남김).
+  function metrics(data, content) {
+    const idx = content && content.pool ? poolIndex(content) : null;
+    const ALL = data.attempts;
+    const A = idx ? ALL.filter(a => !(a.item && !idx[a.item])) : ALL;
     const pct = (xs) => xs.length ? Math.round(100 * xs.filter(x => x.correct).length / xs.length) : null;
     const transfer = A.filter(a => (a.tier === 'transfer' || a.tier === 'mixed') && !a.hinted);
     const delayed = A.filter(a => a.tier === 'delayed');
-    const originals = A.filter(a => a.tier === 'original');
-    const verify = A.filter(a => a.verify);
+    const originals = A.filter(a => a.tier === 'original' && !a.diag);
+    const verify = A.filter(a => a.verify || a.tier === 'verify' || a.tier === 'verify-twin');
     const days = new Set(A.map(a => dayStr(a.at)));
     const trapPicks = A.filter(a => a.trap && !a.correct);
     const sameTrapRepeats = (() => {
@@ -425,10 +567,10 @@
     })();
     const count = (key, vals) => Object.fromEntries(vals.map(v => [v, A.filter(a => a[key] === v).length]));
     return {
-      stuck: count('stuck', ['sound', 'memory', 'judge', 'vocab']),
+      stuck: Object.fromEntries(CAUSES.map(c => [c, A.filter(a => causeOf(a) === c).length])),
       reheard: count('reheard', ['clear', 'still']),
       recur: count('recur', ['same', 'rulefail', 'other', 'unknown']),
-      activity: { attempts: A.length, days: days.size, ms: A.reduce((s, a) => s + (a.ms || 0), 0) },
+      activity: { attempts: ALL.length, days: new Set(ALL.map(a => dayStr(a.at))).size, ms: ALL.reduce((s, a) => s + (a.ms || 0), 0), legacy: ALL.length - A.length },
       originalRedo: { n: originals.length, pct: pct(originals) },
       // Re-checks of questions answered right before: 알고 맞힘 (right, 보통/확신) · 찍어서 맞힘 (right, 찍음) · 틀림 (the earlier right answer didn't hold).
       verify: { n: verify.length, known: verify.filter(a => a.correct && a.conf >= 2).length, guessed: verify.filter(a => a.correct && !(a.conf >= 2)).length, lost: verify.filter(a => !a.correct).length },
@@ -465,7 +607,9 @@
     return content.skills.map(sk => ({ skill: sk.id, counts: tests.map(t => content.originals.filter(o => o.test === t.id && o.skill === sk.id).length) }));
   }
 
-  const api = { testMatrix, recencyMap, dayStr, dayStart, daysLeft, firstInterval, evidence, replaySkill, priority, skillTable, buildSession, metrics,
-    permutation, checkTyped, pickItems, originalQueue, originalQuota, verifyPool, STATE_LABEL, MASTERY_TIERS, DAY };
+  const api = { testMatrix, recencyMap, dayStr, dayStart, daysLeft, firstInterval, evidence, replaySkill, priority, skillTable, metrics,
+    permutation, checkTyped, pickItems, poolItems, poolIndex, freshPool, seenItems, originalQueue, originalQuota, verifyPool, twinFor, origKind,
+    causeQueues, causeOf, legacyAttempts, areaMetrics, weeklyIndicatorsFrom, CAUSES, buildPlan, weights, weeklyAdjust, weekKey, areaAccuracy, migrateRecord, BLOCKS, BASE_WEIGHTS,
+    STATE_LABEL, MASTERY_TIERS, DAY };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof window !== 'undefined' ? window : globalThis);

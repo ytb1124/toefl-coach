@@ -108,7 +108,24 @@
     const sourceLine = (h, name) => h('p', { class: 'small muted' }, info(name).remote
       ? ['비공개 GitHub 저장소에서 불러옴 · ', h('a', { href: 'javascript:void 0', onclick: () => { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* ignore */ } location.reload(); } }, '이 기기에서 토큰 지우기')]
       : '이 Mac의 로컬 파일에서 불러옴');
-    return { REPO, localHost, token, ghFetch, load, info, tokenCard, sourceLine };
+    // 비공개 음원 경로(private/zhan/…) → 재생할 수 있는 URL. 로컬 서버면 경로 그대로, 아니면 토큰으로 받아 Cache API에 보관한 blob URL.
+    const blobs = {};
+    async function audioUrl(path) {
+      if (!path) throw new Error('음원 없음');
+      if (localHost && !(state.pool && state.pool.remote)) return path;
+      if (blobs[path]) return blobs[path];
+      const key = API + path; let res = null, cache = null;
+      try { cache = await caches.open(AUDIO_CACHE); res = await cache.match(key); } catch (e) { /* no Cache API */ }
+      if (!res) {
+        const r = await ghFetch(path.replace(/^private\/zhan\//, ''));
+        res = new Response(await r.arrayBuffer(), { headers: { 'Content-Type': 'audio/mpeg' } });
+        if (cache) try { await cache.put(key, res.clone()); } catch (e) { /* quota */ }
+      }
+      return (blobs[path] = URL.createObjectURL(new Blob([await res.arrayBuffer()], { type: 'audio/mpeg' })));
+    }
+    // 여러 비공개 자료를 차례로 불러온다: [[name, global], …] → then()
+    const loadAll = (list, then) => { const next = i => i >= list.length ? then() : load(list[i][0], list[i][1], () => next(i + 1)); next(0); };
+    return { REPO, localHost, token, ghFetch, load, loadAll, info, tokenCard, sourceLine, audioUrl };
   })();
 
   root.ListenApp = { create(env) {

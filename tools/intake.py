@@ -56,7 +56,8 @@ def summary(test_id):
     prev = Counter(o["skill"] for o in data["originals"] if o["test"] in {t["id"] for t in earlier})
     names = {s["id"]: s["name"] for s in data["skills"]}
     now = Counter(o["skill"] for o in mine)
-    fresh = Counter(i["skill"] for i in data["items"] if i["tier"] == "transfer")
+    # 소站 연습 문제 풀(content/pool.json, 보류 회차 제외)에서 능력별 문항 수 — AI 연습 문제는 없앴다 (개편 2026-11)
+    fresh = Counter(q["skill"] for s in data["pool"]["sets"] if not s.get("held") for q in s["qs"] if q.get("skill"))
     return data, errs, test, mine, earlier, prev, now, names, fresh
 
 
@@ -82,7 +83,7 @@ def cmd_check(test_id):
         print(f"{k:8} {now[k]:>4} {prev[k]:>8}  {verdict}")
     newp = [k for k in now if k != "UNKNOWN" and not prev[k]]
     if newp:
-        print("\n새 패턴 → 전용 transfer 문제가 충분한지 확인:", ", ".join(f"{k}({fresh[k]}문항)" for k in newp))
+        print("\n새 패턴 → 소站 풀에 그 능력 문항이 충분한지 확인:", ", ".join(f"{k}({fresh[k]}문항)" for k in newp))
     rep = test.get("report") or {}
     if not rep.get("headline") or not rep.get("findings"):
         print("\n주의: report.headline / report.findings 가 비어 있음")

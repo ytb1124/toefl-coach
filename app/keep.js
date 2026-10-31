@@ -111,6 +111,6 @@
           : h('p', { class: 'notice' }, showDone ? '외운 단어가 아직 없습니다.' : '킵한 단어가 없습니다. 지문이나 스크립트에서 모르는 단어를 선택해 보세요.'));
     }
 
-    return { mount, view, count, add };
+    return { mount, view, count, add, words: () => load().words };
   } };
 })(typeof window !== 'undefined' ? window : globalThis);

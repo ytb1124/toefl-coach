@@ -8,7 +8,13 @@
 
   window.SWApp = { create(env) {
     const { h, toast, go, storage } = env;
-    const C = window.CONTENT, S = C.sw, K = window.SWCore;
+    // 개편: AI가 만든 문항('AI 변형'·'AI 재구성')은 연습에서 빼고 소站 문제로 대체한다 (기록은 그대로).
+    // 소站 원문과 같은 문제는 비공개 자료를 불러온 기기에서만 보인다 (문제 문장이 없으면 숨김).
+    const AIMADE = x => /^AI (변형|재구성)/.test(x.src || '');
+    const usable = x => !AIMADE(x) && !(x.private && !(x.tasks || x.prof));
+    const C = window.CONTENT, S0 = C.sw, K = window.SWCore;
+    const S = Object.assign({}, S0, ['lr', 'interview', 'email', 'discussion', 'buildSentence', 'grammar', 'ideas'].reduce((m, k) => (m[k] = (S0[k] || []).filter(usable), m), {}));
+    S.ideas = S.ideas.filter(x => !x.ad || S.discussion.some(d => d.id === x.ad));
     const CAT = S.cats;
     const byId = list => Object.fromEntries(list.map(x => [x.id, x]));
     const LR = byId(S.lr), IV = byId(S.interview), EM = byId(S.email), AD = byId(S.discussion), BS = byId(S.buildSentence);
