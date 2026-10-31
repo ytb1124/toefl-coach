@@ -34,6 +34,28 @@ def fill(template, tiles):
     return re.sub(r"_", lambda m: next(it, "_"), template)
 
 
+def order_from_sentence(template, tiles, sentence):
+    """템플릿 빈칸을 정답 문장과 맞춰 가며 타일 순서를 찾는다 (각 타일은 한 번씩). 못 맞추면 []."""
+    words = lambda t: re.findall(r"[a-z'’\-]+", t.lower())
+    target, fixed = words(sentence), template.split("_")
+    def go(i, k, left):   # i: 다음 빈칸 번호, k: target에서의 위치
+        f = words(fixed[i])
+        if target[k:k + len(f)] != f:
+            return None
+        k += len(f)
+        if i == len(fixed) - 1:
+            return [] if k == len(target) else None
+        for t in dict.fromkeys(left):
+            w = words(t)
+            if target[k:k + len(w)] == w:
+                rest = list(left); rest.remove(t)
+                r = go(i + 1, k + len(w), rest)
+                if r is not None:
+                    return [t] + r
+        return None
+    return go(0, 0, tiles) or []
+
+
 def load():
     ko = json.loads((W / "ko.json").read_text()) if (W / "ko.json").exists() else {}
     tests, items = [], []
@@ -52,7 +74,11 @@ def load():
             sp = slotted[0]
             slots = sorted(sp["slots"], key=lambda s: s["index"])
             answer = [s["correctAnswer"] for s in slots]
+            my = [s.get("userAnswer") or "" for s in slots]
             pool = list(q["options"])
+            if len(pool) == 1 and "/" in pool[0]:   # 사이트 데이터가 깨져 타일이 '/'로 한 칸에 몰린 경우: 해설 첫 줄 정답 문장으로 복원, 내 답은 알 수 없음
+                pool = [t.strip() for t in pool[0].split("/")]
+                answer, my = order_from_sentence(SLOT.sub("_", sp["content"]), pool, (q.get("why") or "").strip().strip('"').split("\n", 1)[0]), None
             for a in answer:                      # 남는 타일 = 보기에서 정답 타일을 하나씩 뺀 나머지
                 if a in pool:
                     pool.remove(a)
@@ -64,7 +90,7 @@ def load():
                 "first": sp.get("label") == "A",    # 빈칸 문장이 먼저 나오는 경우 (A가 빈칸)
                 "template": SLOT.sub("_", sp["content"]),
                 "answer": answer, "extra": pool,
-                "my": [s.get("userAnswer") or "" for s in slots],
+                "my": my,
                 "point": tr.get("point") or "", "whyKo": tr.get("why"), "whyZh": q.get("why"),
             })
     return tests, items
@@ -84,7 +110,7 @@ def main():
     tests, items = load()
     if "--todo" in sys.argv:
         print(json.dumps([{"id": i["id"], "context": i["context"], "template": i["template"], "answer": " ".join(i["answer"]),
-                           "my": " ".join(i["my"]), "tiles": i["answer"] + i["extra"], "whyZh": i["whyZh"]}
+                           "my": " ".join(i["my"]) if i["my"] else None, "tiles": i["answer"] + i["extra"], "whyZh": i["whyZh"]}
                           for i in items if not i["whyKo"]], ensure_ascii=False, indent=1))
         return
     errs = check(items)
