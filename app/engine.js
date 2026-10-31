@@ -308,18 +308,18 @@
   // Queues for the next days, from wrong answers with a cause that have not been followed up yet.
   function causeQueues(data, now, extra) {
     const done = data.followups || {};   // key → at (dictation done, two-pass listen done, …)
-    const q = { dictation: [], twoPass: [], judge: [], timed: [] };
+    const q = { dictation: [], twoPass: [], judge: [], timed: [], shadow: [], fix: [], outline: [] };
     const seenKey = new Set();
     const list = data.attempts.concat((extra && extra.attempts) || []).filter(a => !a.correct && causeOf(a)).sort((a, b) => a.at - b.at);
     for (const a of list) {
       const target = a.item || a.ref; if (!target) continue;
       const c = causeOf(a);
-      const route = c === 'sound' ? 'dictation' : c === 'memory' ? 'twoPass' : c === 'judge' ? 'judge' : c === 'time' ? 'timed' : null;
+      const route = c === 'sound' ? 'dictation' : c === 'memory' ? 'twoPass' : c === 'judge' ? 'judge' : c === 'time' ? 'timed' : c === 'omit' ? 'shadow' : c === 'grammar' ? 'fix' : c === 'structure' ? 'outline' : null;
       if (!route) continue;
       const key = route + ':' + target + (a.q != null ? '#' + a.q : '');
       if (seenKey.has(key) || (done[key] && done[key] >= a.at)) continue;
       seenKey.add(key);
-      q[route].push({ key, item: a.item || null, ref: a.ref || null, q: a.q == null ? null : a.q, skill: a.skill, at: a.at });
+      q[route].push({ key, item: a.item || null, ref: a.ref || null, q: a.q == null ? null : a.q, skill: a.skill, at: a.at, missed: a.missed, cats: a.cats });
     }
     return q;
   }
@@ -412,6 +412,7 @@
 
     // ② 리스닝: 받아쓰기→쉐도잉 대기열 · 2단계 듣기 · 강의/대화 1세트(실전 조건) · 응답 문제.
     for (const d of cq.dictation.slice(0, 3)) take('listen', { type: 'dictation', item: null, of: d.item, ref: d.ref, q: d.q, key: d.key, skill: d.skill }, 4);
+    for (const d of cq.shadow.slice(0, 3)) take('listen', { type: 'shadow', of: d.item, key: d.key, missed: d.missed }, 1.5);
     for (const d of cq.twoPass.slice(0, 1)) if (room('listen') >= 5) take('listen', { type: 'twopass', of: d.item, ref: d.ref, key: d.key, skill: d.skill }, 5);
     const lset = freshOf({ sec: 'L', kinds: ['lecture', 'conversation', 'announcement'] }).sort((a, b) => (b.kind === 'lecture') - (a.kind === 'lecture') || byPrio(a, b))[0];
     if (lset && room('listen') >= 2) take('listen', { type: 'item', item: lset.id, tier: 'transfer', skill: lset.skill, exam: true }, lset.minutes);
@@ -434,9 +435,12 @@
     // ⑤ 쓰기: 2분 계획 카드 → 1편 또는 개요 드릴 3개 · 반복 오류 2~3범주 고쳐 쓰기.
     const wr = ctx.write || {};
     const wm = blocks.write.minutes;
-    if (wr.task && wm >= 12) take('write', { type: 'write', task: wr.task, kind: wr.kind, plan: true }, wr.kind === 'email' ? 9 : 12);
-    else take('write', { type: 'outline', n: 3, tasks: (wr.outline || []).slice(0, 3) }, 6);
-    if ((wr.errorCats || []).length && room('write') >= 3) take('write', { type: 'fix', cats: wr.errorCats.slice(0, 3) }, Math.max(3, room('write')));
+    // 구조·아이디어 원인이 남아 있으면 개요 드릴을 먼저.
+    const needOutline = cq.outline.length > 0;
+    if (wr.task && wm >= 12 && !(needOutline && wm < 18)) take('write', { type: 'write', task: wr.task, kind: wr.kind, plan: true }, wr.kind === 'email' ? 7 : 10);
+    if (needOutline || !wr.task || wm < 12) take('write', { type: 'outline', n: 3, key: needOutline ? cq.outline[0].key : undefined }, 6);
+    const fixCats = [...new Set((wr.errorCats || []).concat(cq.fix.flatMap(f => f.cats || [])))].slice(0, 3);
+    if (fixCats.length && room('write') >= 2) take('write', { type: 'fix', cats: fixCats, key: cq.fix.length ? cq.fix[0].key : undefined }, Math.max(3, room('write')));
 
     // ⑥ 마무리: 섞어 풀기 · 다시 확인(전에 맞힌 문제 → 쌍둥이) · 원본 빠른 진단 카드.
     const nearExam = left != null && left <= 4;
@@ -483,7 +487,7 @@
       originals: { total: oq.total, left: oq.fresh.length, again: oq.again.length, today: blocks.wrap.tasks.filter(t => t.type === 'diag').length },
       freshLeft: freshPool(content, data, { seen }).length,
       held: (content.pool && content.pool.papers || []).filter(p => p.held).map(p => ({ paper: p.n, date: p.held })),
-      queues: { dictation: cq.dictation.length, twoPass: cq.twoPass.length, judge: cq.judge.length, timed: cq.timed.length },
+      queues: { dictation: cq.dictation.length, twoPass: cq.twoPass.length, judge: cq.judge.length, timed: cq.timed.length, shadow: cq.shadow.length, fix: cq.fix.length, outline: cq.outline.length },
     };
   }
 

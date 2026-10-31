@@ -73,6 +73,8 @@
 
   root.PracticeApp = { create(env) {
     const { h, toast } = env;
+    const ap = (el, ...kids) => el.append(...kids.flat(Infinity).filter(x => x != null && x !== false));
+    const rc = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter(x => x != null && x !== false));
     const ZD = () => root.ZhanData;
     const ensure = then => ZD().loadAll([['pool', 'ZHAN_POOL']], then);
     let index = null;
@@ -112,8 +114,8 @@
         rec.cause = k; env.save();
         wrap.querySelectorAll('.tagb').forEach(x => { x.disabled = true; }); e.currentTarget.classList.add('sel');
         const c = CAUSE.find(x => x[0] === k);
-        act.replaceChildren(h('p', { class: 'small muted' }, c[3]));
-        if (k === 'sound') act.append(ctx.lines ? scriptBox(ctx.lines, ctx.hl) : ctx.passage ? h('div', { class: 'passage' }, para(ctx.passage)) : null);
+        rc(act, h('p', { class: 'small muted' }, c[3]));
+        if (k === 'sound') ap(act, ctx.lines ? scriptBox(ctx.lines, ctx.hl) : ctx.passage ? h('div', { class: 'passage' }, para(ctx.passage)) : null);
         else if (k === 'memory') {
           const span = ctx.lines && ctx.audio ? lineSpan(ctx.lines, ctx.hl || []) : null;
           const b = h('button', { class: 'ghost', onclick: () => {
@@ -123,31 +125,31 @@
               a.onended = after; a.play();
             }).catch(err => { b.textContent = '재생 실패: ' + err.message; after(); });
           } }, span ? '▶ 근거 구간만 다시 듣기' : '▶ 다시 듣기 (이 세트는 문장 시각 기록이 없어 처음부터)');
-          const after = () => { if (!act.querySelector('.script')) act.append(scriptBox(ctx.lines, ctx.hl)); };
-          act.append(ctx.audio ? b : null);
+          const after = () => { if (!act.querySelector('.script')) ap(act, scriptBox(ctx.lines, ctx.hl)); };
+          ap(act, ctx.audio ? b : null);
           if (!ctx.audio) after();
         } else if (k === 'vocab') {
           const lines = ctx.lines ? ctx.lines.map(l => l.t) : String(ctx.passage || '').split(/\n+/);
           const idx = ctx.hl && ctx.hl.length ? ctx.hl : lines.map((_, i) => i);
           rec.vocabWords = rec.vocabWords || [];
-          act.append(h('p', { class: 'small' }, '모르는 단어를 누르세요 (여러 개 가능):'),
+          ap(act, h('p', { class: 'small' }, '모르는 단어를 누르세요 (여러 개 가능):'),
             idx.slice(0, 12).map(i => tappable(lines[i], (w, sent) => { env.keep(w, sent); rec.vocabWords.push(w); env.save(); })));
         } else if (k === 'judge') {
           const rules = env.rules.get(rec.skill);
           const ta = h('textarea', { class: 'myrule', rows: 2, placeholder: '다음엔 무엇을 할지 내 말로 한 줄' }, '');
-          act.append(h('p', { class: 'stem' }, '같은 원인인가요?'),
+          ap(act, h('p', { class: 'stem' }, '같은 원인인가요?'),
             rules.length ? h('p', { class: 'small' }, '내 규칙: ', h('b', null, rules[0].rule)) : h('p', { class: 'small muted' }, '이 능력에는 아직 내 규칙이 없습니다.'),
             h('div', { class: 'row' }, RECUR.map(([kk, l]) => h('button', { class: 'tagb', onclick: ev => { rec.recur = kk; env.save(); ev.currentTarget.parentNode.querySelectorAll('.tagb').forEach(x => x.classList.remove('sel')); ev.currentTarget.classList.add('sel'); } }, l))),
             ta, h('button', { class: 'link small', onclick: ev => { const v = ta.value.trim(); if (!v) return; env.rules.add(rec.skill, v, rec); ev.currentTarget.textContent = '저장했습니다'; } }, '내 규칙 저장'));
         }
       };
-      wrap.append(h('p', { class: 'stem' }, '왜 틀렸나요?'),
+      ap(wrap, h('p', { class: 'stem' }, '왜 틀렸나요?'),
         h('div', { class: 'row' }, CAUSE.filter(c => c[2].includes(ctx.sec)).map(([k, l]) => h('button', { class: 'tagb', onclick: e => pick(k, e) }, l))), act);
       return wrap;
     }
 
     function header(main, meta, task) {
-      main.append(h('p', { class: 'kicker' }, (meta.sec === 'L' ? '리스닝' : '리딩') + ' · ' + (KIND[meta.kind] || meta.kind),
+      ap(main, h('p', { class: 'kicker' }, (meta.sec === 'L' ? '리스닝' : '리딩') + ' · ' + (KIND[meta.kind] || meta.kind),
         ' · ', h('span', { class: 'muted' }, TIER[task.tier] || '')),
       h('p', { class: 'muted small' }, (lookup(meta.id) || {}).set ? lookup(meta.id).set.src : ''));
     }
@@ -158,7 +160,7 @@
     function renderItem(main, task, meta, onDone) {
       ensure(() => {
         const full = lookup(meta.id);
-        if (!full) { main.append(...ZD().tokenCard(h, { title: '소站 문제를 불러올 수 없습니다', lead: '이 기기에 GitHub 토큰을 넣으면 독점 TPO 원문으로 풉니다.', retry: ok => ensure(() => { ok(!!root.ZHAN_POOL); if (root.ZHAN_POOL) { index = null; main.replaceChildren(); renderItem(main, task, meta, onDone); } }) }),
+        if (!full) { ap(main, ...ZD().tokenCard(h, { title: '소站 문제를 불러올 수 없습니다', lead: '이 기기에 GitHub 토큰을 넣으면 독점 TPO 원문으로 풉니다.', retry: ok => ensure(() => { ok(!!root.ZHAN_POOL); if (root.ZHAN_POOL) { index = null; rc(main, ); renderItem(main, task, meta, onDone); } }) }),
           h('button', { class: 'ghost', onclick: () => onDone({ skipped: true }) }, '이 문제 건너뛰기')); return; }
         header(main, meta, task);
         if (meta.sec === 'L') listening(main, task, meta, full, onDone);
@@ -174,7 +176,7 @@
       const fmt = x => '00:' + String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0');
       const draw = () => { t.textContent = hidden ? '' : fmt(left); };
       const btn = h('button', { class: 'link small', onclick: () => { hidden = !hidden; btn.textContent = hidden ? 'Show Time' : 'Hide Time'; draw(); } }, 'Hide Time');
-      const el = h('div', { class: 'countdown' }, t, ' ', btn);
+      const el = h('div', { class: 'cdown' }, t, ' ', btn);
       draw();
       el.start = () => { timer = setInterval(() => { left--; draw(); if (left <= 0) { clearInterval(timer); onEnd && onEnd(); } }, 1000); };
       el.stop = () => clearInterval(timer);
@@ -187,7 +189,7 @@
     // 시간이 끝나면 자동으로 다음 문항. 다시 듣기·이전 문항·음성 진행바 없음.
     const Q_SEC = 20;
     function listening(main, task, meta, full, onDone) {
-      const box = h('section', { class: 'card' }); main.append(box);
+      const box = h('section', { class: 'card' }); ap(main, box);
       const set = full.set, qs = full.qs, reply = meta.kind === 'reply';
       const path = reply ? qs[0].audio : set.audio;
       const notes = reply ? null : h('textarea', { class: 'notes', rows: 4, placeholder: '노트 (대상·특징을 짧게)' });
@@ -195,9 +197,9 @@
       const start = h('button', { class: 'primary' }, '▶ 듣기 시작');
       const answers = [];
       const stage = h('div');
-      box.append(h('p', { class: 'muted small' }, reply ? '실전 조건: 들은 말에 알맞은 응답을 고릅니다. 질문 문장은 글로 나오지 않고, 음성은 한 번만 나옵니다. 음성이 끝나면 20초 안에 답하세요.'
+      ap(box, h('p', { class: 'muted small' }, reply ? '실전 조건: 들은 말에 알맞은 응답을 고릅니다. 질문 문장은 글로 나오지 않고, 음성은 한 번만 나옵니다. 음성이 끝나면 20초 안에 답하세요.'
         : '실전 조건: 음성은 한 번만, 끝까지 재생된 뒤 문제가 하나씩 나옵니다 (문항마다 20초). 다시 듣기·이전 문항 없음.'), status, start, stage, notes);
-      const fail = msg => { status.textContent = msg; start.disabled = false; start.style.display = ''; box.append(h('button', { class: 'link small', onclick: () => onDone({ skipped: true }) }, '이 문제 건너뛰기 (기록하지 않음)')); };
+      const fail = msg => { status.textContent = msg; start.disabled = false; start.style.display = ''; ap(box, h('button', { class: 'link small', onclick: () => onDone({ skipped: true }) }, '이 문제 건너뛰기 (기록하지 않음)')); };
       // One question screen. audioEnded: Promise that resolves when the (reply) audio has ended (Next stays off until then).
       function ask(i, audioEnded, next) {
         const q = qs[i]; let sel = null; const t0 = Date.now(); let done = false;
@@ -210,7 +212,7 @@
           answers.push({ q, sel, rec }); next();
         };
         const cd = countdown(Q_SEC, () => finish(true));
-        stage.replaceChildren(h('div', { class: 'qhead' }, h('span', { class: 'small muted' }, `${i + 1} / ${qs.length}`), cd),
+        rc(stage, h('div', { class: 'qhead' }, h('span', { class: 'small muted' }, `${i + 1} / ${qs.length}`), cd),
           reply ? null : h('p', { class: 'stem' }, q.stem),
           h('div', { class: 'opts' }, q.choices.map((c, k) => h('button', { class: 'opt', onclick: e => { sel = k; msg.hidden = true; stage.querySelectorAll('.opt').forEach(x => x.classList.remove('sel')); e.currentTarget.classList.add('sel'); } }, c))),
           msg, nextBtn);
@@ -231,37 +233,37 @@
         }).catch(e => fail(e.message));
       };
       function review() {
-        stage.replaceChildren();
+        rc(stage, );
         const lines = set.script || (reply ? [{ sp: '', t: qs[0].stem }] : []);
-        box.append(h('h3', null, '결과'));
+        ap(box, h('h3', null, '결과'));
         for (const { q, sel, rec } of answers) {
           const ok = sel === q.answer;
           const hl = evidenceLines(lines, q.evidence);
-          box.append(h('div', { class: 'fb ' + (ok ? 'good' : 'bad') },
+          ap(box, h('div', { class: 'fb ' + (ok ? 'good' : 'bad') },
             h('p', { class: 'stem' }, (ok ? '✓ ' : '✗ ') + (q.stem || '')),
             h('p', null, '내 답: ', sel == null ? '— (시간 초과)' : `${L[sel]}. ${q.choices[sel]}`, ' · 정답: ', `${L[q.answer]}. ${q.choices[q.answer]}`),
             ok ? null : causePanel(rec, { sec: 'L', lines, hl, audio: path }),
             evidence(q), why(q)));
         }
-        box.append(h('details', { class: 'transcript' }, h('summary', null, '스크립트 보기'), scriptBox(lines, [])));
-        main.append(h('button', { class: 'primary', onclick: () => onDone({ answers: answers.length, correct: answers.filter(a => a.sel === a.q.answer).length }) }, '다음'));
+        ap(box, h('details', { class: 'transcript' }, h('summary', null, '스크립트 보기'), scriptBox(lines, [])));
+        ap(main, h('button', { class: 'primary', onclick: () => onDone({ answers: answers.length, correct: answers.filter(a => a.sel === a.q.answer).length }) }, '다음'));
       }
     }
 
     // Reading (daily/academic): timed reading (academic: read → '다 읽음' → wpm) → questions with the passage → review.
     function reading(main, task, meta, full, onDone) {
-      const box = h('section', { class: 'card' }); main.append(box);
+      const box = h('section', { class: 'card' }); ap(main, box);
       const set = full.set, qs = full.qs;
       const text = showPassage(set.passage);
       const t0 = Date.now();
       if (task.timed) {
         const nWords = words(set.passage.replace(/\[\[[is][A-Z]\]\]/g, '')).length;
-        box.append(h('p', { class: 'muted small' }, `Timed reading: 지문을 다 읽으면 '다 읽음'을 누르세요 (${nWords}단어). 읽는 속도(wpm)를 기록한 뒤 문제가 나옵니다.`),
+        ap(box, h('p', { class: 'muted small' }, `Timed reading: 지문을 다 읽으면 '다 읽음'을 누르세요 (${nWords}단어). 읽는 속도(wpm)를 기록한 뒤 문제가 나옵니다.`),
           h('div', { class: 'passage' }, para(text)),
           h('button', { class: 'primary', onclick: e => {
             const ms = Date.now() - t0; const v = wpm(nWords, ms);
             env.logSpeed({ item: meta.id, words: nWords, ms, wpm: v });
-            e.currentTarget.remove(); box.replaceChildren(h('p', { class: 'small' }, `읽기 속도 ${v} wpm (${Math.round(ms / 1000)}초)`)); questions();
+            e.currentTarget.remove(); rc(box, h('p', { class: 'small' }, `읽기 속도 ${v} wpm (${Math.round(ms / 1000)}초)`)); questions();
           } }, '다 읽음'));
       } else questions();
       // 소站 화면: 왼쪽 지문 + 문항 하나씩, Next만 (Back 없음), 답 없이 넘어가기 가능.
@@ -269,27 +271,27 @@
         const sel = {}; let i = 0;
         const pass = h('div', { class: 'passage' }, para(text));
         const qcol = h('div', { class: 'qcol' });
-        box.append(h('div', { class: 'split' }, pass, qcol));
+        ap(box, h('div', { class: 'split' }, pass, qcol));
         const one = () => {
           const q = qs[i];
           const nextBtn = h('button', { class: 'primary' }, i < qs.length - 1 ? 'Next' : '제출');
-          qcol.replaceChildren(h('p', { class: 'small muted' }, `${i + 1} / ${qs.length}`), h('p', { class: 'stem' }, q.stem),
+          rc(qcol, h('p', { class: 'small muted' }, `${i + 1} / ${qs.length}`), h('p', { class: 'stem' }, q.stem),
             q.type === 'insert' && q.sentence ? h('p', { class: 'insert-s' }, h('b', null, '넣을 문장: '), q.sentence) : null,
             h('div', { class: 'opts' }, q.choices.map((c, k) => h('button', { class: 'opt', onclick: e => { sel[i] = k; qcol.querySelectorAll('.opt').forEach(x => x.classList.remove('sel')); e.currentTarget.classList.add('sel'); } }, c))),
             nextBtn);
           nextBtn.onclick = () => { i++; if (i < qs.length) one(); else finish(); };
         };
         const finish = () => {
-          qcol.replaceChildren();
+          rc(qcol, );
           const recs = qs.map((q, k) => logQ(meta, task, k, q, sel[k] === q.answer, 2, sel[k] == null ? null : sel[k], t0));
-          box.append(h('h3', null, '결과'));
+          ap(box, h('h3', null, '결과'));
           qs.forEach((q, k) => {
             const ok = sel[k] === q.answer;
-            box.append(h('div', { class: 'fb ' + (ok ? 'good' : 'bad') }, h('p', { class: 'stem' }, (ok ? '✓ ' : '✗ ') + `${k + 1}. ` + q.stem),
+            ap(box, h('div', { class: 'fb ' + (ok ? 'good' : 'bad') }, h('p', { class: 'stem' }, (ok ? '✓ ' : '✗ ') + `${k + 1}. ` + q.stem),
               h('p', null, '내 답: ', sel[k] == null ? '— (답 안 함)' : q.choices[sel[k]], ' · 정답: ', q.choices[q.answer]),
               ok ? null : causePanel(recs[k], { sec: 'R', passage: set.passage.replace(/\[\[[is][A-Z]\]\]/g, '') }), evidence(q), why(q)));
           });
-          main.append(h('button', { class: 'primary', onclick: () => onDone({ answers: qs.length, correct: recs.filter(r => r.correct).length }) }, '다음'));
+          ap(main, h('button', { class: 'primary', onclick: () => onDone({ answers: qs.length, correct: recs.filter(r => r.correct).length }) }, '다음'));
         };
         one();
       }
@@ -297,7 +299,7 @@
 
     // C-Test: type the missing letters (first letters shown) → per-blank result.
     function ctest(main, task, meta, full, onDone) {
-      const box = h('section', { class: 'card' }); main.append(box);
+      const box = h('section', { class: 'card' }); ap(main, box);
       const set = full.set, qs = full.qs;
       const inputs = {};
       const t0 = Date.now();
@@ -310,9 +312,9 @@
         const inp = h('input', { class: 'blank', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', size: Math.max(2, q.answer.length + 1), maxlength: q.answer.length + 4, 'aria-label': '빈칸 ' + m[1] });
         inputs[+m[1] - 1] = inp; p.append(inp);
       }
-      box.append(h('p', { class: 'muted small' }, set.src === 'Fill in the blank 자료' ? '출처: Fill in the blank 자료 · 빈칸의 나머지 글자를 입력하세요.' : '빈칸의 나머지 글자를 입력하세요 (앞 글자는 지문에 있음).'), p);
+      ap(box, h('p', { class: 'muted small' }, set.src === 'Fill in the blank 자료' ? '출처: Fill in the blank 자료 · 빈칸의 나머지 글자를 입력하세요.' : '빈칸의 나머지 글자를 입력하세요 (앞 글자는 지문에 있음).'), p);
       const submit = h('button', { class: 'primary' }, '제출');
-      box.append(submit);
+      ap(box, submit);
       submit.onclick = () => {
         submit.remove();
         const recs = qs.map((q, i) => {
@@ -321,14 +323,14 @@
           return env.log({ item: meta.id, q: i, ref: meta.id + '#' + i, skill: q.skill, tier: task.tier, correct: ok, answer: v, conf: 2, verify: /^verify/.test(task.tier) || undefined, verifyOf: task.verifyOf, exam: true, ms: Date.now() - t0 });
         });
         const wrong = qs.map((q, i) => [q, i]).filter(([, i]) => !recs[i].correct);
-        box.append(h('p', { class: 'small' }, `${qs.length - wrong.length} / ${qs.length} 정답`));
+        ap(box, h('p', { class: 'small' }, `${qs.length - wrong.length} / ${qs.length} 정답`));
         for (const [q, i] of wrong) {
-          box.append(h('div', { class: 'fb bad' }, h('p', null, `${i + 1}. `, h('b', null, q.prefix + q.answer), q.glossKo ? ` (${q.glossKo})` : '', ' · 내 답: ', q.prefix + (recs[i].answer || '—')),
+          ap(box, h('div', { class: 'fb bad' }, h('p', null, `${i + 1}. `, h('b', null, q.prefix + q.answer), q.glossKo ? ` (${q.glossKo})` : '', ' · 내 답: ', q.prefix + (recs[i].answer || '—')),
             causePanel(recs[i], { sec: 'R', passage: set.passage.replace(/【(\d+)】/g, (m, n) => qs[n - 1].answer) })));
         }
-        if (set.noteKo) box.append(h('p', null, h('span', { class: 'lbl' }, '해설'), ' ', set.noteKo));
-        else if (qs[0] && (qs[0].whyKo || qs[0].whyZh)) box.append(why(qs[0]));
-        main.append(h('button', { class: 'primary', onclick: () => onDone({ answers: qs.length, correct: qs.length - wrong.length }) }, '다음'));
+        if (set.noteKo) ap(box, h('p', null, h('span', { class: 'lbl' }, '해설'), ' ', set.noteKo));
+        else if (qs[0] && (qs[0].whyKo || qs[0].whyZh)) ap(box, why(qs[0]));
+        ap(main, h('button', { class: 'primary', onclick: () => onDone({ answers: qs.length, correct: qs.length - wrong.length }) }, '다음'));
       };
     }
 
@@ -337,8 +339,8 @@
     function dictation(main, task, onDone) {
       ensure(() => {
         const full = task.of ? lookup(task.of) : null;
-        main.append(h('p', { class: 'kicker' }, '받아쓰기 → 쉐도잉 · 전에 "안 들렸다"고 고른 부분'));
-        const box = h('section', { class: 'card' }); main.append(box);
+        ap(main, h('p', { class: 'kicker' }, '받아쓰기 → 쉐도잉 · 전에 "안 들렸다"고 고른 부분'));
+        const box = h('section', { class: 'card' }); ap(main, box);
         let lines, path, span = null;
         if (full) {
           const set = full.set;
@@ -354,7 +356,7 @@
           if (r) { lines = r.lines; path = r.path; span = r.span; }
         }
         if (!lines || !lines.length || !path) {
-          box.append(h('p', { class: 'muted' }, '이 문제는 받아쓰기 자료(스크립트·음원)를 찾지 못했습니다.'), h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '넘어가기'));
+          ap(box, h('p', { class: 'muted' }, '이 문제는 받아쓰기 자료(스크립트·음원)를 찾지 못했습니다.'), h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '넘어가기'));
           return;
         }
         const target = lines.map(l => l.t).join(' ');
@@ -362,12 +364,12 @@
         play.onclick = () => audioEl(path).then(a => { if (span) { a.currentTime = span[0]; a.ontimeupdate = () => { if (span[1] != null && a.currentTime >= span[1]) a.pause(); }; } a.play(); }).catch(e => toast(e.message));
         const ta = h('textarea', { rows: 3, placeholder: `들은 대로 적기 (${words(target).length}단어)` });
         const res = h('div');
-        box.append(h('p', { class: 'muted small' }, '몇 번이든 들어도 됩니다. 들리는 대로 적고 확인하세요.'), play, ta,
+        ap(box, h('p', { class: 'muted small' }, '몇 번이든 들어도 됩니다. 들리는 대로 적고 확인하세요.'), play, ta,
           h('button', { class: 'primary', onclick: e => {
             const a = align(target, ta.value);
             env.logDictation({ key: task.key, item: task.of || null, ref: task.ref || null, ok: a.ok, total: a.total, pct: a.pct });
             e.currentTarget.remove();
-            res.append(h('p', null, `단어 정확도 ${a.pct}% (${a.ok}/${a.total})`),
+            ap(res, h('p', null, `단어 정확도 ${a.pct}% (${a.ok}/${a.total})`),
               h('p', { class: 'aligned' }, a.words.map(x => h('span', { class: x.ok ? 'ok' : 'miss' }, x.w + ' '))),
               h('p', { class: 'small muted' }, '빨간 단어가 못 들은 부분입니다. 이제 쉐도잉: 문장을 보며 소리와 동시에 3번 따라 말하세요.'),
               h('div', { class: 'script' }, lines.map(l => h('p', null, l.t))),
@@ -380,21 +382,21 @@
     function twoPass(main, task, onDone) {
       ensure(() => {
         const full = task.of ? lookup(task.of) : null;
-        main.append(h('p', { class: 'kicker' }, '2단계 듣기 · 전에 "들었는데 잊었다"고 고른 세트'));
-        const box = h('section', { class: 'card' }); main.append(box);
-        if (!full || !full.set.audio) { box.append(h('p', { class: 'muted' }, '이 세트의 음원을 찾지 못했습니다.'), h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '넘어가기')); return; }
+        ap(main, h('p', { class: 'kicker' }, '2단계 듣기 · 전에 "들었는데 잊었다"고 고른 세트'));
+        const box = h('section', { class: 'card' }); ap(main, box);
+        if (!full || !full.set.audio) { ap(box, h('p', { class: 'muted' }, '이 세트의 음원을 찾지 못했습니다.'), h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '넘어가기')); return; }
         const set = full.set; let pass = 0;
         const notes = h('textarea', { class: 'notes', rows: 5, placeholder: '2회차: 대상 → 특징/이유를 짧게' });
         const btn = h('button', { class: 'primary' }, '▶ 1회차: 노트 없이 흐름만 듣기');
         const st = h('p', { class: 'small muted' });
-        btn.onclick = () => { btn.disabled = true; audioEl(set.audio).then(a => { a.onended = () => { pass++; btn.disabled = false; if (pass === 1) { btn.textContent = '▶ 2회차: 노트하며 듣기'; box.append(notes); } else { btn.remove(); again(); } }; a.play(); st.textContent = '듣는 중…'; }).catch(e => toast(e.message)); };
-        box.append(st, btn);
+        btn.onclick = () => { btn.disabled = true; audioEl(set.audio).then(a => { a.onended = () => { pass++; btn.disabled = false; if (pass === 1) { btn.textContent = '▶ 2회차: 노트하며 듣기'; ap(box, notes); } else { btn.remove(); again(); } }; a.play(); st.textContent = '듣는 중…'; }).catch(e => toast(e.message)); };
+        ap(box, st, btn);
         function again() {
           const q = full.qs[task.q || 0] || full.qs[0];
           let sel = null;
-          box.append(h('p', { class: 'stem' }, q.stem), h('div', { class: 'opts' }, q.choices.map((c, k) => h('button', { class: 'opt', onclick: e => {
+          ap(box, h('p', { class: 'stem' }, q.stem), h('div', { class: 'opts' }, q.choices.map((c, k) => h('button', { class: 'opt', onclick: e => {
             sel = k; box.querySelectorAll('.opt').forEach(x => { x.disabled = true; }); e.currentTarget.classList.add(k === q.answer ? 'right' : 'wrong');
-            box.append(h('p', null, k === q.answer ? '맞혔습니다 (다시 푼 문제라 새 문제 정답률에는 넣지 않음)' : `정답은 ${L[q.answer]}`), evidence(q), scriptBox(set.script, evidenceLines(set.script, q.evidence)),
+            ap(box, h('p', null, k === q.answer ? '맞혔습니다 (다시 푼 문제라 새 문제 정답률에는 넣지 않음)' : `정답은 ${L[q.answer]}`), evidence(q), scriptBox(set.script, evidenceLines(set.script, q.evidence)),
               h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '다음'));
           } }, h('b', null, L[k]), ' ', c))));
         }

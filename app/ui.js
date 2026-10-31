@@ -93,6 +93,8 @@
   function render() {
     stopAudio();
     if (P) P.stopAll();
+    if (SP) SP.stopAll();
+    if (WR) WR.stopAll();
     const [, view, arg, arg2] = (location.hash || '#/').split('/');
     app.innerHTML = '';
     window.scrollTo(0, 0);
@@ -108,7 +110,20 @@
     else if (view === 'tests') viewTests(main);
     else if (view === 'room') viewRoom(main, arg, arg2);
     else if (view === 'wrong') viewWrong(main);
-    else if (view === 'mock') (window.viewMock || viewRoom)(main, { h, C, E, D: () => D, practice, POOL, go, save, logAttempt });
+    else if (view === 'write') {
+      const back = () => go('#/write');
+      if (arg === 'bs' && arg2) write().bs(main, decodeURIComponent(arg2), back);
+      else if ((arg === 'email' || arg === 'discussion') && arg2) write().writeTask(main, { task: decodeURIComponent(arg2), kind: arg }, back);
+      else if (arg === 'outline') write().outline(main, { n: 5 }, back);
+      else if (arg === 'fix') write().fix(main, {}, back);
+      else write().room(main, C, go);
+    }
+    else if (view === 'speak') {
+      if (arg === 'lr' && arg2) speak().lr(main, { set: decodeURIComponent(arg2) }, () => go('#/speak'));
+      else if (arg === 'iv' && arg2) speak().interview(main, { q: decodeURIComponent(arg2) }, () => go('#/speak'));
+      else speak().room(main, C, go);
+    }
+    else if (view === 'mock') viewMock(main, arg, arg2);
     else if (view === 'vocab') viewVocab(main);
     else if (view === 'sw') swApp().view(main, (location.hash || '').split('/').slice(2), render);
     else if (view === 'listen') listenApp().view(main, (location.hash || '').split('/').slice(2), render);
@@ -118,7 +133,7 @@
     else viewToday(main);
   }
   // 탭 5개: 오늘 · 연습실 · 오답 · 변화 · 설정 (단어·리딩·리스닝·말하기·쓰기 화면은 연습실/오답에서 들어감)
-  const TAB_OF = { '': '', do: '', room: 'room', vocab: 'room', sw: 'room', keep: 'room', mock: 'room', wrong: 'wrong', tests: 'wrong', read: 'wrong', listen: 'wrong', ko: 'wrong', skill: 'wrong', orig: 'wrong', progress: 'progress', settings: 'settings' };
+  const TAB_OF = { '': '', do: '', room: 'room', speak: 'room', write: 'room', vocab: 'room', sw: 'room', keep: 'room', mock: 'room', wrong: 'wrong', tests: 'wrong', read: 'wrong', listen: 'wrong', ko: 'wrong', skill: 'wrong', orig: 'wrong', progress: 'progress', settings: 'settings' };
   function nav(cur) {
     const tab = TAB_OF[cur] != null ? TAB_OF[cur] : cur;
     const link = (hash, label, key) => h('a', { href: hash, class: tab === key ? 'on' : '' }, label);
@@ -228,11 +243,23 @@
   // ---------- PRACTICE: 소站 문제 풀이 (app/practice.js) ----------
   let P = null;
   const practice = () => P || (P = PracticeApp.create({ h, toast, save, log: a => logAttempt(a),
-    keep: (w, sent) => keepApp().add(w, sent),
+    keep: (w, sent) => { keepApp().add(w, sent); const v = vocabApp(); if (v && v.flagWrong) v.flagWrong(w); },
     rules: { get: skill => myRules(skill), add: (skill, rule, rec) => { D.skillRules = D.skillRules || []; D.skillRules.push({ skill, rule, at: now(), from: rec && (rec.item || rec.ref) }); save(); } },
     logSpeed: r => { D.readSpeed = D.readSpeed || []; D.readSpeed.push(Object.assign({ at: now() }, r)); save(); },
     logDictation: r => { D.dictation = D.dictation || []; D.dictation.push(Object.assign({ at: now() }, r)); save(); },
     origAudio: ref => { const o = ORIG[ref]; const m = o && o.audio && C.audio[o.audio]; if (!m || !m.lines) return null; return { lines: m.lines.map(l => ({ sp: l.v, t: l.t })), path: m.src, span: o.seg || null }; } }));
+
+  // ---------- SPEAKING: 소站 L&R · Interview (app/speak.js) ----------
+  let SP = null;
+  const speak = () => SP || (SP = SpeakApp.create({ h, toast, log: a => logAttempt(a), scanRules: () => C.sw.scan,
+    logSpeak: r => { D.speak = D.speak || []; D.speak.push(Object.assign({ at: now() }, r)); save(); } }));
+
+  // ---------- WRITING: 소站 BS · Email · Discussion, 계획 카드·개요 드릴·고쳐 쓰기 (app/write.js) ----------
+  let WR = null;
+  const write = () => WR || (WR = WriteApp.create({ h, toast, log: a => logAttempt(a), scanRules: () => C.sw.scan, cats: () => C.sw.cats,
+    tutorGrammar: cats => C.sw.grammar.filter(g => /^튜터/.test(g.src || '') && cats.includes(g.cat)),
+    writingLog: () => D.writing || [],
+    logWriting: r => { D.writing = D.writing || []; D.writing.push(Object.assign({ at: now() }, r)); save(); } }));
 
   // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
   let V = null, vocabMode = 'home', vocabReturn = null;
@@ -265,6 +292,7 @@
       h('p', { class: 'muted small' }, '문제를 풀다가 모르는 단어를 선택해 저장한 목록입니다.')));
     if (!api.hasData()) { main.append(vocabImportCard(api, true)); return; }
 
+    main.append(frequentCard(api));
     const r = api.resumable();
     if (r) {
       main.append(h('section', { class: 'card hero' },
@@ -304,6 +332,29 @@
     }
     main.append(h('details', { class: 'card' }, h('summary', null, '단어 기록 내보내기 (파일 저장)'), vocabExportCard(api)));
     main.append(h('details', { class: 'card' }, h('summary', null, '단어장 기록 다시 가져오기'), vocabImportCard(api, false)));
+  }
+
+  // 자주 틀린 단어: 평소와 같은 풀이(같은 날 반복)로 범위만 바뀐다. 출처(단어장 Day / 문제 풀다 킵)·주제(단어장 분류) 필터.
+  let freqFilter = { src: 'all', cl: '' };
+  function frequentCard(api) {
+    if (!api.frequentList) return null;
+    const keptSet = new Set(keepApp().words ? keepApp().words().map(w => w.w.toLowerCase()) : []);
+    const all = api.frequentList();
+    const srcOf = w => (w.label.includes('문제 풀다 모름') || keptSet.has(w.en.toLowerCase())) ? 'tpo' : 'day';
+    const list = all.filter(w => (freqFilter.src === 'all' || srcOf(w) === freqFilter.src) && (!freqFilter.cl || w.cl === freqFilter.cl));
+    const cand = all.filter(w => w.candidate).length;
+    const sel = h('select', { onchange: e => { freqFilter.src = e.target.value; render(); } }, [['all', '전체 출처'], ['day', '단어장 Day'], ['tpo', '문제 풀다 모른 단어']].map(([v, l]) => h('option', { value: v, selected: freqFilter.src === v }, l)));
+    const cls = api.clusters();
+    const clSel = h('select', { onchange: e => { freqFilter.cl = e.target.value; render(); } }, h('option', { value: '' }, '전체 주제'), cls.map(c => h('option', { value: c, selected: freqFilter.cl === c }, c)));
+    return h('section', { class: 'card' },
+      h('h2', null, `자주 틀린 단어 ${cand}개`, h('span', { class: 'muted small' }, ' · 고질 오답 함께 표시')),
+      h('p', { class: 'small muted' }, '틀린 횟수(직접 입력은 2배) 2회 이상 또는 틀린 날 2일 이상, 틀린 비율 순. 서로 다른 2일 연속으로 맞히면 빠집니다. 풀이 방식은 평소와 같습니다.'),
+      h('div', { class: 'row wrap' }, sel, cls.length ? clSel : null),
+      cand ? h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 암기 시작 (최대 30개)') : null,
+      h('details', null, h('summary', null, `목록 ${list.length}개`),
+        h('ul', { class: 'wordlist' }, list.slice(0, 200).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko), ' ',
+          h('span', { class: 'small' }, w.label || ''), w.hard ? h('span', { class: 'chip' }, '고질') : null, !w.candidate ? h('span', { class: 'chip' }, '고질만') : null,
+          h('span', { class: 'muted small' }, ` · ${srcOf(w) === 'tpo' ? '문제에서' : 'Day ' + w.day}`))))));
   }
 
   // The same code the import box accepts, saved as a file (Safari keeps its storage out of reach of other apps).
@@ -350,8 +401,8 @@
     vocab: t.mode === 'hard' ? `자주 틀린 단어${t.n ? ' ' + t.n + '개' : ''}` : '오늘 복습 단어',
     dictation: '받아쓰기 → 쉐도잉', twopass: '2단계 듣기',
     item: (practice().KIND[(POOL()[t.item] || {}).kind] || '문제') + (t.timed ? ' · timed reading' : '') + (/^verify/.test(t.tier) ? ' · 다시 확인' : t.tier === 'delayed' ? ' · 유지 확인' : ''),
-    lr: 'Listen & Repeat 1세트', interview: 'Interview 4/3/2', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion') + ' 1편',
-    outline: '개요 드릴 3개', fix: '반복 오류 고쳐 쓰기', diag: '원본 빠른 진단', original: '다시 확인 · 원본',
+    lr: 'Listen & Repeat 1세트', interview: 'Interview 4/3/2', shadow: '쉐도잉 (L&R에서 빠뜨린 문장)', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion') + ' 1편',
+    outline: `개요 드릴 ${t.n || 3}개`, fix: '반복 오류 고쳐 쓰기', diag: '원본 빠른 진단', original: '다시 확인 · 원본',
   })[t.type] || t.type;
   let poolIdx = null;
   const POOL = () => poolIdx || (poolIdx = E.poolIndex(C));
@@ -377,7 +428,7 @@
   function planCtx() {
     const api = vocabApp();
     const vc = api && api.hasData() ? { hard: api.hardCount ? api.hardCount() : 0, due: api.reviewCounts ? api.reviewCounts()[api.bestReviewMode()] : null } : {};
-    return { seen: tabSeen(), vocab: vc, speak: swApp().todaySpeak ? swApp().todaySpeak() : {}, write: swApp().todayWrite ? swApp().todayWrite() : {} };
+    return { seen: tabSeen(), vocab: vc, speak: speak().today(C, D.speak), write: window.WriteApp ? write().today(C, D) : {} };
   }
   // 주 1회 비중 자동 조정: 선행 지표가 지난주보다 오르지 않은 영역 +5%p (설정에서 고정한 영역은 제외).
   function weeklyIndicators() {
@@ -487,7 +538,10 @@
         api && api.startHard && t.mode === 'hard' ? h('button', { class: 'primary', onclick: () => { if (api.startHard()) { vocabMode = 'flow'; vocabReturn = '#/do'; go('#/vocab'); } } }, '자주 틀린 단어 시작')
           : h('button', { class: 'primary', onclick: () => { vocabReturn = '#/do'; go('#/vocab'); } }, '단어 탭으로'),
         h('button', { class: 'ghost', onclick: () => done() }, '다 했어요')));
-    } else if (swApp().runTask && ['lr', 'interview', 'write', 'outline', 'fix'].includes(t.type)) swApp().runTask(main, t, done);
+    } else if (t.type === 'lr') speak().lr(main, t, done);
+    else if (t.type === 'interview') speak().interview(main, t, done);
+    else if (t.type === 'shadow') speak().shadow(main, t, done);
+    else if (window.WriteApp && ['write', 'outline', 'fix'].includes(t.type)) write().run(main, t, done);
     else {
       main.append(h('section', { class: 'card' }, h('h1', null, TASK_LABEL(t)), h('p', { class: 'muted' }, '말하기·쓰기 탭에서 하세요.'),
         h('button', { class: 'ghost', onclick: () => go('#/sw') }, '말하기·쓰기 탭'), h('button', { class: 'primary', onclick: () => done() }, '다 했어요')));
@@ -544,9 +598,44 @@
       main.append(h('section', { class: 'card' }, h('h2', null, name), h('div', { class: 'row wrap' }, kinds.map(([k, l]) => h('button', { class: 'ghost', onclick: () => go(`#/room/${sec}/${k}`) }, l)))));
     }
     main.append(h('section', { class: 'card' }, h('h2', null, '말하기 · 쓰기'), h('div', { class: 'row wrap' },
-      h('button', { class: 'ghost', onclick: () => go('#/sw') }, 'Listen & Repeat · Interview · Build a Sentence · Email · Academic Discussion'))),
+      h('button', { class: 'ghost', onclick: () => go('#/speak') }, '말하기: Listen & Repeat · Interview 4/3/2'),
+      h('button', { class: 'ghost', onclick: () => go('#/write') }, '쓰기: Build a Sentence · Email · Discussion · 개요 드릴'),
+      h('button', { class: 'ghost', onclick: () => go('#/sw') }, '튜터 교정 문장·반복 오류 (말하기·쓰기 탭)'))),
     h('section', { class: 'card' }, h('h2', null, '단어'), h('div', { class: 'row wrap' }, h('button', { class: 'ghost', onclick: () => go('#/vocab') }, '단어 암기'), h('button', { class: 'ghost', onclick: () => go('#/keep') }, `킵한 단어 ${keepApp().count()}개`))),
     h('section', { class: 'card' }, h('h2', null, '모의 모듈'), h('p', { class: 'small muted' }, '보류 회차(독점 TPO 2·3)로 실전처럼 리딩·리스닝 모듈을 풉니다.'), h('button', { class: 'ghost', onclick: () => go('#/mock') }, '모의 모듈')));
+  }
+
+  // ---------- 모의 모듈: 보류 회차(독점 TPO 2·3)의 리딩·리스닝을 소站 순서대로 (기록 tier 'mock', 숙달 판정에는 넣지 않음) ----------
+  function mockSets(paper, sec) {
+    return C.pool.sets.filter(s => s.paper === paper && s.sec === sec).sort((a, b) => a.module - b.module || a.task - b.task)
+      .flatMap(s => s.kind === 'reply' ? s.qs.map(q => q.id) : [s.id]).filter(id => POOL()[id] || true);
+  }
+  function viewMock(main, arg, arg2) {
+    const papers = (C.pool.papers || []).filter(p => p.held);
+    if (!arg) {
+      main.append(h('p', { class: 'kicker' }, h('a', { href: '#/room' }, '← 연습실')), h('h1', null, '모의 모듈'),
+        h('p', { class: 'muted small' }, '일상 훈련에서 빼 둔 회차입니다. 소站 순서대로 실전 조건으로 풉니다 (리딩 모듈 1 약 11분 30초 카운트다운, 리스닝 문항마다 20초 — docs/exam-rules.md). 모듈 2는 적응형이라 소站에서 받은 모듈 2 세트를 모두 이어서 풉니다 (시간 미확인).'),
+        ...papers.map(p => h('section', { class: 'card' }, h('h2', null, `${p.name} · ${p.held.slice(5).replace('-', '/')} 예정`),
+          h('div', { class: 'row wrap' }, h('button', { class: 'ghost', onclick: () => go(`#/mock/R/${p.n}`) }, '리딩 모듈'), h('button', { class: 'ghost', onclick: () => go(`#/mock/L/${p.n}`) }, '리스닝 모듈')),
+          (() => { const r = (D.mock || []).filter(x => x.paper === p.n); return r.length ? h('p', { class: 'small' }, r.map(x => `${x.sec} ${x.correct}/${x.total} (${E.dayStr(x.at).slice(5)})`).join(' · ')) : null; })())));
+      return;
+    }
+    const sec = arg, paper = +arg2;
+    const ids = mockSets(paper, sec);
+    const st = D.mockRun && D.mockRun.paper === paper && D.mockRun.sec === sec ? D.mockRun : (D.mockRun = { paper, sec, i: 0, correct: 0, total: 0, startedAt: now() });
+    if (st.i >= ids.length) {
+      (D.mock = D.mock || []).push({ at: now(), paper, sec, correct: st.correct, total: st.total, ms: now() - st.startedAt });
+      D.mockRun = null; save();
+      main.append(h('section', { class: 'card hero' }, h('h1', null, `모의 모듈 끝 · ${sec === 'R' ? '리딩' : '리스닝'}`), h('p', null, `${st.correct} / ${st.total} 정답`), h('button', { class: 'primary', onclick: () => go('#/mock') }, '모의 모듈 목록')));
+      return;
+    }
+    if (sec === 'R' && st.i === 0 && !st.cdStarted) { st.cdStarted = now(); save(); }
+    const left = sec === 'R' ? 690 - Math.round((now() - (st.cdStarted || now())) / 1000) : null;
+    main.append(h('p', { class: 'kicker' }, `모의 모듈 · 독점 TPO ${paper} · ${sec === 'R' ? '리딩' : '리스닝'} · ${st.i + 1}/${ids.length}`,
+      left != null ? h('span', { class: 'muted small' }, left > 0 ? ` · 모듈 1 남은 시간 약 ${Math.floor(left / 60)}분 ${left % 60}초` : ' · 모듈 1 시간 종료 (계속 풀어도 기록은 남음)') : null));
+    const id = ids[st.i]; const meta = POOL()[id] || E.poolItems(Object.assign({}, C, { pool: { sets: C.pool.sets.filter(s => s.paper === paper) } })).find(x => x.id === id);
+    if (!meta) { st.i++; save(); render(); return; }
+    practice().renderItem(main, { type: 'item', item: id, tier: 'mock', exam: true }, meta, res => { st.i++; st.correct += (res && res.correct) || 0; st.total += (res && res.answers) || 0; save(); render(); });
   }
 
   // ---------- 오답: 원인별 대기열 + TPO 회차 기록 + 한국어로 풀어 보기 ----------

@@ -104,6 +104,63 @@ function resumeSession() {
   return true;
 }
 
+// ===== 자주 틀린 단어 (개편 2026-11) =====
+// 기존 기록(failures·tier·spacedRecall 등)은 그대로 두고 새 필드만 더한다:
+//   m.vagueCount{모드}: '애매'도 틀린 쪽 신호로 따로 셈 · m.wrongDates / m.okDates: 모드와 관계없이 틀린 날·맞힌 날 · m.keepFlagAt: 문제 풀이 중 '뜻을 몰랐다'로 킵한 날
+// 범위: 틀린 횟수(직접 입력은 2배) 2회 이상 또는 틀린 날 2일 이상(또는 '뜻을 몰랐다'로 킵), 틀린 비율 순.
+// 마지막으로 틀린 날 뒤에 서로 다른 2일 연속으로 맞히면 빠진다. 기존 '고질 오답'(7일 중 3일)은 그대로 두고 목록에서 함께 표시.
+const baseRecordAttempt = recordAttempt;
+recordAttempt = function (qMode, en, tier, responseMs = null) {
+  baseRecordAttempt(qMode, en, tier, responseMs);
+  const m = getWordMeta(en), today = dayKey();
+  m.vagueCount = Object.assign({flash:0,quiz_ko:0,quiz_en:0,typed:0}, m.vagueCount);
+  if (tier === 'vague') m.vagueCount[qMode]++;
+  if (tier === 'guess') addDate(m.wrongDates || (m.wrongDates = []), today);
+  if (tier === 'sure') addDate(m.okDates || (m.okDates = []), today);
+  saveMeta();
+};
+function addDate(list, d) { if (!list.includes(d)) list.push(d); list.sort(); if (list.length > 40) list.splice(0, list.length - 40); }
+const MODE_LABEL = {typed: '직접 입력', flash: '카드', quiz_ko: '뜻 고르기', quiz_en: '동의어 고르기'};
+function nextDay(d) { const t = new Date(d + 'T00:00:00'); t.setDate(t.getDate() + 1); return t.toLocaleDateString('en-CA'); }
+function frequentInfo(en) {
+  const m = getWordMeta(en), f = m.failures, a = m.attempts, v = Object.assign({flash:0,quiz_ko:0,quiz_en:0,typed:0}, m.vagueCount);
+  const weighted = f.flash + f.quiz_ko + f.quiz_en + 2 * f.typed;
+  const tries = a.flash + a.quiz_ko + a.quiz_en + 2 * a.typed;
+  const wrongDays = [...new Set((m.wrongDates || []).concat(m.spacedRecall.failureDates || [], m.keepFlagAt ? [m.keepFlagAt] : []))].sort();
+  const lastWrong = wrongDays[wrongDays.length - 1] || '';
+  const okAfter = [...new Set((m.okDates || []).concat(m.spacedRecall.successfulDates || []))].filter(d => d > lastWrong).sort();
+  const exited = okAfter.some((d, i) => i > 0 && nextDay(okAfter[i - 1]) === d);
+  const candidate = (weighted >= 2 || wrongDays.length >= 2 || !!m.keepFlagAt) && !exited;
+  const top = Object.keys(f).sort((x, y) => (y === 'typed' ? 2 : 1) * f[y] - (x === 'typed' ? 2 : 1) * f[x])[0];
+  const vague = v.flash + v.quiz_ko + v.quiz_en + v.typed;
+  const parts = [];
+  if (f[top]) parts.push(MODE_LABEL[top] + ' ' + f[top] + '회 틀림');
+  if (wrongDays.length) parts.push(wrongDays.length + '일');
+  if (vague) parts.push('애매 ' + vague);
+  if (m.keepFlagAt) parts.push('문제 풀다 모름');
+  return { candidate, weighted, ratio: tries ? weighted / tries : (m.keepFlagAt ? 1 : 0), days: wrongDays.length, vague, hard: !!m.hard, exited, label: parts.join(' · ') };
+}
+function frequentWords() {
+  return WORDS.map(w => [w, frequentInfo(w.en)]).filter(([, i]) => i.candidate || i.hard)
+    .sort((x, y) => (y[1].candidate - x[1].candidate) || y[1].ratio - x[1].ratio || y[1].weighted - x[1].weighted).map(([w]) => w);
+}
+const baseBuildSession = buildSession;
+buildSession = function (size, qMode, srcMode) {
+  if (srcMode === 'frequent') return frequentWords().slice(0, size);
+  return baseBuildSession(size, qMode, srcMode);
+};
+// '자주 틀린 단어' 범위로 오늘 암기(같은 날 반복)를 시작한다 — 풀이 방식은 세트와 똑같다.
+function startFrequentSession() {
+  const candidates = frequentWords().filter(w => !getTodayLearningMeta(w.en).todayMastered).slice(0, CHUNK_SIZE);
+  if (!candidates.length) { alert('오늘 할 자주 틀린 단어가 없습니다.'); return false; }
+  learningGoalMode = 'same_day'; quizMode = 'typed'; sessionQueue = candidates; sessionIdx = 0;
+  sessionStats = {sure:0, vague:0, guess:0, quickRepairs:0, quickRepairSuccess:0, stopped:[]};
+  learningState = null; delayedRetries = []; finalReviewQueue = []; finalReviewActive = false;
+  sameDayState = {targets: candidates.map(w => w.en), sourceMode: 'frequent', sourceQuizMode: 'flash', chunk: null, nextNewIndex: 0, activityIndex: 0, pending: [], finalQueue: [], current: null, lastEns: [], phase: 'encoding', stats: {firstRecallSuccess:0, quick:0, deep:0, memory:0}};
+  candidates.forEach(w => resetTodayLearningIfNeeded(w.en)); saveMeta(); saveSession(); renderCard();
+  return true;
+}
+
 const __api = {
   hasData() { return QUIZ_MODES.some(m => Object.keys(srsState[m] || {}).length > 0); },
   wordCount() { return WORDS.length; },
@@ -115,6 +172,13 @@ const __api = {
     return null;
   },
   reviewCounts, bestReviewMode,
+  // 자주 틀린 단어
+  hardCount() { return frequentWords().filter(w => frequentInfo(w.en).candidate).length; },
+  startHard: startFrequentSession,
+  frequentList() { return frequentWords().map(w => Object.assign({ en: w.en, ko: getCoreMeaning(w), day: w.day, cl: w.cl || null }, frequentInfo(w.en))); },
+  // '뜻을 몰랐다'로 킵한 단어가 단어장에 있으면 자주 틀린 단어 후보로 (틀린 날 하나로 셈)
+  flagWrong(word) { const hit = __api.lookup(word); if (!hit) return null; const m = getWordMeta(hit.en); m.keepFlagAt = dayKey(); saveMeta(); return hit.en; },
+  clusters() { return [...new Set(WORDS.map(w => w.cl).filter(Boolean))]; },
   plan: loadChunkPlan,
   createPlan: createChunkPlan,
   chunkCount, nextChunkIndex,

@@ -417,6 +417,8 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 <script src="app/vocab.js"></script>
 <script src="app/sw.js"></script>
 <script src="app/listen.js"></script>
+<script src="app/write.js"></script>
+<script src="app/speak.js"></script>
 <script src="app/practice.js"></script>
 <script src="app/read.js"></script>
 <script src="app/kotrial.js"></script>
@@ -443,6 +445,8 @@ def leak_strings(data):
                 add(l["t"])
             for q in s["qs"]:
                 add(q.get("stem")); add(q.get("prompt")); add(q.get("model")); add(q.get("text"))
+                for po in q.get("posts") or []:
+                    add(po.get("text"))
                 for c in q.get("choices") or []:
                     add(c)
     for o in data["originals"]:

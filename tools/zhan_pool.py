@@ -211,7 +211,11 @@ def writing_set(a, base):
                        "template": tpl, "answer": answer, "extra": extra, "whyZh": why_zh(q)})
         else:
             model = text(q.get("answer"))
-            qs.append({"qid": q["questionId"], "type": kind, "prompt": text(q.get("questionContent")),
+            posts = [{"name": p.get("name") or None,
+                      "role": "professor" if "/teacher/" in (p.get("headImgUrl") or "") else "student", "text": text(p.get("content"))}
+                     for p in q.get("writingProfessorStudent") or []]
+            head = text(q.get("writingOutline")) if q.get("writingOutline") not in (None, "None") else ""
+            qs.append({"qid": q["questionId"], "type": kind, "prompt": text(q.get("questionContent")), "posts": posts or None, "head": head or None,
                        "limit": q.get("prepareTime"), "model": model if model and model != "None" else None})
     return dict(base, kind=kind, qs=qs)
 
@@ -265,6 +269,20 @@ def load():
                     if t and q["questionId"] in byq:
                         tries[byq[q["questionId"]]["id"]].append(dict(t, wf=int(wf), date=dates.get(wf)))
     out = sorted(sets.values(), key=lambda s: (s["paper"], "RLSW".index(s["sec"]), s["module"], s["task"]))
+    # Whisper로 붙인 줄 시각 (tools/zhan_align.py): 소站 스크립트에 시각이 없는 줄만 채운다 (atSrc 'whisper').
+    al = json.loads((Z / "align.json").read_text()) if (Z / "align.json").exists() else {}
+    for s in out:
+        ats = al.get(s["id"])
+        if ats and len(ats) == len(s.get("script") or []):
+            for l, a in zip(s["script"], ats):
+                if l.get("at") is None and a is not None:
+                    l["at"], l["atSrc"] = a, "whisper"
+    # Kokoro로 만든 질문 음성 (tools/zhan_kokoro.py): 소站 음원이 없는 Interview 질문만.
+    for s in out:
+        for q in s["qs"]:
+            k = Z / "kokoro" / f"{q.get('id', '')}.mp3"
+            if s["kind"] == "interview" and not q.get("audio") and k.exists():
+                q["audio"], q["audioSrc"] = f"private/zhan/kokoro/{k.name}", "Kokoro 생성 (원본 음원 아님)"
     for s in out:
         hay = s.get("passage") or " ".join(l["t"] for l in s.get("script") or [])
         for q in s["qs"]:

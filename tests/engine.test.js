@@ -287,3 +287,15 @@ test('weekly auto weights: an area whose indicator did not improve gets +5%p, on
   d.settings.weights = { listen: 30 };
   assert.ok(!('listen' in E.weeklyAdjust(Object.assign({}, d, { weightAuto: null }), T0, ind).adj));
 });
+
+test('L&R 빠뜨림(omit) → 다음 날 ② 쉐도잉; 말하기 문법(grammar) → 고쳐 쓰기 대기열', () => {
+  const d = blank(); d.settings.examDate = '2026-11-14';
+  d.attempts.push(att(null, 'speak', false, day(0), { item: 'Z4-S-A1-Q2', cause: 'omit', missed: ['the'] }));
+  d.attempts.push(att(null, 'speak', false, day(0) + 1, { item: 'Z4-S-A2-Q1', cause: 'grammar', cats: ['TENSE'] }));
+  const q = E.causeQueues(d, day(1));
+  assert.strictEqual(q.shadow.length, 1); assert.deepStrictEqual(q.shadow[0].missed, ['the']);
+  assert.strictEqual(q.fix.length, 1);
+  const sh = tasks(plan(d, day(1)), 'listen').filter(t => t.type === 'shadow');
+  assert.strictEqual(sh.length, 1); assert.strictEqual(sh[0].of, 'Z4-S-A1-Q2');
+  assert.strictEqual(E.replaySkill('ACT', d, ALL, day(1)).mastery, 0, 'speak attempts never count toward reading/listening mastery');
+});
