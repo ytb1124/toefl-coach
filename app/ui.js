@@ -497,7 +497,7 @@
         a.playbackRate = listenApp().rate();
         activePlayers.push({ stop: () => a.pause() });
         p.stop(); p.style.display = 'none';
-        note.replaceChildren('소站 원본 음원 (세트 전체) · ', h('a', { href: 'javascript:void 0', onclick: () => { a.pause(); a.remove(); p.style.display = ''; note.textContent = '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).'; } }, '재구성 음성으로 듣기'));
+        note.replaceChildren('원본 음원 (세트 전체) · ', h('a', { href: 'javascript:void 0', onclick: () => { a.pause(); a.remove(); p.style.display = ''; note.textContent = '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).'; } }, '재구성 음성으로 듣기'));
         note.after(a);
       });
     }

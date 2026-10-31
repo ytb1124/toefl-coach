@@ -54,7 +54,7 @@
       const wrongTotal = Z().sets.reduce((n, s) => n + s.qs.filter(x => x.wrong).length, 0);
       main.append(root.ZhanData.sourceLine(h, 'reading'), h('section', { class: 'card hero' },
         h('h1', null, '리딩 오답 다시 풀기'),
-        h('p', { class: 'muted' }, `소站 TPO独家 ${Z().tests.length}회에서 틀린 ${wrongTotal}문항이 들어 있는 ${Z().sets.length}세트 (C-Test·일상·학술). 원문 지문으로 다시 풀고, 끝나면 해설을 봅니다.`),
+        h('p', { class: 'muted' }, `독점 TPO ${Z().tests.length}회에서 틀린 ${wrongTotal}문항이 들어 있는 ${Z().sets.length}세트 (C-Test·일상·학술). 원문 지문으로 다시 풀고, 끝나면 해설을 봅니다.`),
         h('p', { class: 'small' }, `또 틀림 ${counts.again} · 아직 안 풂 ${counts.new} · 다시 풀어 맞힘 ${counts.fixed}`),
         h('p', { class: 'small muted' }, '오늘 훈련에서 같은 원본 문제를 다시 푼 기록도 함께 셉니다 (가장 최근 결과 기준).'),
         q.length ? h('button', { class: 'primary', onclick: () => go('#/read/' + q[0].id) }, `다음 세트: ${q[0].title} (${testName(q[0].test)})`) : null));
@@ -160,8 +160,7 @@
         card.append(h('div', { class: 'fb ' + (right ? 'good' : 'bad') }, body,
           q.orig ? origLine(q.orig) : null,
           q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
-          q.point ? h('p', { class: 'rule small' }, '다음엔 → ', q.point) : null,
-          !q.whyKo && q.whyZh ? h('details', null, h('summary', { class: 'small' }, q.wrong ? '해설 (중국어 원문, 한국어 해설 없음)' : '해설 (중국어 원문 — 시험에서 맞힌 문항)'), h('pre', { class: 'essaytext small' }, q.whyZh)) : null));
+          q.point ? h('p', { class: 'rule small' }, '다음엔 → ', q.point) : null));
       });
       const d = load();
       const nxt = queue(setsForCore(), d.sets, Z().tests.map(t => t.id), hist).find(s => s.id !== set.id);

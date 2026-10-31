@@ -94,7 +94,7 @@
       } }, '토큰 저장하고 불러오기');
       return [h('h1', null, title), h('section', { class: 'card' },
         h('p', null, lead),
-        h('p', { class: 'small muted' }, `소站 TPO独家 원본 자료는 저작물이라 공개 사이트에 두지 않고 비공개 저장소 ${REPO}에만 있습니다. 토큰은 이 기기 브라우저에만 저장되고 동기화되지 않습니다 (기기마다 한 번, 리스닝·리딩 공용). 학습 기록은 동기화됩니다.`),
+        h('p', { class: 'small muted' }, `독점 TPO 원본 자료는 저작물이라 공개 사이트에 두지 않고 비공개 저장소 ${REPO}에만 있습니다. 토큰은 이 기기 브라우저에만 저장되고 동기화되지 않습니다 (기기마다 한 번, 리스닝·리딩 공용). 학습 기록은 동기화됩니다.`),
         h('details', null, h('summary', { class: 'small' }, '토큰 만드는 법 (읽기 전용, 이 저장소 하나만)'),
           h('ol', { class: 'small' },
             h('li', null, 'github.com → 오른쪽 위 프로필 → Settings → 맨 아래 Developer settings'),
@@ -207,7 +207,7 @@
       const wrongTotal = Z.sets.reduce((n, s) => n + s.qs.filter(x => x.wrong).length, 0);
       main.append(h('section', { class: 'card hero' },
         h('h1', null, '리스닝 오답 다시 풀기'),
-        h('p', { class: 'muted' }, `소站 TPO独家 ${Z.tests.length}회에서 틀린 ${wrongTotal}문항이 들어 있는 ${Z.sets.length}세트. 원본 음원으로 시험처럼 한 번 듣고 풀고, 끝나면 스크립트·해설을 봅니다.`),
+        h('p', { class: 'muted' }, `독점 TPO ${Z.tests.length}회에서 틀린 ${wrongTotal}문항이 들어 있는 ${Z.sets.length}세트. 원본 음원으로 시험처럼 한 번 듣고 풀고, 끝나면 스크립트·해설을 봅니다.`),
         h('p', { class: 'small' }, `또 틀림 ${counts.again} · 아직 안 풂 ${counts.new} · 다시 풀어 맞힘 ${counts.fixed}`),
         h('p', { class: 'small muted' }, '오늘 훈련에서 같은 원본 문제를 다시 푼 기록도 함께 셉니다 (가장 최근 결과 기준).'),
         q.length ? h('button', { class: 'primary', onclick: () => go('#/listen/' + q[0].id) }, `다음 세트: ${q[0].title} (${testName(Z, q[0].test)})`) : null));
@@ -297,7 +297,6 @@
           q.orig ? origLine(q.orig) : null,
           q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
           q.point ? h('p', { class: 'rule small' }, '다음엔 → ', q.point) : null,
-          !q.whyKo && q.whyZh ? h('details', null, h('summary', { class: 'small' }, q.wrong ? '해설 (중국어 원문, 한국어 해설 없음)' : '해설 (중국어 원문 — 시험에서 맞힌 문항)'), h('pre', { class: 'essaytext small' }, q.whyZh)) : null,
           reply && q.audio ? h('button', { class: 'ghost small', onclick: () => player(q.audio).play() }, '▶ 다시 듣기') : null));
       });
       if (!reply) {

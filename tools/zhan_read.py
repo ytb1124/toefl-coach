@@ -68,7 +68,7 @@ def load():
         d = json.loads(f.read_text())
         n = int(d["paper"].split()[-1])
         tid = f"Z{n}"
-        tests.append({"id": tid, "name": f"TPO独家 {n}", "date": (d.get("date") or "")[:10],
+        tests.append({"id": tid, "name": f"독점 TPO {n}", "date": (d.get("date") or "")[:10],
                       "score": d.get("score"), "correct": d.get("correct"), "total": d.get("total")})
         for s in d["sets"]:
             sid = f"{tid}-R-M{s['m']}-T{s['task']}"
@@ -133,6 +133,9 @@ def main():
     errs = check(sets)
     for e in errs:
         print("✗", e)
+    for s in sets:   # 중국어 해설 원문은 앱에 보내지 않는다 (한국어 해설만 표시)
+        for q in s["qs"]:
+            q.pop("whyZh", None)
     data = json.dumps({"tests": tests, "sets": sets}, ensure_ascii=False)
     (Z / "reading.js").write_text("/* 생성 파일 (tools/zhan_read.py). 원본 저작물 — 공개 저장소에 올리지 않는다. */\nwindow.ZHAN_READ = " + data + ";\n")
     (Z / "reading.json").write_text(data + "\n")
