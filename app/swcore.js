@@ -163,6 +163,26 @@
     return out.filter((f, k) => !out.slice(0, k).some(g => g.index === f.index && g.match === f.match));
   }
 
+  // ---------- idea switch: did my idea just repeat a classmate? ----------
+  // Content words of `mine` that also appear in the classmates' posts but not in the professor's question
+  // (question words are the shared topic, not a repeated idea). Light stemming so "economies" meets "economy".
+  const GENERIC = new Set(('think believe agree disagree because also really very more most much many people person thing things ' +
+    'good better best great important help helps make makes made other others even such example instance while however ' +
+    'which what when where would could should will have been being there their them they this that these those your ' +
+    'just only with from into about like well than then some every overall way ways lot lots get gets can actually time create live need needs give gives bring keep').split(' '));
+  const wroot = w => w.replace(/(ies|ied)$/, 'y').replace(/(ing|ed|es|s)$/, '').replace(/e$/, '');
+  function ideaOverlap(mine, posts, question) {
+    const skip = new Set(tokens(question).map(wroot));
+    const theirs = new Set([].concat(posts || []).flatMap(p => tokens(p)).map(wroot));
+    const out = [], seen = new Set();
+    for (const w of tokens(mine)) {
+      const r = wroot(w);
+      if (w.length < 4 || GENERIC.has(w) || GENERIC.has(r) || skip.has(r) || seen.has(r) || !theirs.has(r)) continue;
+      seen.add(r); out.push(w);
+    }
+    return out;
+  }
+
   // ---------- writing stats ----------
   function wordCount(text) { return (String(text || '').match(/[A-Za-z0-9][A-Za-z0-9'’-]*/g) || []).length; }
   function paragraphs(text) { return String(text || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean).length; }
@@ -180,6 +200,6 @@
     return a;
   }
 
-  const API = { DAY, INTERVAL, MASTER, tokens, norm, matchAnswer, nearest, review, drillQueue, diff, lrScore, LR_CAT, scan, wordCount, paragraphs, bsCorrect, shuffle };
+  const API = { DAY, INTERVAL, MASTER, tokens, norm, matchAnswer, nearest, review, drillQueue, diff, lrScore, LR_CAT, scan, ideaOverlap, wordCount, paragraphs, bsCorrect, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.SWCore = API;
 })(typeof window !== 'undefined' ? window : globalThis);

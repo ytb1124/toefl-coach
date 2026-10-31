@@ -117,3 +117,32 @@ test('wordCount and paragraphs', () => {
   assert.strictEqual(K.wordCount("Dear Sam,\n\nI hope this email finds you well. It's 7 pm."), 12);
   assert.strictEqual(K.paragraphs('a\n\nb\n\n\nc'), 3);
 });
+
+test('ideaOverlap flags content words a classmate already used, not the question topic', () => {
+  const q = SW.ideas[0];
+  const posts = q.students.map(s => s.text);
+  const repeat = K.ideaOverlap('Globalization helps countries build infrastructure and grow the economy', posts, q.q);
+  assert.ok(repeat.length >= 3, repeat.join(','));
+  assert.ok(!repeat.includes('globalization'), 'question topic is not an overlap');
+  assert.deepStrictEqual(K.ideaOverlap(q.angles[0].line, posts, q.q), []);
+});
+
+test('ideas: every prompt has two classmates (own or from a tutor discussion) and more than one side', () => {
+  const AD = Object.fromEntries(SW.discussion.map(d => [d.id, d]));
+  for (const q of SW.ideas) {
+    const students = q.ad ? AD[q.ad].students : q.students;
+    assert.strictEqual(students.length, 2, q.id);
+    assert.ok(new Set(q.angles.map(a => a.side)).size >= 2, q.id);
+  }
+});
+
+test('ideas: tutor-sourced angle lines are not repeats of the classmates', () => {
+  const AD = Object.fromEntries(SW.discussion.map(d => [d.id, d]));
+  for (const q of SW.ideas.filter(x => x.ad)) {
+    const d = AD[q.ad];
+    for (const a of q.angles.filter(x => x.strategy === 1)) {
+      const o = K.ideaOverlap(a.line, d.students.map(s => s.text), d.prof.text);
+      assert.ok(o.length < 3, `${q.id} ${a.who}: ${o}`);
+    }
+  }
+});

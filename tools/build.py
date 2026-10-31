@@ -123,7 +123,7 @@ def sw_audio_sets(sw):
 def check_sw(sw, voices):
     errs = []
     cats = set(sw["cats"])
-    ids = [x["id"] for k in ("grammar", "lr", "buildSentence", "interview", "email", "discussion") for x in sw[k]]
+    ids = [x["id"] for k in ("grammar", "lr", "buildSentence", "interview", "email", "discussion", "ideas") for x in sw.get(k, [])]
     dup = {i for i in ids if ids.count(i) > 1}
     if dup:
         errs.append(f"sw: duplicate ids {sorted(dup)}")
@@ -161,6 +161,21 @@ def check_sw(sw, voices):
     for d in sw["discussion"]:
         if len(d.get("students", [])) != 2:
             errs.append(f"sw discussion {d['id']}: needs 2 student posts")
+    ads = {x["id"] for x in sw["discussion"]}
+    for q in sw.get("ideas", []):
+        p = f"sw ideas {q['id']}"
+        if q.get("ad"):
+            if q["ad"] not in ads:
+                errs.append(f"{p}: unknown discussion {q['ad']}")
+        elif not q.get("q") or len(q.get("students", [])) != 2:
+            errs.append(f"{p}: needs q + 2 student posts, or ad")
+        if len(q.get("angles", [])) < 3:
+            errs.append(f"{p}: needs at least 3 angles")
+        for an in q.get("angles", []):
+            if an.get("side") not in ("+", "-", "0") or an.get("strategy") not in (1, 2) or not all(an.get(k) for k in ("who", "idea", "ex", "line")):
+                errs.append(f"{p}: angle needs who/side(+/-/0)/strategy(1/2)/idea/ex/line")
+        if not q.get("src"):
+            errs.append(f"{p}: missing src")
     for r in sw["scan"]:
         if r["cat"] not in cats:
             errs.append(f"sw scan: unknown cat {r['cat']}")

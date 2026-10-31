@@ -1,6 +1,6 @@
 /* 스피킹·라이팅 파트 — 튜터 피드백(Taebin TOEFL Classes.pdf)에서 반복된 오류로 만든 별도 훈련.
  * 기록은 'toefl-sw-v1' 한 키에만 저장한다 (오늘 훈련 'toeflcoach.v1'·단어 'toefl-vocab-*'와 분리, Sync로 기기 동기화).
- * Routes: #/sw · #/sw/drill · #/sw/lr[/id] · #/sw/bs · #/sw/iv[/id] · #/sw/em[/id] · #/sw/ad[/id] · #/sw/log */
+ * Routes: #/sw · #/sw/drill · #/sw/lr[/id] · #/sw/bs · #/sw/idea · #/sw/iv[/id] · #/sw/em[/id] · #/sw/ad[/id] · #/sw/log */
 (function () {
   'use strict';
   const KEY = 'toefl-sw-v1';
@@ -21,7 +21,7 @@
     const catChip = c => h('span', { class: 'chip cat' }, (CAT[c] || { label: c }).label);
 
     // ---------- storage ----------
-    function blank() { return { v: 1, g: {}, lr: {}, bs: {}, log: [], drafts: {}, prefs: {} }; }
+    function blank() { return { v: 1, g: {}, lr: {}, bs: {}, idea: {}, log: [], drafts: {}, prefs: {} }; }
     function load() {
       try { const d = JSON.parse(storage.getItem(KEY) || 'null'); if (d && d.v) return Object.assign(blank(), d); } catch (e) { /* fresh */ }
       return blank();
@@ -191,6 +191,7 @@
       const lrDone = S.lr.filter(s => (d.lr[s.id] || []).length).length;
       const mastered = Object.values(d.g).filter(c => c.box >= K.MASTER).length;
       const bsOk = Object.values(d.bs).filter(b => b.lastOk).length;
+      const ideaOk = Object.values(d.idea).filter(b => b.lastOk).length;
       const count = k => d.log.filter(l => l.kind === k).length;
       put(main, h('section', { class: 'sw-tiles' },
         tile('#/sw/lr', '스피킹', 'Listen & Repeat', `${lrDone}/${S.lr.length}세트 해 봄`),
@@ -198,13 +199,15 @@
         tile('#/sw/drill', '공통', '교정 문장', `${mastered}/${S.grammar.length} 마스터`),
         tile('#/sw/bs', '라이팅', 'Build a Sentence', `${bsOk}/${S.buildSentence.length} 맞힘`),
         tile('#/sw/em', '라이팅', '이메일 (7분)', `${count('em')}개 씀`),
-        tile('#/sw/ad', '라이팅', '토론 (10분)', `${count('ad')}개 씀`)));
+        tile('#/sw/ad', '라이팅', '토론 (10분)', `${count('ad')}개 씀`),
+        tile('#/sw/idea', '라이팅', '아이디어 전환 (1분)', `${ideaOk}/${S.ideas.length} 새 관점`)));
 
       put(main, h('details', { class: 'card' }, h('summary', null, '튜터 전략 모음 (PREP · STAR · 이메일 · 토론 템플릿)'),
         h('h3', null, '인터뷰 — 의견 질문: PREP'), guideList(S.guides.prep),
         h('h3', null, '인터뷰 — 경험 질문: STAR'), guideList(S.guides.star),
         h('h3', null, '이메일'), guideList(S.guides.email),
         h('h3', null, '토론'), guideList(S.guides.discussion),
+        h('h3', null, '토론 — 앞 학생이 다 말했을 때'), guideList(S.guides.ideaSwitch),
         h('h3', null, '내 토론 템플릿'), h('pre', { class: 'template' }, S.guides.template)));
       put(main, h('p', { class: 'small' }, h('a', { href: '#/sw/log' }, '내가 쓴 글·답변 기록 보기 →')));
     }
@@ -478,6 +481,89 @@
     }
 
     // =====================================================================
+    // 아이디어 전환 (1분): 앞 학생이 다 말했을 때 주어를 바꿔 새 아이디어 만들기
+    // =====================================================================
+    // 튜터 템플릿의 주어(As a student / consumer / member of society)를 앞에, 10/31 실전에서 정리한 주어를 뒤에
+    const WHO = ['학생', '소비자', '사회 구성원', '개인·소상공인', '근로자', '노인·약자', '문화·환경', '기타'];
+    const STRAT = { 1: ['전략 1', '완전히 다르게', 'Although [A] and [B] both have good ideas, I feel …'], 2: ['전략 2', '한 학생 주장 넓히기', 'I agree with [B], and I would further her argument … (B와 꽤 다른 내 내용 필수)'] };
+    // ideas 항목은 교수 질문·학생 글을 직접 갖거나(q, students) 튜터 수업 토론 문제(ad: AD 번호)를 가리킨다
+    const ideaQ = q => q.ad ? Object.assign({}, q, { q: AD[q.ad].prof.text, prof: AD[q.ad].prof.name, students: AD[q.ad].students }) : q;
+    let ix = null;
+    function viewIdea(main) {
+      if (!ix || ix.done) {
+        const d = load();
+        const rank = q => { const r = d.idea[q.id]; return !r ? 0 : r.lastOk ? 2 + (r.ok || 0) : 1; };
+        const list = S.ideas.slice().sort((a, b) => rank(a) - rank(b) || S.ideas.indexOf(a) - S.ideas.indexOf(b)).slice(0, 5);
+        ix = { list, idx: 0, ok: 0, secs: [] };
+      }
+      if (ix.idx >= ix.list.length) return ideaEnd(main);
+      const q = ideaQ(ix.list[ix.idx]);
+      if (!ix.start) ix.start = now();
+      const clock = h('span', { class: 'small muted' });
+      const tick = () => { const l = 60 - (now() - ix.start) / 1000; clock.textContent = '⏱ ' + mmss(l) + (l < 0 ? ' 초과' : ''); clock.classList.toggle('warn', l < 0); };
+      tick(); every(1000, tick);
+      put(main, h('div', { class: 'swbar' }, back('#/sw', '나가기'), h('span', { class: 'small muted' }, `${ix.idx + 1} / ${ix.list.length}`), clock));
+      const card = h('section', { class: 'card' });
+      put(main, card);
+      put(card, h('div', { class: 'row tight' }, srcChip(q.src)), q.note ? h('p', { class: 'hint small' }, q.note) : null,
+        h('div', { class: 'passage' }, h('p', null, h('b', null, (q.prof || 'Professor') + ': '), q.q),
+          q.students.map(s => h('p', { class: 'student' }, h('b', null, s.name + ': '), s.text))),
+        h('p', { class: 'small muted' }, '튜터: 학생 글은 훑기만, 실수로 그들의 주장을 반복하지 말 것. 전략을 고르고 "As a [student / consumer / member of society]"처럼 주어를 바꿔 1분 안에 첫 문장 + 예시 하나를 정하세요.'));
+      let who = null, side = null, strat = null, locked = false;
+      const whoRow = h('div', { class: 'row tight idea-chips' }), sideRow = h('div', { class: 'row tight idea-chips' }), stratRow = h('div', { class: 'row tight idea-chips' });
+      const stratHint = h('p', { class: 'small muted' });
+      const line = h('textarea', { class: 'essay', rows: 3, spellcheck: 'false', autocorrect: 'off', placeholder: 'I think … because it gives [주어] …  (영어 첫 문장 한 줄)' });
+      const ex = h('input', { type: 'text', class: 'idea-ex', placeholder: '예시 키워드 (고유명사·숫자 하나, 한국어 가능)' });
+      const btn = h('button', { class: 'primary', onclick: check }, '확인');
+      const fb = h('div');
+      function chips() {
+        whoRow.innerHTML = ''; sideRow.innerHTML = ''; stratRow.innerHTML = '';
+        Object.entries(STRAT).forEach(([k, [n, l]]) => put(stratRow, h('button', { class: 'word' + (strat === k ? ' sel' : ''), disabled: locked, onclick: () => { strat = k; chips(); } }, `${n} · ${l}`)));
+        stratHint.textContent = strat ? '튜터 문장: ' + STRAT[strat][2] : '';
+        WHO.forEach(w => put(whoRow, h('button', { class: 'word' + (who === w ? ' sel' : ''), disabled: locked, onclick: () => { who = w; chips(); } }, w)));
+        [['+', '찬성'], ['-', '반대'], ['0', '제3의 답']].forEach(([v, l]) => put(sideRow, h('button', { class: 'word' + (side === v ? ' sel' : ''), disabled: locked, onclick: () => { side = v; chips(); } }, l)));
+      }
+      chips();
+      put(card, h('h3', null, '전략 (튜터)'), stratRow, stratHint, h('h3', null, '내 주어'), whoRow, h('h3', null, '입장'), sideRow, h('h3', null, '첫 문장'), line, ex, btn, fb);
+      setTimeout(() => line.focus(), 30);
+      function check() {
+        if (!line.value.trim()) { toast('첫 문장을 한 줄 쓰세요'); return; }
+        locked = true; chips(); btn.disabled = true; line.disabled = true; ex.disabled = true;
+        const secs = Math.round((now() - ix.start) / 1000);
+        const shared = K.ideaOverlap(line.value + ' ' + ex.value, q.students.map(s => s.text), q.q);
+        const verdict = shared.length >= 3 ? ['bad', `앞 학생 글과 겹치는 단어 ${shared.length}개 — 같은 관점을 반복했을 가능성이 큽니다.` + (strat === '2' ? ' 전략 2여도 튜터: "MUST give original content that is quite different".' : ' 주어를 바꿔 보세요.')]
+          : shared.length ? ['', `겹치는 단어 ${shared.length}개 — 관점이 다른지 직접 확인하세요.`]
+          : ['good', '앞 학생 글과 겹치는 내용어 없음.'];
+        put(fb, h('div', { class: 'fb ' + verdict[0] },
+          h('p', { class: 'rule' }, verdict[1]), shared.length ? h('p', { class: 'small' }, '겹친 단어: ', shared.map(w => h('span', { class: 'chip' }, w)).reduce((a, c) => a.concat(c, ' '), [])) : null,
+          h('p', { class: 'small' }, `걸린 시간 ${mmss(secs)}${secs > 60 ? ' (1분 초과 — 실전에선 고민을 끊고 주어 하나 골라 시작)' : ''}` + (who ? ` · 주어: ${who}` : ' · 주어를 고르지 않음') + (ex.value.trim() ? '' : ' · 예시 없음')),
+          h('h3', null, '다른 주어로 가능한 아이디어'),
+          h('p', { class: 'small muted' }, '초록 칩 = 튜터 첨삭 PDF에 있는 관점·문장 / 나머지는 AI 예시'),
+          h('ul', { class: 'idea-angles' }, q.angles.map(a => h('li', null,
+            h('b', null, `${{ '+': '찬성', '-': '반대', '0': '제3의 답' }[a.side]} · ${a.who}`), ' ', h('span', { class: 'chip' }, STRAT[a.strategy || 1][0]), a.src ? [' ', h('span', { class: 'chip src-tutor' }, a.src)] : null, ' — ', a.idea,
+            h('div', { class: 'small muted' }, '예시: ', a.ex), h('div', { class: 'small' }, h('i', null, a.line))))),
+          h('p', { class: 'small muted' }, '내 아이디어가 앞 학생과 다른 주어였고, 예시가 구체적이었나요?'),
+          h('div', { class: 'row' },
+            h('button', { class: 'primary', onclick: () => grade(true, secs) }, '✓ 새 관점 + 예시 있음'),
+            h('button', { class: 'ghost', onclick: () => grade(false, secs) }, '✗ 겹치거나 막힘'))));
+      }
+      function grade(ok, secs) {
+        if (ok) ix.ok++;
+        ix.secs.push(secs);
+        save(d => { const r = d.idea[q.id] || { ok: 0, bad: 0 }; r[ok ? 'ok' : 'bad']++; r.lastOk = ok; r.last = now(); r.secs = secs; r.who = who; r.strat = strat; r.line = line.value; d.idea[q.id] = r; });
+        ix.idx++; ix.start = null; render(); window.scrollTo(0, 0);
+      }
+    }
+    function ideaEnd(main) {
+      ix.done = true;
+      put(main, back('#/sw', '스피킹·라이팅'), h('section', { class: 'card' }, h('h1', null, `아이디어 전환 ${ix.ok} / ${ix.list.length}`),
+        h('p', null, `평균 ${mmss(avg(ix.secs))} (목표 1:00 이내)`),
+        guideList(S.guides.ideaSwitch),
+        h('button', { class: 'primary', onclick: () => { ix = null; render(); } }, '5문제 더'),
+        h('a', { class: 'ghost wide as-btn', href: '#/sw/ad' }, '토론 10분 글쓰기로 →')));
+    }
+
+    // =====================================================================
     // Interview (45 seconds)
     // =====================================================================
     let iv = null;
@@ -597,7 +683,8 @@
       if (wr.phase === 'intro') {
         put(card, h('button', { class: 'primary', onclick: () => { wr.phase = 'write'; wr.start = now(); render(); } }, `시작 (${cfg.min}:00 타이머)`),
           draft ? h('button', { class: 'ghost wide', onclick: () => { wr.phase = 'write'; wr.start = now(); wr.resume = true; render(); } }, '저장된 초안 이어 쓰기') : null,
-          kind === 'ad' ? h('details', null, h('summary', { class: 'small' }, '내 토론 템플릿'), h('pre', { class: 'template' }, S.guides.template)) : null);
+          kind === 'ad' ? h('details', null, h('summary', { class: 'small' }, '내 토론 템플릿'), h('pre', { class: 'template' }, S.guides.template)) : null,
+          kind === 'ad' ? h('details', null, h('summary', { class: 'small' }, '앞 학생이 다 말했을 때 (주어 바꾸기)'), guideList(S.guides.ideaSwitch)) : null);
         return;
       }
       if (wr.phase === 'write') {
@@ -695,6 +782,7 @@
       if (mode === 'drill') return viewDrill(main);
       if (mode === 'lr') return id ? viewLr(main, id) : viewLrList(main);
       if (mode === 'bs') return viewBs(main);
+      if (mode === 'idea') return viewIdea(main);
       if (mode === 'iv') return id ? viewIv(main, id) : viewIvList(main);
       if (mode === 'em' || mode === 'ad') return id ? viewW(main, mode, id) : viewWList(main, mode);
       if (mode === 'log') return viewLog(main);

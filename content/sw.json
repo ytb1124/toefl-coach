@@ -533,10 +533,824 @@
       "mine": "Both Andrew and Claire made valid points, but I lean toward Claire's view. I agree with the notion that democratic leadership is more effective on business because it can lead to productive results. For example, if leader encourages employee participation and morale on business, it will become a good opportunity to improve employee's abilities such as teamwork and making-decisions skills. Nowadays, many employees, especially many junior jobs, do not have enough opportunity to participate on business. I think it can limit productive results to companies. If companies access various opinions by democratic leadership, I believe it will be advantageous chances to results.",
       "tutor": "Both Andrew and Claire made valid points, but I lean toward Claire's view. I agree with the notion that democratic leadership is more effective on business because it can lead to productive results. For example, if a leader encourages employee participation and improved morale in business, it will become a good opportunity to improve employee's abilities in teamwork and decision-making skills. In contrast to the traditional authoritarian leadership style, democratic leadership that encourages participation allows employees to make important decisions in their companies, and this increases their sense of “ownership” in their workplace. Furthermore, they can improve their communication skills in the process." }
   ],
+  "ideas": [
+    {
+      "id": "ID1",
+      "src": "실전 10/31 (기억 재구성)",
+      "note": "질문은 실전 기억, 학생 글은 '인프라·돈·경제 발전을 앞 학생이 다 말했다'는 기억으로 AI가 다시 씀. 당시 내 글: 국익 → 알리바바·타오바오 세금 → 정부 투자 (98단어에서 끝남).",
+      "q": "Globalization has connected economies and societies around the world more closely than ever. Overall, do you think globalization has been good for society and the economy? Why or why not?",
+      "students": [
+        {
+          "name": "Kevin",
+          "text": "I think globalization has been very positive. When foreign companies invest in a country, they build roads, ports, and factories. This infrastructure helps the whole economy grow, and countries that trade more become richer."
+        },
+        {
+          "name": "Sophia",
+          "text": "I agree with Kevin. Global trade lets countries earn a lot of money by exporting their products. For example, many Asian countries developed their economies quickly because they could sell goods to the rest of the world."
+        }
+      ],
+      "angles": [
+        {
+          "who": "개인·소상공인",
+          "side": "+",
+          "idea": "온라인 플랫폼으로 작은 가게도 전 세계에 판다 (기업·국가가 아닌 개인)",
+          "ex": "Taobao/AliExpress small sellers → buyers in Korea, US, Europe",
+          "line": "Globalization gives ordinary people and small businesses a chance to reach the world market.",
+          "strategy": 1
+        },
+        {
+          "who": "소비자",
+          "side": "+",
+          "idea": "더 싸고 다양한 상품을 고를 수 있다",
+          "ex": "Korean supermarkets: Chilean wine, Vietnamese coffee at low prices",
+          "line": "Globalization makes a wider variety of products affordable for ordinary consumers.",
+          "strategy": 1
+        },
+        {
+          "who": "동네 가게",
+          "side": "-",
+          "idea": "글로벌 대기업 때문에 지역 상점이 문을 닫는다",
+          "ex": "Local bookstores closing after Amazon / Coupang",
+          "line": "Globalization often helps giant companies but pushes small local shops out of business.",
+          "strategy": 1
+        },
+        {
+          "who": "소비자·사회",
+          "side": "-",
+          "idea": "공급망이 해외에 묶여 위기 때 물건이 끊긴다",
+          "ex": "COVID-19 mask and semiconductor shortages in 2020–2021",
+          "line": "Globalization makes countries depend on each other so much that one crisis can stop the supply of basic goods.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID11",
+      "src": "튜터 수업 9/14 (원문)",
+      "ad": "AD1",
+      "angles": [
+        {
+          "who": "사회 구성원·부모",
+          "side": "+",
+          "strategy": 1,
+          "idea": "맞벌이 부모는 두 달 돌봄 공백이 부담 → 짧은 방학이 가정에 더 현실적",
+          "ex": "Working parents paying for two months of summer camp",
+          "line": "As a member of society, I would add that a year-round calendar is easier for working parents, who struggle to find childcare for two whole months."
+        },
+        {
+          "who": "학생·저소득층",
+          "side": "+",
+          "strategy": 1,
+          "idea": "방학엔 학교 급식·도서관·컴퓨터를 못 쓰는 학생이 있다",
+          "ex": "Students who rely on free school lunches",
+          "line": "Shorter breaks protect students who depend on school for meals and study spaces."
+        },
+        {
+          "who": "교사",
+          "side": "-",
+          "strategy": 1,
+          "idea": "긴 방학에 교사가 연수받고 수업을 새로 설계한다",
+          "ex": "Teachers taking a summer training program",
+          "line": "A long summer gives teachers time to train and redesign their courses, which improves the next school year."
+        },
+        {
+          "who": "학생",
+          "side": "-",
+          "strategy": 2,
+          "idea": "Liam 확장: 긴 방학이라야 한 기술을 깊게 배우는 프로젝트가 가능 (3주로는 안 됨)",
+          "ex": "A six-week coding camp that cannot fit into a three-week break",
+          "line": "I agree with Liam, and I would add that only a long break gives students enough time to master a skill through a deep project."
+        }
+      ]
+    },
+    {
+      "id": "ID12",
+      "src": "튜터 수업 9/15 (원문)",
+      "ad": "AD2",
+      "angles": [
+        {
+          "who": "사회 구성원·환경",
+          "side": "+",
+          "strategy": 1,
+          "idea": "출근하는 날이 하루 줄면 교통량·배출이 준다",
+          "ex": "Thousands of Seoul commuters staying home on Fridays",
+          "line": "As a member of society, I would add that a four-day week means one less commuting day, which reduces traffic and pollution."
+        },
+        {
+          "who": "회사 채용",
+          "side": "+",
+          "strategy": 1,
+          "idea": "좋은 인재가 주 4일 회사로 몰린다",
+          "ex": "Young job seekers choosing a company with a four-day week",
+          "line": "A four-day week helps companies attract talented young workers who value free time."
+        },
+        {
+          "who": "소비자",
+          "side": "-",
+          "strategy": 2,
+          "idea": "David 확장: 고객 입장에서 금요일에 병원·은행 서비스가 끊긴다",
+          "ex": "A customer who cannot reach a bank on Friday",
+          "line": "I agree with David, and as a consumer, I would add that customers suffer when services are unavailable one extra day."
+        },
+        {
+          "who": "근로자",
+          "side": "-",
+          "strategy": 1,
+          "idea": "4일에 몰아서 일하면 하루 10시간 → 오히려 더 지친다",
+          "ex": "Ten-hour days that leave no energy in the evening",
+          "line": "Squeezing five days of work into four creates long, exhausting days for employees."
+        }
+      ]
+    },
+    {
+      "id": "ID13",
+      "src": "튜터 수업 9/16 (원문)",
+      "ad": "AD3",
+      "angles": [
+        {
+          "who": "소비자",
+          "side": "+",
+          "strategy": 1,
+          "idea": "같은 비용으로 여러 콘텐츠를 누린다 (물건 하나 살 돈으로 다양한 자료)",
+          "ex": "One monthly fee for thousands of movies instead of buying one DVD",
+          "line": "As a consumer, I would add that a subscription gives access to a huge variety of content for the price of a single item.",
+          "src": "튜터 9/16 — Good!"
+        },
+        {
+          "who": "사회 구성원·환경",
+          "side": "+",
+          "strategy": 1,
+          "idea": "CD·DVD·박스 같은 실물 쓰레기가 줄어든다",
+          "ex": "No more plastic CD cases and game boxes",
+          "line": "Subscriptions reduce physical waste because products are delivered digitally."
+        },
+        {
+          "who": "소비자",
+          "side": "-",
+          "strategy": 1,
+          "idea": "무료 체험 후 자동 결제·해지하기 어려움 → 잊은 구독에 돈이 샌다",
+          "ex": "A free trial that quietly renews every month",
+          "line": "Because of automatic renewal, consumers often pay for services they no longer use."
+        },
+        {
+          "who": "소비자",
+          "side": "-",
+          "strategy": 1,
+          "idea": "콘텐츠가 플랫폼마다 쪼개져 여러 개를 동시에 구독해야 한다",
+          "ex": "Needing Netflix, Disney+, and Tving to watch different shows",
+          "line": "Content is now split across many platforms, so consumers must pay for several subscriptions at once."
+        }
+      ]
+    },
+    {
+      "id": "ID14",
+      "src": "AI 재구성 (튜터 수업 9/17 주제)",
+      "ad": "AD9",
+      "angles": [
+        {
+          "who": "사회 구성원·정부",
+          "side": "+",
+          "strategy": 1,
+          "idea": "현금 거래가 사라지면 탈세·불법 거래가 어려워진다",
+          "ex": "Businesses hiding cash income from tax officials",
+          "line": "As a member of society, I would add that a cashless system makes tax evasion and illegal deals much harder."
+        },
+        {
+          "who": "여행자",
+          "side": "+",
+          "strategy": 1,
+          "idea": "환전 없이 휴대폰 하나로 해외 결제",
+          "ex": "Paying with a phone in Japan without exchanging money",
+          "line": "Going cashless makes travel easier because people do not need to exchange currency."
+        },
+        {
+          "who": "사회 구성원",
+          "side": "-",
+          "strategy": 1,
+          "idea": "정전·서버 장애가 나면 결제가 전부 멈춘다",
+          "ex": "The 2022 Kakao data center fire that stopped mobile payments in Korea",
+          "line": "If all payments depend on computer systems, one power outage or server failure can leave people unable to pay at all."
+        },
+        {
+          "who": "어린이·청소년",
+          "side": "-",
+          "strategy": 1,
+          "idea": "현금을 안 만지면 돈의 가치 감각을 배우기 어렵고 과소비하기 쉽다",
+          "ex": "Children learning to save with coins in a piggy bank",
+          "line": "Without cash, young people find it harder to understand the real value of money."
+        }
+      ]
+    },
+    {
+      "id": "ID15",
+      "src": "AI 재구성 (튜터 수업 10/22·10/29 주제)",
+      "ad": "AD13",
+      "angles": [
+        {
+          "who": "회사의 미래",
+          "side": "+",
+          "strategy": 2,
+          "idea": "Claire 확장: 결정에 참여해 본 직원이 미래의 리더가 된다",
+          "ex": "Junior employees who only follow the supervisor's rules",
+          "line": "If employees never have a chance to develop such skills and participate in teamwork, where will the company's future leaders come from?",
+          "src": "튜터 10/22"
+        },
+        {
+          "who": "직원 개인",
+          "side": "+",
+          "strategy": 2,
+          "idea": "Claire 확장: 참여 과정에서 의사소통 능력이 자란다",
+          "ex": "Employees presenting ideas in weekly team meetings",
+          "line": "Furthermore, they can improve their communication skills in the process.",
+          "src": "튜터 10/29"
+        },
+        {
+          "who": "고객",
+          "side": "+",
+          "strategy": 1,
+          "idea": "현장 직원이 고객 문제를 가장 잘 안다 → 더 나은 결정",
+          "ex": "A cashier suggesting a faster checkout system",
+          "line": "Front-line employees understand customers best, so including them leads to better decisions."
+        },
+        {
+          "who": "신입",
+          "side": "-",
+          "strategy": 1,
+          "idea": "신입은 명확한 지시가 있어야 빨리 배운다 (Andrew의 '위기'와 다른 이유)",
+          "ex": "A new cook's first week in a busy restaurant kitchen",
+          "line": "Authoritarian leadership helps new employees learn quickly because they get clear instructions."
+        }
+      ]
+    },
+    {
+      "id": "ID16",
+      "src": "모의고사 10/27 (원문) · 튜터 10/28",
+      "ad": "AD17",
+      "angles": [
+        {
+          "who": "전문직 진로",
+          "side": "+",
+          "strategy": 1,
+          "idea": "연구·개발 같은 상위 직무는 학위 없이 지원조차 못 한다",
+          "ex": "Some programmers are already being replaced by AI tools",
+          "line": "Research and development positions are still being actively hired for, and you cannot even apply to these positions without advanced degrees.",
+          "src": "튜터 10/28"
+        },
+        {
+          "who": "학생",
+          "side": "+",
+          "strategy": 1,
+          "idea": "4년 동안 동아리·선후배로 평생 인맥을 만든다",
+          "ex": "Club members who later start a company together",
+          "line": "As a student, I would add that four years of college build a network of friends and mentors that lasts for life."
+        },
+        {
+          "who": "학생·비용",
+          "side": "-",
+          "strategy": 1,
+          "idea": "등록금 빚 없이 사회생활을 시작한다",
+          "ex": "Graduates spending ten years paying back student loans",
+          "line": "Short programs let young people start their careers without huge debts."
+        },
+        {
+          "who": "직장인·지역 주민",
+          "side": "-",
+          "strategy": 1,
+          "idea": "일하면서·지방에서도 온라인 단기 과정으로 배울 수 있다",
+          "ex": "A factory worker taking an online data course at night",
+          "line": "Short online programs give working adults and people in small towns a chance to learn new skills."
+        }
+      ]
+    },
+    {
+      "id": "ID17",
+      "src": "튜터 수업 10/23 (원문)",
+      "ad": "AD18",
+      "angles": [
+        {
+          "who": "시민·정부 감시",
+          "side": "-",
+          "strategy": 1,
+          "idea": "정부가 뉴스를 통제하기 어려워졌다 → 영향력이 지나치지 않다 (오히려 필요)",
+          "ex": "Governments that once controlled the news media",
+          "line": "In the past, many governments tried to control the news media in order to manipulate people, but this is impossible nowadays because people express their opinions on social media.",
+          "src": "내 글 10/23 (튜터 교정)"
+        },
+        {
+          "who": "재난·긴급 상황",
+          "side": "-",
+          "strategy": 1,
+          "idea": "속보가 가장 빨리 전달된다",
+          "ex": "Real-time updates during a typhoon or earthquake",
+          "line": "Social media can deliver breaking news faster, which is strongly advantageous in emergency situations.",
+          "src": "내 글 10/23 (튜터 교정)"
+        },
+        {
+          "who": "사회 구성원",
+          "side": "+",
+          "strategy": 1,
+          "idea": "확인 안 된 가짜 뉴스가 사실보다 빨리 퍼진다",
+          "ex": "False rumors about vaccines spreading during COVID-19",
+          "line": "Social media has too much influence because false information spreads faster than the truth."
+        },
+        {
+          "who": "소수 기업",
+          "side": "+",
+          "strategy": 1,
+          "idea": "몇몇 회사의 알고리즘이 사람들이 볼 내용을 정한다",
+          "ex": "Trending topics chosen by an algorithm, not by people",
+          "line": "A few tech companies' algorithms decide what millions of people see, which gives them too much power."
+        }
+      ]
+    },
+    {
+      "id": "ID18",
+      "src": "튜터 수업 10/28 (원문)",
+      "ad": "AD19",
+      "angles": [
+        {
+          "who": "사회 구성원",
+          "side": "+",
+          "strategy": 2,
+          "idea": "Claire 확장 + Paul 반박: 사람들은 이미 충분히 힘들다, 굳이 도발을 더 만들 필요 없다",
+          "ex": "Ordinary people already facing stress at work and school",
+          "line": "Unlike Paul, I think people are challenged enough without the need to manufacture more provocations or challenges.",
+          "src": "튜터 10/28"
+        },
+        {
+          "who": "나 (개인 경험)",
+          "side": "+",
+          "strategy": 2,
+          "idea": "Claire 확장: 주말 미술관·출근길 재즈가 내 삶을 돌아보게 하고 꿈을 줬다",
+          "ex": "Ancient paintings at the art museum and jazz on the morning commute",
+          "line": "When I see ancient paintings, it makes me reflect on my life.",
+          "src": "내 글 10/28 (튜터 교정)"
+        },
+        {
+          "who": "미래 세대",
+          "side": "0",
+          "strategy": 1,
+          "idea": "제3의 목적: 예술은 역사를 기록해 다음 세대가 기억하게 한다",
+          "ex": "Picasso's Guernica recording the bombing of a town",
+          "line": "I feel that art should record history so that future generations never forget important events."
+        },
+        {
+          "who": "지역사회",
+          "side": "0",
+          "strategy": 1,
+          "idea": "제3의 목적: 공공 예술이 동네 사람들을 모은다",
+          "ex": "Residents painting murals together in Seoul's Ihwa Mural Village",
+          "line": "I believe art should bring communities together, as public mural projects do."
+        }
+      ]
+    },
+    {
+      "id": "ID2",
+      "src": "AI 재구성",
+      "q": "Cities have limited budgets for transportation. Should a city spend more money on improving public transportation, such as buses and subways, or on building and repairing roads for cars? Why?",
+      "students": [
+        {
+          "name": "Daniel",
+          "text": "Public transportation is the better choice. If more people take buses and subways, there will be fewer cars on the road, so traffic jams will decrease. This saves everyone time."
+        },
+        {
+          "name": "Mia",
+          "text": "I also prefer public transportation because it is better for the environment. Cars produce a lot of air pollution, and buses and trains can carry many people while producing much less carbon dioxide."
+        }
+      ],
+      "angles": [
+        {
+          "who": "저소득층·학생",
+          "side": "+",
+          "idea": "차가 없는 사람에게 대중교통은 일자리·학교로 가는 유일한 수단",
+          "ex": "Students and part-time workers without cars commuting by subway",
+          "line": "Public transportation gives people who cannot afford a car equal access to jobs and education.",
+          "strategy": 1
+        },
+        {
+          "who": "노인·장애인",
+          "side": "+",
+          "idea": "운전 못 하는 사람의 이동권",
+          "ex": "Elderly people who stopped driving using low-floor buses",
+          "line": "Better public transportation lets elderly and disabled people move around the city independently.",
+          "strategy": 1
+        },
+        {
+          "who": "화물·응급",
+          "side": "-",
+          "idea": "트럭·구급차·소방차는 도로가 있어야 움직인다",
+          "ex": "Delivery trucks and ambulances stuck on broken roads",
+          "line": "Roads are still essential because delivery trucks and ambulances cannot use subways.",
+          "strategy": 1
+        },
+        {
+          "who": "농촌·교외 주민",
+          "side": "-",
+          "idea": "버스가 드문 지역은 결국 차가 필요하다",
+          "ex": "Rural towns where a bus comes only twice a day",
+          "line": "In suburbs and rural areas, good roads help more people than buses that rarely come.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID3",
+      "src": "AI 재구성",
+      "q": "Social media has become a major part of teenagers' lives. Do you think social media has a more positive or more negative effect on teenagers? Why?",
+      "students": [
+        {
+          "name": "Emma",
+          "text": "I think it is mostly positive. Teenagers can stay connected with their friends anytime, even when they move to a different city or school. This helps them feel less lonely."
+        },
+        {
+          "name": "Jason",
+          "text": "I disagree. Social media is harmful to teenagers' mental health. They constantly compare themselves to others' perfect photos, which makes them feel anxious and unhappy with their own lives."
+        }
+      ],
+      "angles": [
+        {
+          "who": "공부·진로",
+          "side": "+",
+          "idea": "무료 강의·진로 정보를 SNS로 얻는다",
+          "ex": "Learning coding or drawing from YouTube and Instagram tutorials",
+          "line": "Social media helps teenagers discover new skills and career paths for free.",
+          "strategy": 1
+        },
+        {
+          "who": "소수자·고립된 학생",
+          "side": "+",
+          "idea": "주변에 없는 같은 관심사 친구를 찾는다",
+          "ex": "A teenager in a small town joining an online club for rare hobbies",
+          "line": "Social media lets teenagers find communities that do not exist in their own neighborhood.",
+          "strategy": 1
+        },
+        {
+          "who": "수면·집중",
+          "side": "-",
+          "idea": "밤늦게까지 스크롤해서 잠·성적이 떨어진다",
+          "ex": "Scrolling short videos until 2 a.m. before an exam",
+          "line": "Social media takes away teenagers' sleep and focus, which hurts their grades.",
+          "strategy": 1
+        },
+        {
+          "who": "개인정보·안전",
+          "side": "-",
+          "idea": "사진·위치 공개로 범죄·사이버 폭력 위험",
+          "ex": "Location tags revealing a student's school and home",
+          "line": "Teenagers often share too much personal information online, which can put their safety at risk.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID4",
+      "src": "AI 재구성",
+      "q": "Some universities require all students to study a foreign language, regardless of their major. Do you think universities should have this requirement? Why or why not?",
+      "students": [
+        {
+          "name": "Olivia",
+          "text": "Yes, they should. Speaking a second language is a big advantage in the job market. Many companies work with international partners, so they prefer to hire employees who can speak another language."
+        },
+        {
+          "name": "Ryan",
+          "text": "I don't think so. Students have limited time, and they should focus on courses related to their major. An engineering student, for instance, needs more math and science, not a language class."
+        }
+      ],
+      "angles": [
+        {
+          "who": "사고방식·뇌",
+          "side": "+",
+          "idea": "다른 언어를 배우면 다른 관점으로 생각하는 법을 배운다",
+          "ex": "Learning that some languages have no future tense",
+          "line": "Learning a foreign language teaches students to see the world from a different point of view.",
+          "strategy": 1
+        },
+        {
+          "who": "여행·교류",
+          "side": "+",
+          "idea": "교환학생·여행에서 현지인과 진짜 관계를 맺는다",
+          "ex": "An exchange student in Spain making local friends",
+          "line": "A foreign language lets students build real relationships during exchange programs and travel.",
+          "strategy": 1
+        },
+        {
+          "who": "기술 변화",
+          "side": "-",
+          "idea": "번역 앱·AI 때문에 필요성이 줄었다",
+          "ex": "Using Papago or AI translation during a business trip",
+          "line": "With modern translation tools, a required language class is less useful than before.",
+          "strategy": 1
+        },
+        {
+          "who": "학생 선택권·비용",
+          "side": "-",
+          "idea": "억지로 듣는 수업은 효과 없고 등록금만 든다",
+          "ex": "Students forgetting a required language two years later",
+          "line": "Students learn best when they choose a language because they want to, not because it is required.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID5",
+      "src": "AI 재구성",
+      "q": "Many companies now allow employees to work from home several days a week. Do you think working from home is better or worse for companies overall? Why?",
+      "students": [
+        {
+          "name": "Lucas",
+          "text": "It is better. Employees save a lot of time because they don't have to commute, so they have more energy for their work and become more productive."
+        },
+        {
+          "name": "Hannah",
+          "text": "I think it is worse. When people are not in the same office, communication becomes difficult. Small questions take longer to answer, and teamwork suffers."
+        }
+      ],
+      "angles": [
+        {
+          "who": "채용",
+          "side": "+",
+          "idea": "지역 제한 없이 전국·해외 인재를 뽑는다",
+          "ex": "A Seoul startup hiring a developer living in Busan",
+          "line": "Remote work lets companies hire talented people from anywhere, not just near the office.",
+          "strategy": 1
+        },
+        {
+          "who": "회사 비용",
+          "side": "+",
+          "idea": "사무실 임대료·관리비가 줄어든다",
+          "ex": "A company moving to a smaller office and saving rent",
+          "line": "Companies can save a large amount of money on office rent when employees work from home.",
+          "strategy": 1
+        },
+        {
+          "who": "신입 교육",
+          "side": "-",
+          "idea": "신입은 옆에서 보고 배우는 기회를 잃는다",
+          "ex": "A new employee who never sees how seniors handle clients",
+          "line": "New employees learn much more slowly when they cannot watch experienced coworkers in person.",
+          "strategy": 1
+        },
+        {
+          "who": "보안",
+          "side": "-",
+          "idea": "집 와이파이·개인 노트북으로 정보 유출 위험",
+          "ex": "Confidential files on a shared family computer",
+          "line": "Working from home increases the risk that important company information will leak.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID6",
+      "src": "AI 재구성",
+      "q": "Some cities have banned private cars from their downtown areas. Do you think this is a good policy? Why or why not?",
+      "students": [
+        {
+          "name": "Noah",
+          "text": "I support this policy because cars cause serious air pollution. Without cars downtown, the air would be much cleaner and healthier for everyone."
+        },
+        {
+          "name": "Grace",
+          "text": "I agree. Downtown areas always have terrible traffic. If cars are banned, buses can move faster and people can get where they need to go more easily."
+        }
+      ],
+      "angles": [
+        {
+          "who": "상점·관광",
+          "side": "+",
+          "idea": "걷는 사람이 늘면 가게 매출이 오른다",
+          "ex": "Car-free streets in Copenhagen with busy outdoor cafés",
+          "line": "When people walk instead of drive, they stop at more shops, which helps local businesses.",
+          "strategy": 1
+        },
+        {
+          "who": "안전",
+          "side": "+",
+          "idea": "보행자 교통사고가 줄어든다",
+          "ex": "Fewer accidents involving children near downtown schools",
+          "line": "Banning cars makes downtown streets much safer for pedestrians, especially children.",
+          "strategy": 1
+        },
+        {
+          "who": "배달·상인",
+          "side": "-",
+          "idea": "물건 납품·배달이 어려워진다",
+          "ex": "Store owners unable to receive deliveries during the day",
+          "line": "A car ban makes it hard for downtown stores to receive goods and deliver to customers.",
+          "strategy": 1
+        },
+        {
+          "who": "노인·장애인",
+          "side": "-",
+          "idea": "걷기 힘든 사람은 도심 접근이 막힌다",
+          "ex": "An elderly patient who must drive to a downtown hospital",
+          "line": "People who cannot walk long distances could lose access to downtown hospitals and offices.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID7",
+      "src": "AI 재구성",
+      "q": "AI tools like chatbots can now write essays and solve math problems. Should schools allow students to use AI tools for their homework? Why or why not?",
+      "students": [
+        {
+          "name": "Chloe",
+          "text": "Yes. AI tools can explain difficult concepts quickly, so students can learn more efficiently and finish their homework faster."
+        },
+        {
+          "name": "Ethan",
+          "text": "No. Students will just copy answers from AI without thinking. This is cheating, and they will not actually learn anything."
+        }
+      ],
+      "angles": [
+        {
+          "who": "미래 직업",
+          "side": "+",
+          "idea": "회사에서 AI를 쓰니 학교에서 제대로 쓰는 법을 배워야 한다",
+          "ex": "Office workers using AI to draft reports",
+          "line": "Schools should teach students how to use AI well, because they will need this skill at work.",
+          "strategy": 1
+        },
+        {
+          "who": "형편이 어려운 학생",
+          "side": "+",
+          "idea": "과외 받을 돈 없는 학생에게 무료 개인 교사",
+          "ex": "A student who cannot afford a tutor asking AI at midnight",
+          "line": "AI tools give students who cannot afford private tutors a free source of help.",
+          "strategy": 1
+        },
+        {
+          "who": "정확성",
+          "side": "-",
+          "idea": "AI가 틀린 정보를 그럴듯하게 말한다",
+          "ex": "A chatbot inventing a fake historical date",
+          "line": "AI tools often give wrong information confidently, and students may not notice the mistakes.",
+          "strategy": 1
+        },
+        {
+          "who": "교사·평가",
+          "side": "-",
+          "idea": "숙제로는 학생 실력을 알 수 없어 교사가 도울 수 없다",
+          "ex": "A teacher who thinks a student understands because the homework is perfect",
+          "line": "If students use AI, teachers cannot see what their students actually need help with.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID8",
+      "src": "AI 재구성",
+      "q": "Some young people go to university right after high school, while others start working first. Which do you think is better for young people? Why?",
+      "students": [
+        {
+          "name": "Ava",
+          "text": "Going to university is better. People with a university degree usually earn higher salaries and have more job opportunities over their lifetime."
+        },
+        {
+          "name": "Liam",
+          "text": "I think working first is better. University is very expensive, and many students end up with large debts. Working first lets young people save money."
+        }
+      ],
+      "angles": [
+        {
+          "who": "진로 선택",
+          "side": "+",
+          "idea": "일해 보면 무엇을 전공할지 분명해진다 (일 먼저)",
+          "ex": "Working at a café and discovering an interest in business",
+          "line": "Working first helps young people find out what they really want to study.",
+          "strategy": 1
+        },
+        {
+          "who": "인간관계",
+          "side": "+",
+          "idea": "대학에서 평생 갈 인맥·친구를 만든다 (대학 먼저)",
+          "ex": "Classmates who later start a company together",
+          "line": "University gives young people a network of friends and contacts that lasts for life.",
+          "strategy": 1
+        },
+        {
+          "who": "학습 습관",
+          "side": "-",
+          "idea": "일 먼저 하면 공부 습관이 끊겨 돌아가기 어렵다",
+          "ex": "Friends who planned to go back to school but never did",
+          "line": "Once young people start earning money, it becomes very hard to return to studying.",
+          "strategy": 1
+        },
+        {
+          "who": "성숙·책임감",
+          "side": "+",
+          "idea": "일하면서 책임감·시간 관리를 배운다",
+          "ex": "Learning to manage a schedule at a part-time job",
+          "line": "Working first teaches young people responsibility that makes them better students later.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID9",
+      "src": "AI 재구성",
+      "q": "Space exploration programs cost governments billions of dollars. Do you think governments should continue to spend money on space exploration? Why or why not?",
+      "students": [
+        {
+          "name": "Isabella",
+          "text": "Yes. Space programs create new technologies that we use every day, such as GPS and better medical equipment. This research benefits everyone."
+        },
+        {
+          "name": "Mason",
+          "text": "No. There are many problems on Earth, like poverty and hunger. The money should be used to help people who are struggling right now."
+        }
+      ],
+      "angles": [
+        {
+          "who": "청소년·교육",
+          "side": "+",
+          "idea": "우주 탐사가 학생들을 과학·공학으로 끌어들인다",
+          "ex": "Students choosing engineering after watching a Mars landing",
+          "line": "Space exploration inspires young people to study science and engineering.",
+          "strategy": 1
+        },
+        {
+          "who": "지구 환경",
+          "side": "+",
+          "idea": "위성으로 기후·산불·홍수를 감시한다",
+          "ex": "Satellites tracking wildfires and typhoons",
+          "line": "Space programs help us protect the Earth by watching climate change and natural disasters from above.",
+          "strategy": 1
+        },
+        {
+          "who": "민간 기업",
+          "side": "-",
+          "idea": "SpaceX처럼 민간이 더 싸게 하니 세금은 다른 곳에",
+          "ex": "SpaceX reusable rockets cutting launch costs",
+          "line": "Private companies can now explore space more cheaply, so governments should spend tax money elsewhere.",
+          "strategy": 1
+        },
+        {
+          "who": "우주 쓰레기",
+          "side": "-",
+          "idea": "위성 경쟁이 우주 쓰레기·충돌 위험을 키운다",
+          "ex": "Thousands of broken satellites orbiting the Earth",
+          "line": "More space programs create dangerous space debris that could damage important satellites.",
+          "strategy": 1
+        }
+      ]
+    },
+    {
+      "id": "ID10",
+      "src": "AI 재구성",
+      "q": "Tourism has grown rapidly in many small towns and villages. Overall, do you think tourism is good or bad for local communities? Why?",
+      "students": [
+        {
+          "name": "Sarah",
+          "text": "Tourism is good because it brings money and jobs. Hotels, restaurants, and shops all need workers, so local people have more ways to earn a living."
+        },
+        {
+          "name": "David",
+          "text": "I think it is bad. Too many tourists create pollution and crowds. The streets become dirty and noisy, and nature gets damaged."
+        }
+      ],
+      "angles": [
+        {
+          "who": "전통문화",
+          "side": "+",
+          "idea": "관광객 관심 덕분에 사라질 전통이 보존된다",
+          "ex": "Traditional hanok villages restored because of visitors",
+          "line": "Tourism can help small towns protect traditions that might otherwise disappear.",
+          "strategy": 1
+        },
+        {
+          "who": "주거비",
+          "side": "-",
+          "idea": "에어비앤비 때문에 집값·월세가 올라 주민이 떠난다",
+          "ex": "Residents in Barcelona or Jeju pushed out by rising rent",
+          "line": "Tourism raises housing prices so much that local residents can no longer afford to live there.",
+          "strategy": 1
+        },
+        {
+          "who": "지역 정체성",
+          "side": "-",
+          "idea": "관광객 취향에 맞춘 똑같은 가게만 남는다",
+          "ex": "Every street filled with the same souvenir shops and chain cafés",
+          "line": "Tourism can turn unique towns into places that all look the same.",
+          "strategy": 1
+        },
+        {
+          "who": "주민 자부심·교류",
+          "side": "+",
+          "idea": "외부 사람과 교류하며 주민이 자기 지역에 자부심을 갖는다",
+          "ex": "Elderly villagers teaching visitors how to make kimchi",
+          "line": "Meeting visitors from other places makes local people proud of their community.",
+          "strategy": 1
+        }
+      ]
+    }
+  ],
   "guides": {
     "prep": ["P  Point — 첫 문장에 결론", "R  Reason — 왜 그렇게 생각하는지", "E  Example — 구체적인 경험·예시", "P  Point — 결론 다시"],
     "star": ["S  Situation — 언제·어디서 (과거형!)", "T  Task — 해야 했던 일·목표", "A  Action — 실제로 한 일", "R  Result — 결과·배운 점"],
     "email": ["요구사항 3개를 모두, 각각 설명 한 문장씩 더해서", "'suggest / recommend' 요구사항은 '추천하겠다'로 끝내지 말고 실제 이름 2개 + 각각 어떻게 도움이 되는지 (10/25 감점)", "100–130단어 · 2–3문단 · 'I hope this email finds you well.'은 따로 한 줄", "순서: 상황 → 목적(I am writing to …) → 요청", "정중하게: Would it be possible to … / Please let me know … / I would appreciate it if …", "inform/ask 뒤엔 사람(you)", "마지막 1분: 철자 → 수일치 → 전치사"],
+    "ideaSwitch": ["튜터: 교수 질문에 집중하고 학생 글은 훑기만. 계획 1–2분 = 나만의 'original content'", "튜터: 다른 학생은 무시해도 되지만, 실수로 그들의 주장을 반복하지 말 것", "전략 1 (튜터): 완전히 다른 것 말하기 — Although A and B both have good ideas, I feel …", "전략 2 (튜터): 한 학생 주장 넓히기 — I agree with B, and I would further her argument … 단 B와 꽤 다른 내 내용이 있어야 높은 점수대 (MUST)", "튜터 템플릿 주어: As a [student / consumer / member of society], I would add that … — 앞 학생이 국가·기업 얘기를 했으면 이 주어로 내려간다", "튜터가 칭찬한 예 (9/16 구독): 앞 학생이 '초기 비용 낮음'·'장기적으로 비쌈'을 말했을 때 '같은 비용으로 다양한 콘텐츠' 관점 — Good!", "AI 정리 (10/31 실전): 같은 예시도 주어를 바꾸면 새 아이디어 (타오바오: 정부 세금 → 작은 판매자). 인과 사슬을 3단계 넘게 늘이지 않는다"],
     "discussion": ["교수 질문을 먼저 읽고 학생 글은 훑기 (1분) · 계획 1–2분 · 쓰기 6–7분 · 검토 1분", "질문이 How / In what ways면 찬반이 아니라 '방법'을 답한다. 첫 문장 = 방법 한 줄 (10/25 감점)", "40초 안에 입장 + 이유 1개 + 예시 1개를 정하고, 쓰는 도중엔 바꾸지 않는다. 표현이 5초 넘게 안 떠오르면 쉬운 말로 (10/27)", "Opinion → Reason → Example → Result → Conclusion: 이유 다음에 바로 결론으로 넘어가지 말 것 (10/27)", "120–140단어, 내 주제 문장이 질문의 핵심 명사와 맞는지", "이름·장소·숫자가 있는 구체적 예시 1개 ('recent research'는 막연함)", "'그래서 어떻게 되는가' 문장 1개 더 (튜터가 매번 추가한 부분)", "다른 학생 주장을 반복하지 말고 넓히거나 다른 것을 말하기"],
     "template": "Both [A] and [B] made valid points, but I lean toward [A/B]'s view.\nI agree with the notion that [argument] because [reason].\n\nAs a [student / consumer / member of society], I would add that [argument].\nFor example, [situation or experience].\nIf [ ], [ ] can [ ], which can ultimately lead to [ ].\nOf course, [ ], as [Student] mentioned, but I think [ ].\nThis is because [ ].\n\nFor these reasons, I believe [conclusion]."
   },
