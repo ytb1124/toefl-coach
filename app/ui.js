@@ -285,12 +285,13 @@
       return;
     }
     main.append(h('h1', null, '단어 암기'),
-      h('p', { class: 'muted small' }, `원본 단어장(${api.wordCount().toLocaleString()}개)의 '오늘 암기 시작'과 같은 방식으로 복습 단어를 30개씩 외웁니다. 뜻 연결하기, 6개씩 묶어 익히기, 시간을 두고 철자 떠올리기, 마지막 재시험 순서로 진행합니다.`));
+      h('p', { class: 'muted small' }, '고른 750개 단어를 50개씩 15세트로 외웁니다. 원본 단어장의 \'오늘 암기 시작\'과 같은 방식(뜻 연결하기 → 6개씩 묶어 익히기 → 시간을 두고 철자 떠올리기 → 마지막 재시험)입니다.'));
     const kept = keepApp().count();
     main.append(h('section', { class: 'card keep-card', onclick: () => go('#/keep') },
       h('strong', null, `킵한 단어 ${kept}개 →`),
       h('p', { class: 'muted small' }, '문제를 풀다가 모르는 단어를 선택해 저장한 목록입니다.')));
     if (!api.hasData()) { main.append(vocabImportCard(api, true)); return; }
+    if (api.flagKept && keepApp().words) api.flagKept(keepApp().words());
 
     main.append(frequentCard(api));
     const r = api.resumable();
@@ -314,9 +315,9 @@
     } else {
       const total = api.chunkCount(plan), done = Object.keys(plan.done).length, next = api.nextChunkIndex(plan);
       const sec = h('section', { class: 'card' + (r ? '' : ' hero') },
-        h('h2', null, `고정 단어 ${plan.words.length.toLocaleString()}개 · ${total}세트`, h('span', { class: 'muted small' }, `${done} / ${total}세트 완료`)),
+        h('h2', null, `단어 ${plan.words.length.toLocaleString()}개 · ${plan.size}개씩 ${total}세트`, h('span', { class: 'muted small' }, ` ${done} / ${total}세트 완료`)),
         h('div', { class: 'meter' }, h('div', { style: `width:${total ? 100 * done / total : 0}%` })),
-        h('p', { class: 'muted small' }, `이 ${plan.words.length.toLocaleString()}개는 영구 고정되어 더해지거나 빠지지 않습니다 (${E.dayStr(plan.createdAt).replace(/-/g, '.')} 고정). 세트를 끝내면 날짜가 기록되고, 아무 세트나 눌러 다시 할 수 있어요.`));
+        h('p', { class: 'muted small' }, `세트마다 예전 세트에서 2회 이상 틀린 단어 16 · 예전에 안 한 세트 단어 16 · 새로 넣은 단어 16~17 · 다시 넣은 아는 단어 1~2개가 고르게 섞여 있습니다 (${E.dayStr(plan.createdAt).replace(/-/g, '.')} 시작). 세트를 끝내면 날짜가 기록되고, 아무 세트나 눌러 다시 할 수 있어요.`));
       if (!r && next != null) sec.append(h('button', { class: 'primary', onclick: () => vocabFlow(() => api.start(next)) }, `세트 ${next + 1} 암기 시작 (${api.chunkWords(next).length}개)`));
       if (next == null) sec.append(h('p', { class: 'rule' }, '모든 세트를 한 번씩 끝냈습니다. 세트를 눌러 다시 복습할 수 있습니다.'));
       const grid = h('div', { class: 'setgrid' });
@@ -335,26 +336,22 @@
   }
 
   // 자주 틀린 단어: 평소와 같은 풀이(같은 날 반복)로 범위만 바뀐다. 출처(단어장 Day / 문제 풀다 킵)·주제(단어장 분류) 필터.
-  let freqFilter = { src: 'all', cl: '' };
+  let freqFilter = { src: 'all' };
   function frequentCard(api) {
     if (!api.frequentList) return null;
-    const keptSet = new Set(keepApp().words ? keepApp().words().map(w => w.w.toLowerCase()) : []);
     const all = api.frequentList();
-    const srcOf = w => (w.label.includes('문제 풀다 모름') || keptSet.has(w.en.toLowerCase())) ? 'tpo' : 'day';
-    const list = all.filter(w => (freqFilter.src === 'all' || srcOf(w) === freqFilter.src) && (!freqFilter.cl || w.cl === freqFilter.cl));
-    const cand = all.filter(w => w.candidate).length;
-    const sel = h('select', { onchange: e => { freqFilter.src = e.target.value; render(); } }, [['all', '전체 출처'], ['day', '단어장 Day'], ['tpo', '문제 풀다 모른 단어']].map(([v, l]) => h('option', { value: v, selected: freqFilter.src === v }, l)));
-    const cls = api.clusters();
-    const clSel = h('select', { onchange: e => { freqFilter.cl = e.target.value; render(); } }, h('option', { value: '' }, '전체 주제'), cls.map(c => h('option', { value: c, selected: freqFilter.cl === c }, c)));
+    const srcOf = w => w.kept ? 'tpo' : 'set';
+    const list = all.filter(w => freqFilter.src === 'all' || (freqFilter.src === 'tpo' ? w.kept : w.setFails >= 3));
+    const nSet = all.filter(w => w.setFails >= 3).length, nTpo = all.filter(w => w.kept).length;
+    const sel = h('select', { onchange: e => { freqFilter.src = e.target.value; render(); } }, [['all', `전체 ${all.length}`], ['set', `세트에서 3회 이상 틀림 ${nSet}`], ['tpo', `문제 풀다 모름 ${nTpo}`]].map(([v, l]) => h('option', { value: v, selected: freqFilter.src === v }, l)));
     return h('section', { class: 'card' },
-      h('h2', null, `자주 틀린 단어 ${cand}개`, h('span', { class: 'muted small' }, ' · 고질 오답 함께 표시')),
-      h('p', { class: 'small muted' }, '틀린 횟수(직접 입력은 2배) 2회 이상 또는 틀린 날 2일 이상, 틀린 비율 순. 서로 다른 2일 연속으로 맞히면 빠집니다. 풀이 방식은 평소와 같습니다.'),
-      h('div', { class: 'row wrap' }, sel, cls.length ? clSel : null),
-      cand ? h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 암기 시작 (최대 30개)') : null,
-      h('details', null, h('summary', null, `목록 ${list.length}개`),
-        h('ul', { class: 'wordlist' }, list.slice(0, 200).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko), ' ',
-          h('span', { class: 'small' }, w.label || ''), w.hard ? h('span', { class: 'chip' }, '고질') : null, !w.candidate ? h('span', { class: 'chip' }, '고질만') : null,
-          h('span', { class: 'muted small' }, ` · ${srcOf(w) === 'tpo' ? '문제에서' : 'Day ' + w.day}`))))));
+      h('h2', null, `자주 틀린 단어 ${all.length}개`),
+      h('p', { class: 'small muted' }, '세트를 공부하면서 직접 입력으로 3회 이상 틀린 단어와, 문제를 풀다 \'뜻을 몰랐다\'로 킵한 단어입니다. 세트를 나누기 전에 틀린 횟수는 세지 않습니다. 마지막으로 틀린 날 뒤 서로 다른 2일 연속으로 맞히면 빠집니다.'),
+      all.length ? h('div', { class: 'row wrap' }, sel, h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 암기 시작 (최대 30개)'))
+        : h('p', { class: 'muted small' }, '아직 없습니다. 세트를 공부하면 여기에 모입니다.'),
+      list.length ? h('details', null, h('summary', null, `목록 ${list.length}개`),
+        h('ul', { class: 'wordlist' }, list.slice(0, 300).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko), ' ',
+          h('span', { class: 'small' }, w.label || ''), w.kept ? h('span', { class: 'chip' }, '문제에서') : null)))) : null);
   }
 
   // The same code the import box accepts, saved as a file (Safari keeps its storage out of reach of other apps).
@@ -427,7 +424,7 @@
   }
   function planCtx() {
     const api = vocabApp();
-    const vc = api && api.hasData() ? { hard: api.hardCount ? api.hardCount() : 0, due: api.reviewCounts ? api.reviewCounts()[api.bestReviewMode()] : null } : {};
+    const vc = api && api.hasData() ? { hard: api.hardCount ? api.hardCount() : 0, due: api.remaining ? api.remaining() : api.reviewCounts ? api.reviewCounts()[api.bestReviewMode()] : null } : {};
     return { seen: tabSeen(), vocab: vc, speak: speak().today(C, D.speak), write: window.WriteApp ? write().today(C, D) : {} };
   }
   // 주 1회 비중 자동 조정: 선행 지표가 지난주보다 오르지 않은 영역 +5%p (설정에서 고정한 영역은 제외).

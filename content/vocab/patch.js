@@ -3,10 +3,29 @@
 // 원본의 '오늘 암기 시작' 흐름(노출 → 6개 묶음 → 간격 회상 → 최종 재시험)은 손대지 않고,
 // 홈 화면 · 세트 나누기 · 이어하기만 코치 화면과 연결한다.
 
-const CHUNK_PLAN_KEY = 'toefl-vocab-chunk-plan-v1';
-const CHUNK_SIZE = 30;
+// 세트 750 (2026-11-01 사용자 구성, content/vocab/set750.json): 예전 30개 세트 계획(v1 키)은 지우지 않고 그대로 두고,
+// 새 계획(v2 키)을 50개씩 15세트로 만든다. 단어별 학습 기록(srs·meta)은 그대로 이어서 쓴다.
+const SET750 = /*__SET750__*/null;
+const CHUNK_PLAN_KEY = 'toefl-vocab-chunk-plan-v2';
+const CHUNK_SIZE = 50;
+const ADDED_DAY = ALL_DAYS.length + 1;  // 단어장에 없던 단어(통합 문서1)는 'Day 31'로 덧붙인다. 기존 단어의 순번(기록 압축에 쓰임)은 바뀌지 않는다.
+if (SET750) {
+  const have = new Set(WORDS.map(w => w.en.toLowerCase()));
+  SET750.added.forEach(a => { if (!have.has(a.en.toLowerCase())) WORDS.push({ en: a.en, ko: a.ko, cl: null, day: ADDED_DAY, added: true }); });
+  ALL_DAYS.push(ADDED_DAY);
+}
 
-function loadChunkPlan() { try { const p = JSON.parse(localStorage.getItem(CHUNK_PLAN_KEY)); return p && Array.isArray(p.words) ? p : null; } catch (e) { return null; } }
+function readChunkPlan() { try { const p = JSON.parse(localStorage.getItem(CHUNK_PLAN_KEY)); return p && Array.isArray(p.words) ? p : null; } catch (e) { return null; } }
+// 처음 열 때 한 번 만든다. base = 그때까지의 직접 입력 틀린 횟수 (세트를 나누기 전 기록은 '자주 틀린 단어' 셈에서 뺀다).
+function loadChunkPlan() {
+  const p = readChunkPlan(); if (p || !SET750) return p;
+  const words = SET750.sets.flat(), base = {};
+  words.forEach(en => { const m = wordMeta[en]; base[en] = m && m.failures ? Number(m.failures.typed || 0) : 0; });
+  const plan = { createdAt: Date.now(), locked: true, version: 2, sourceQuizMode: 'flash', size: CHUNK_SIZE, words, base, done: {}, last: null };
+  saveChunkPlan(plan);
+  const s = loadSession(); if (s && s.sameDayState && s.sameDayState.chunk) clearSession();  // 예전 세트의 진행 중 세션만 정리 (단어 기록은 남음)
+  return plan;
+}
 function saveChunkPlan(plan) { localStorage.setItem(CHUNK_PLAN_KEY, JSON.stringify(plan)); }
 function chunkToday() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 
@@ -20,17 +39,8 @@ function bestReviewMode() {
   const c = reviewCounts();
   return c.flash ? 'flash' : QUIZ_MODES.slice().sort((a, b) => c[b] - c[a])[0];
 }
-// 세트 목록은 한 번만 만들고 영구 고정한다: 이미 있으면 절대 다시 만들지 않는다.
-// 이후 단어가 마스터되거나 새로 찍음으로 분류돼도 세트의 단어는 바뀌지 않는다.
-function createChunkPlan(qMode = bestReviewMode()) {
-  const existing = loadChunkPlan();
-  if (existing) return existing;
-  const words = reviewWordsFor(qMode);
-  if (!words.length) return null;
-  const plan = { createdAt: Date.now(), locked: true, sourceQuizMode: qMode, size: CHUNK_SIZE, words: words.map(w => w.en), done: {}, last: null };
-  saveChunkPlan(plan);
-  return plan;
-}
+// 세트 계획은 loadChunkPlan이 세트 750으로 한 번 만들고 영구 고정한다 (다시 만들지 않음).
+function createChunkPlan() { return loadChunkPlan(); }
 function chunkCount(plan) { return Math.ceil(plan.words.length / plan.size); }
 function chunkWords(plan, i) { return plan.words.slice(i * plan.size, (i + 1) * plan.size).map(en => WORDS.find(w => w.en === en)).filter(Boolean); }
 function nextChunkIndex(plan) { for (let i = 0; i < chunkCount(plan); i++) if (!plan.done[i]) return i; return null; }
@@ -140,9 +150,19 @@ function frequentInfo(en) {
   if (m.keepFlagAt) parts.push('문제 풀다 모름');
   return { candidate, weighted, ratio: tries ? weighted / tries : (m.keepFlagAt ? 1 : 0), days: wrongDays.length, vague, hard: !!m.hard, exited, label: parts.join(' · ') };
 }
+// 범위(사용자 요청 2026-11-01): ① 세트 750에서 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(나누기 전 횟수는 plan.base로 뺌)
+// ② 문제를 풀다 '뜻을 몰랐다'로 킵한 단어. 마지막 틀린 날 뒤 서로 다른 2일 연속 맞히면 빠진다. 많이 틀린 순.
+const FREQUENT_MIN_SET_FAILS = 3;
+const FREQUENT_SESSION_SIZE = 30;
+function setFails(en, plan = loadChunkPlan()) {
+  if (!plan || !plan.base || !(en in plan.base)) return 0;
+  return Math.max(0, Number(getWordMeta(en).failures.typed || 0) - plan.base[en]);
+}
 function frequentWords() {
-  return WORDS.map(w => [w, frequentInfo(w.en)]).filter(([, i]) => i.candidate || i.hard)
-    .sort((x, y) => (y[1].candidate - x[1].candidate) || y[1].ratio - x[1].ratio || y[1].weighted - x[1].weighted).map(([w]) => w);
+  const plan = loadChunkPlan();
+  return WORDS.map(w => [w, frequentInfo(w.en), setFails(w.en, plan)])
+    .filter(([w, i, n]) => (n >= FREQUENT_MIN_SET_FAILS || getWordMeta(w.en).keepFlagAt) && !i.exited)
+    .sort((x, y) => y[2] - x[2] || y[1].ratio - x[1].ratio).map(([w]) => w);
 }
 const baseBuildSession = buildSession;
 buildSession = function (size, qMode, srcMode) {
@@ -151,7 +171,7 @@ buildSession = function (size, qMode, srcMode) {
 };
 // '자주 틀린 단어' 범위로 오늘 암기(같은 날 반복)를 시작한다 — 풀이 방식은 세트와 똑같다.
 function startFrequentSession() {
-  const candidates = frequentWords().filter(w => !getTodayLearningMeta(w.en).todayMastered).slice(0, CHUNK_SIZE);
+  const candidates = frequentWords().filter(w => !getTodayLearningMeta(w.en).todayMastered).slice(0, FREQUENT_SESSION_SIZE);
   if (!candidates.length) { alert('오늘 할 자주 틀린 단어가 없습니다.'); return false; }
   learningGoalMode = 'same_day'; quizMode = 'typed'; sessionQueue = candidates; sessionIdx = 0;
   sessionStats = {sure:0, vague:0, guess:0, quickRepairs:0, quickRepairSuccess:0, stopped:[]};
@@ -173,9 +193,24 @@ const __api = {
   },
   reviewCounts, bestReviewMode,
   // 자주 틀린 단어
-  hardCount() { return frequentWords().filter(w => frequentInfo(w.en).candidate).length; },
+  hardCount() { return frequentWords().length; },
   startHard: startFrequentSession,
-  frequentList() { return frequentWords().map(w => Object.assign({ en: w.en, ko: getCoreMeaning(w), day: w.day, cl: w.cl || null }, frequentInfo(w.en))); },
+  frequentList() {
+    const plan = loadChunkPlan();
+    return frequentWords().map(w => {
+      const n = setFails(w.en, plan), kept = !!getWordMeta(w.en).keepFlagAt;
+      return Object.assign(frequentInfo(w.en), { en: w.en, ko: getCoreMeaning(w), day: w.day, cl: w.cl || null, added: !!w.added, setFails: n, kept,
+        label: [n >= FREQUENT_MIN_SET_FAILS ? '세트에서 ' + n + '회 틀림' : '', kept ? '문제 풀다 모름' : ''].filter(Boolean).join(' · ') });
+    });
+  },
+  // 킵 목록 중 단어장에 있는데 아직 표시가 없는 단어를 '문제 풀다 모름'으로 (단어장에 새로 들어온 단어 포함)
+  flagKept(list) {
+    let n = 0;
+    (list || []).forEach(k => { const hit = __api.lookup(k.w); if (!hit) return; const m = getWordMeta(hit.en); if (m.keepFlagAt) return; m.keepFlagAt = k.at ? new Date(k.at).toLocaleDateString('en-CA') : dayKey(); n++; });
+    if (n) saveMeta();
+    return n;
+  },
+  setGroups(i) { const p = loadChunkPlan(); if (!p || !SET750) return null; const c = {}; chunkWords(p, i).forEach(w => { const g = SET750.group[w.en] || '?'; c[g] = (c[g] || 0) + 1; }); return c; },
   // '뜻을 몰랐다'로 킵한 단어가 단어장에 있으면 자주 틀린 단어 후보로 (틀린 날 하나로 셈)
   flagWrong(word) { const hit = __api.lookup(word); if (!hit) return null; const m = getWordMeta(hit.en); m.keepFlagAt = dayKey(); saveMeta(); return hit.en; },
   // 단어장에 있는 단어면 그 상태 ('master' | 'review' | 'new' | 'hard'), 없으면 null
@@ -184,6 +219,7 @@ const __api = {
   plan: loadChunkPlan,
   createPlan: createChunkPlan,
   chunkCount, nextChunkIndex,
+  remaining() { const p = loadChunkPlan(); if (!p) return null; let n = 0; for (let i = 0; i < chunkCount(p); i++) if (!p.done[i]) n += chunkWords(p, i).length; return n; },
   chunkWords(i) { const p = loadChunkPlan(); return p ? chunkWords(p, i).map(w => ({ en: w.en, ko: getCoreMeaning(w) })) : []; },
   start: startChunkSession,
   resume: resumeSession,

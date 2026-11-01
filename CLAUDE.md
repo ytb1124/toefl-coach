@@ -116,7 +116,8 @@ node --test tests/*.test.js
 
 ## 단어 (`#/vocab`)
 - `app/vocab.js`는 빌드 생성 파일: `content/vocab/source.html`(원본 단어장) + `content/vocab/patch.js`(연동). 학습 방식은 원본 그대로.
-- '자주 틀린 단어'(patch.js `frequentInfo`): 틀린 횟수(직접 입력 2배) 2회 이상 또는 틀린 날 2일 이상, 틀린 비율 순, 마지막 틀린 날 뒤 서로 다른 2일 연속 맞히면 빠짐. 새 필드 `vagueCount`·`wrongDates`·`okDates`·`keepFlagAt`만 쓰고 기존 필드는 바꾸지 않는다.
+- 세트 750 (2026-11-01, `content/vocab/set750.json`, 빌드가 patch.js에 넣음): 50개씩 15세트. 단어장에 없던 252개는 `added`(통합 문서1의 뜻)로 WORDS 끝에 'Day 31'로 붙는다 (기존 순번 유지). 계획 키 `toefl-vocab-chunk-plan-v2`는 처음 열 때 만들어지고 `base`(그때의 직접 입력 틀린 횟수)를 남긴다. 예전 30개 계획 `-v1`은 지우지 않는다.
+- '자주 틀린 단어'(patch.js `frequentWords`): 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(`base` 차감) + 문제 풀다 '뜻을 몰랐다'로 킵한 단어(`keepFlagAt`, 킵 목록과 `flagKept`로 맞춤). 마지막 틀린 날 뒤 서로 다른 2일 연속 맞히면 빠짐. 새 필드만 쓰고 기존 필드는 바꾸지 않는다.
 - Safari 기록 비교: `python3 tools/vocab_compare.py` (`~/Downloads/vocab-export-*.txt` 요약, 읽기만). 가져오기는 사용자가 단어 탭에서 직접.
 
 ## 단어 킵 (`#/keep`)
