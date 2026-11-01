@@ -159,6 +159,7 @@ test('(a) 완주 할당: 종류마다 ⌈남은 문제 ÷ 남은 날⌉, 블록 
   const q = plan(d, T0, { speak: { lrLeft: Array.from({ length: 13 }, (_, i) => 'lr' + i), ivLeft: Array.from({ length: 52 }, (_, i) => 'iv' + i) }, write: { left: { email: ['e1', 'e2'], discussion: [], bs: ['b1'] } } });
   assert.strictEqual(tasks(q).filter(t => t.type === 'interview').length, Math.ceil(52 / left));
   assert.strictEqual(tasks(q).filter(t => t.type === 'bs').length, 1);
+  assert.strictEqual(tasks(q).filter(t => t.type === 'write' || t.type === 'outline').length, 0, 'no Email/Discussion (2026-11-02)');
   // fixed weights still parse (wrap floor uses them)
   d.settings.weights = { listen: 40 };
   const w = E.weights(d);
@@ -182,7 +183,7 @@ test('(b) "안 들렸다" → 받아쓰기 대기열 (다음 날 ② 리스닝);
   // other causes route elsewhere
   d.attempts.push(att('TARGET', 'transfer', false, day(2), { item: 'x', cause: 'memory' }), att('AUDIT', 'transfer', false, day(2) + 1, { item: 'y', cause: 'judge' }), att('TARGET', 'transfer', false, day(2) + 2, { item: 'z', cause: 'time' }));
   const q2 = E.causeQueues(d, day(3));
-  assert.deepStrictEqual([q2.twoPass.length, q2.judge.length, q2.timed.length], [1, 1, 1]);
+  assert.deepStrictEqual([q2.twoPass.length, q2.judge.length, q2.timed.length], [1, 1, 0], "'time' has no follow-up (no timed reading)");
 });
 
 test('(c) AI 문항이 계획에 없음: every planned item is a 소站 pool item', () => {
@@ -309,16 +310,15 @@ test('변화 지표: 최근 7일 vs 그 전 7일, 영역별 (기록 적으면 nu
   for (let i = 0; i < 4; i++) d.attempts.push(att(L.skill, 'transfer', i < 3, day(10) + i, { item: L.id, q: i }));
   for (let i = 0; i < 3; i++) d.attempts.push(att(L.skill, 'transfer', false, day(2) + i, { item: L.id, q: i }));
   d.dictation = [{ at: day(10), pct: 80 }, { at: day(9), pct: 60 }];
-  d.readSpeed = [{ at: day(10), wpm: 180 }, { at: day(10), wpm: 5000 }];
   d.speak = [{ at: day(10), kind: 'lr', stt: true, pct: 90 }, { at: day(10), kind: 'interview', stt: true, rounds: [{ wpm: 100, pauses: 4 }, { wpm: 120, pauses: 2 }] }];
-  d.writing = [{ at: day(10), kind: 'discussion', planMs: 95000, structure: [['a', true], ['b', false]], cats: ['TENSE'] }];
+  d.writing = [{ at: day(10), kind: 'hk', task: 'HD01', words: 112, bold: [3, 6], errors: 1 }, { at: day(10), kind: 'discussion', words: 999 }];
   d.mock = [{ at: day(10), sec: 'L', correct: 30, total: 40, paper: 2 }];
   const m = E.areaMetrics(d, ALL, day(10), { vocabNow: 40, vocabPrev: 50, knownRatio: 0.7 });
   assert.deepStrictEqual(m.L.newQ, { now: 75, prev: 0 });
   assert.deepStrictEqual(m.L.dictation, { now: 70, prev: null });
-  assert.strictEqual(m.R.wpm.now, 180, 'implausible wpm (clicked through) ignored');
+  assert.ok(!('wpm' in m.R), 'no reading wpm (2026-11-02)');
   assert.strictEqual(m.S.lr.now, 90); assert.strictEqual(m.S.wpm.now, 110); assert.strictEqual(m.S.pauses.now, 3);
-  assert.strictEqual(m.W.planSec.now, 95); assert.strictEqual(m.W.structure.now, 50); assert.strictEqual(m.W.errors.now, 1);
+  assert.strictEqual(m.W.words.now, 112, 'only hackers records'); assert.strictEqual(m.W.bold.now, 50); assert.strictEqual(m.W.errors.now, 1);
   assert.strictEqual(m.L.mock.pct, 75);
   const ind = E.weeklyIndicatorsFrom(m);
   assert.deepStrictEqual(ind.vocab, { higherIsBetter: false, now: 40, prev: 50 });

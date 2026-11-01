@@ -328,7 +328,7 @@
     for (const a of list) {
       const target = a.item || a.ref; if (!target || gone(a)) continue;
       const c = causeOf(a);
-      const route = c === 'sound' ? 'dictation' : c === 'memory' ? 'twoPass' : c === 'judge' ? 'judge' : c === 'time' ? 'timed' : c === 'omit' ? 'shadow' : c === 'grammar' ? 'fix' : c === 'structure' ? 'outline' : null;
+      const route = c === 'sound' ? 'dictation' : c === 'memory' ? 'twoPass' : c === 'judge' ? 'judge' : c === 'omit' ? 'shadow' : c === 'grammar' ? 'fix' : c === 'structure' ? 'outline' : null;
       if (!route) continue;
       const key = route + ':' + target + (a.q != null ? '#' + a.q : '');
       if (seenKey.has(key) || (done[key] && done[key] >= a.at)) continue;
@@ -416,6 +416,8 @@
         const fu = data.followups || {};
         for (const t of rest) {
           if (t.item && (seen.has(t.item) || used.has(t.item))) continue;
+          if (t.type === 'write' || t.type === 'outline') continue;   // Email·Discussion·개요 드릴은 없앴다 (2026-11-02)
+          if (t.type === 'hk' && (data.writing || []).some(w => w.kind === 'hk' && w.task === t.task && w.at >= prev.createdAt)) continue;
           // 다른 화면에서 이미 한 것은 넘기지 않는다 (원본 진단·다시 확인, 받아쓰기 등 후속 훈련)
           if (t.ref && data.attempts.some(a => a.ref === t.ref && a.tier === 'original' && a.at >= prev.createdAt)) continue;
           if (t.key && fu[t.key] && fu[t.key] >= prev.createdAt) continue;
@@ -439,7 +441,7 @@
     // 완주 할당 (2026-11-01): 종류마다 오늘 몫 = ⌈(안 푼 문제 + 넘어온 것) ÷ 남은 날⌉ − 넘어온 것.
     // 시험일까지 풀 전체(모의 모듈용 보류 회차 제외)를 한 번씩 풀도록 하루 양을 정한다. 하루 시간이 모자라면 계획의 예상 시간(need)이 설정보다 커진다.
     const D = Math.max(1, left == null ? 14 : left);
-    const kindOf = t => t.item && poolIndex(content)[t.item] ? poolIndex(content)[t.item].kind : t.type === 'write' ? t.kind : t.type;
+    const kindOf = t => t.item && poolIndex(content)[t.item] ? poolIndex(content)[t.item].kind : t.type === 'write' || t.type === 'hk' ? t.kind : t.type;
     const carriedN = kinds => Object.values(blocks).reduce((n, b) => n + b.tasks.filter(t => t.carriedFrom && kinds.includes(kindOf(t))).length, 0);
     const share = (n, kinds) => { const c = carriedN(kinds); return Math.max(0, Math.ceil((n + c) / D) - c); };
     const cover = {};
@@ -453,11 +455,8 @@
     takeQuota('listen', lsets, ['lecture', 'conversation', 'announcement'], 'L 대화·안내·강의', it => take('listen', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
     takeQuota('listen', freshOf({ sec: 'L', kinds: ['reply'] }).sort(byPrio), ['reply'], 'L 응답', it => take('listen', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
 
-    // ③ 리딩: 학술 지문 timed reading(wpm) · C-Test · 일상 지문.
-    // '시간이 부족했다'고 고른 오답이 있으면 학술 지문 timed reading 하나를 먼저 (끝내면 그 원인 후속이 완료된다).
-    const tq = cqFresh(cq.timed)[0];
-    if (tq) { const it = freshOf({ sec: 'R', kinds: ['academic'] }).sort(byPrio)[0]; if (it) take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, timed: true, exam: true, because: 'timed', key: tq.key }, it.minutes); }
-    takeQuota('read', freshOf({ sec: 'R', kinds: ['academic'] }).sort(byPrio), ['academic'], 'R 학술 지문', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, timed: true, exam: true }, it.minutes));
+    // ③ 리딩: 학술 지문 · C-Test · 일상 지문. (먼저 읽기·wpm 측정은 2026-11-02에 없앴다)
+    takeQuota('read', freshOf({ sec: 'R', kinds: ['academic'] }).sort(byPrio), ['academic'], 'R 학술 지문', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
     takeQuota('read', freshOf({ sec: 'R', kinds: ['ctest'] }).sort(byPrio), ['ctest'], 'R C-Test', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
     takeQuota('read', freshOf({ sec: 'R', kinds: ['daily'] }).sort(byPrio), ['daily'], 'R 일상 지문', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
 
@@ -467,14 +466,14 @@
     takeQuota('speak', lrLeft, ['lr'], 'S Listen & Repeat', id => take('speak', { type: 'lr', set: id }, 3));
     takeQuota('speak', ivLeft, ['interview'], 'S Interview', id => take('speak', { type: 'interview', q: id }, 1.5));
 
-    // ⑤ 쓰기: 2분 계획 카드 → 이메일·토론 · Build a Sentence · 구조 원인이면 개요 드릴 · 반복 오류 고쳐 쓰기.
+    // ⑤ 쓰기: Build a Sentence · 해커스 모범답안 재구성 (Email·Discussion) · 반복 오류 고쳐 쓰기.
     const wr = ctx.write || {};
     const wLeft = wr.left || {};
     if (!wr.left && wr.task) wLeft[wr.kind] = [wr.task];
-    takeQuota('write', notCarried('task:', wLeft.email || []), ['email'], 'W Email', id => take('write', { type: 'write', task: id, kind: 'email', plan: true }, 9));
-    takeQuota('write', notCarried('task:', wLeft.discussion || []), ['discussion'], 'W Discussion', id => take('write', { type: 'write', task: id, kind: 'discussion', plan: true }, 12));
     takeQuota('write', notCarried('set:', wLeft.bs || []), ['bs'], 'W Build a Sentence', id => take('write', { type: 'bs', set: id }, 7));
-    if (cqFresh(cq.outline).length) take('write', { type: 'outline', n: 3, key: cqFresh(cq.outline)[0].key }, 6);
+    // 해커스 모범답안 라벨 재구성 (Day 순서, Day가 3의 배수면 처음 보는 문제 — app/hackers.js)
+    takeQuota('write', notCarried('task:', wLeft.hkD || []), ['hkD'], 'W 해커스 Discussion', id => take('write', { type: 'hk', task: id, kind: 'hkD' }, 13));
+    takeQuota('write', notCarried('task:', wLeft.hkE || []), ['hkE'], 'W 해커스 Email', id => take('write', { type: 'hk', task: id, kind: 'hkE' }, 8));
     const fixCats = [...new Set((wr.errorCats || []).concat(cq.fix.flatMap(f => f.cats || [])))].slice(0, 3);
     if (fixCats.length && !Object.values(blocks).some(b => b.tasks.some(t => t.type === 'fix'))) take('write', { type: 'fix', cats: fixCats, key: cq.fix.length ? cq.fix[0].key : undefined }, 4);
     for (const k of ['listen', 'read', 'speak', 'write']) blocks[k].minutes = Math.round(blocks[k].tasks.reduce((s, t) => s + (t.min || 0), 0));
@@ -519,6 +518,7 @@
     const need = Math.round(out.reduce((s, b) => s + b.tasks.reduce((x, t) => x + (t.min || 0), 0), 0));
     return {
       v: 3,
+      rev: 2,   // 2026-11-02: 해커스 쓰기·리딩 wpm 제거 — 그 전에 만든 오늘 계획은 한 번 다시 짠다 (ui.js todayPlan)
       id: 'p' + now.toString(36),
       date: dayStr(now),
       createdAt: now,
@@ -553,24 +553,24 @@
     const speak = data.speak || [], writing = data.writing || [];
     const lr = x => x.kind === 'lr' && x.stt;
     const iv = x => x.kind === 'interview' && x.stt && (x.rounds || []).length;
-    const essays = x => x.kind === 'email' || x.kind === 'discussion';
+    const hk = x => x.kind === 'hk';
     const ex = extra || {};
     return {
       L: { dictation: two((a, b) => avg(win(data.dictation, a, b), x => x.pct)), newQ: two((a, b) => pct(win(data.attempts, a, b).filter(newQ('L')))), mock: mockLast('L') },
-      R: { wpm: two((a, b) => avg(win(data.readSpeed, a, b).filter(x => x.wpm && x.wpm < 1000), x => x.wpm)), newQ: two((a, b) => pct(win(data.attempts, a, b).filter(newQ('R')))),
+      R: { newQ: two((a, b) => pct(win(data.attempts, a, b).filter(newQ('R')))),
         ctest: two((a, b) => pct(win(data.attempts, a, b).filter(ctest), 10)), mock: mockLast('R') },
       V: { frequent: ex.vocabNow == null ? null : { now: ex.vocabNow, prev: ex.vocabPrev == null ? null : ex.vocabPrev }, known: ex.knownRatio == null ? null : ex.knownRatio },
       S: { lr: two((a, b) => avg(win(speak, a, b).filter(lr), x => x.pct)),
         wpm: two((a, b) => avg(win(speak, a, b).filter(iv), x => avg(x.rounds, r => r.wpm))),
         pauses: two((a, b) => avg(win(speak, a, b).filter(iv), x => avg(x.rounds, r => r.pauses))) },
-      W: { planSec: two((a, b) => avg(win(writing, a, b).filter(x => x.planMs), x => Math.round(x.planMs / 1000))),
-        structure: two((a, b) => avg(win(writing, a, b).filter(essays).filter(x => x.structure), x => Math.round(100 * x.structure.filter(c => c[1]).length / x.structure.length))),
-        errors: two((a, b) => avg(win(writing, a, b).filter(essays), x => (x.cats || []).length)) },
+      W: { words: two((a, b) => avg(win(writing, a, b).filter(hk), x => x.words)),
+        bold: two((a, b) => avg(win(writing, a, b).filter(hk).filter(x => x.bold && x.bold[1]), x => Math.round(100 * x.bold[0] / x.bold[1]))),
+        errors: two((a, b) => avg(win(writing, a, b).filter(hk), x => x.errors)) },
     };
   }
-  // 주간 비중 자동 조정용 선행 지표 (영역별 하나): 리스닝 새 문제 정답률, 리딩 새 문제 정답률, 단어 자주 틀린 수(낮을수록 좋음), 말하기 L&R 일치율, 쓰기 구조 체크.
+  // 주간 비중 자동 조정용 선행 지표 (영역별 하나): 리스닝 새 문제 정답률, 리딩 새 문제 정답률, 단어 자주 틀린 수(낮을수록 좋음), 말하기 L&R 일치율, 쓰기 해커스 굵은 표현 적중률.
   function weeklyIndicatorsFrom(m) {
-    return { listen: m.L.newQ, read: m.R.newQ, vocab: m.V.frequent && Object.assign({ higherIsBetter: false }, m.V.frequent), speak: m.S.lr, write: m.W.structure };
+    return { listen: m.L.newQ, read: m.R.newQ, vocab: m.V.frequent && Object.assign({ higherIsBetter: false }, m.V.frequent), speak: m.S.lr, write: m.W.bold };
   }
 
   // Old plan/session records (v1 'session' with steps of removed AI items) are kept as-is under

@@ -1,7 +1,6 @@
-/* 쓰기 — 소站 TPO独家 Build a Sentence · Email · Academic Discussion (오늘 계획 ⑤ · 연습실).
- * 계획 카드(필수, 2분) → 다 채워야 쓰기 칸이 열린다. 시간은 소站 규칙 (Email 7분 · Discussion 10분 · BS 10문항 6분 50초, docs/exam-rules.md).
- * 제출 후: 구조 체크, 반복 오류 범주(SWCore.scan), 소站 제공 답안과 문장 역할(입장/이유/예시/대조/맺음) 비교.
- * 문장 역할 표시는 규칙 기반 자동 표시다 (AI 추정과 같은 급, 화면에 표시). 쓴 글은 주 기록 writing[]에 남고 내보낼 수 있다 (Claude 첨삭용).
+/* 쓰기 — 소站 TPO独家 Build a Sentence (6분 50초, docs/exam-rules.md) · 반복 오류 고쳐 쓰기 (오늘 계획 ⑤ · 연습실).
+ * Email·Academic Discussion 쓰기·계획 카드·개요 드릴은 2026-11-02에 없앴다 (해커스 모범답안 훈련으로 대체 예정).
+ * 예전에 쓴 글은 주 기록 writing[]에 그대로 남고 내보낼 수 있다. 구조·문장 역할 함수(WriteCore)는 옛 기록 지표용으로 남긴다.
  * 순수 로직(WriteCore)은 node 테스트에서도 쓴다 (tests/write.test.js). */
 (function (root) {
   'use strict';
@@ -66,115 +65,6 @@
       el.stop = () => clearInterval(id); el.left = () => left;
       return el;
     }
-    const postsBox = q => h('div', { class: 'passage' }, (q.posts || []).map(p => h('p', { class: p.role === 'student' ? 'student' : '' }, h('b', null, (p.name || (p.role === 'professor' ? 'Professor' : 'Student')) + ': '), p.text)));
-    const promptBox = (set, q) => set.kind === 'email'
-      ? h('div', { class: 'passage' }, q.head ? h('p', { class: 'small muted' }, q.head) : null, q.prompt.split('\n').filter(Boolean).map(l => h('p', null, l)))
-      : h('div', null, h('p', { class: 'small muted' }, q.prompt.split(/\n\s*\n/)[0].replace(/\s+/g, ' ')), postsBox(q));
-
-    // ---- plan card: 다 채워야 쓰기 칸이 열린다 ----
-    function planCard(set, q, onReady) {
-      const t0 = Date.now();
-      const fields = set.kind === 'email'
-        ? requirements(q.prompt).map((r, i) => [`요구사항 ${i + 1}: ${r}`, '이 요구사항에 쓸 1~2문장 계획'])
-        : [['교수 질문 핵심어', '예: remote work, productivity'], ['내 입장', '한쪽을 분명히'], ['이유 1', '왜?'], ['구체 예시 (누가·어디서·숫자)', '예: 우리 학교 도서관 2층, 지난 학기 3주 동안'], ['다른 학생과의 차이', '앞 학생들이 말하지 않은 점']];
-      const inputs = fields.map(([label, ph]) => h('input', { class: 'idea-ex', placeholder: ph, oninput: () => check() }));
-      const go = h('button', { class: 'primary', disabled: true }, '쓰기 시작');
-      const cd = countdown(PLAN_SEC);
-      const check = () => { go.disabled = inputs.some(i => i.value.trim().length < 2); };
-      go.onclick = () => { cd.stop(); onReady({ fields: fields.map((f, i) => [f[0], inputs[i].value.trim()]), ms: Date.now() - t0 }); };
-      return h('section', { class: 'card plan-card' }, h('div', { class: 'qhead' }, h('h3', null, '계획 카드 (2분)'), cd),
-        h('p', { class: 'small muted' }, '칸을 모두 채워야 쓰기 칸이 열립니다. 짧은 말로 충분합니다.'),
-        fields.map(([label], i) => h('label', { class: 'field' }, label, inputs[i])), go);
-    }
-
-    // ---- 한 편 쓰기 (Email 7분 / Discussion 10분 — 계획 시간 포함) ----
-    function writeTask(main, task, done) {
-      ensure(() => {
-        const set = sets(task.kind || 'discussion').find(s => s.id === task.task) || sets(task.kind || 'discussion')[0];
-        if (!set) return noData(main, done);
-        const q = set.qs[0];
-        const total = set.kind === 'email' ? EMAIL_SEC : AD_SEC;
-        ap(main, h('p', { class: 'kicker' }, `⑤ 쓰기 · ${set.kind === 'email' ? 'Write an Email' : 'Academic Discussion'} · `, h('span', { class: 'muted' }, set.src)),
-          h('p', { class: 'small muted' }, `소站 규칙: ${total / 60}분 (계획 카드 시간 포함). 시간이 끝나면 그때까지 쓴 글로 제출됩니다.`));
-        const tStart = Date.now();
-        const box = h('section', { class: 'card' }, promptBox(set, q)); ap(main, box);
-        const area = h('div'); ap(main, area);
-        let cdAll = null;
-        ap(area, planCard(set, q, plan => {
-          rc(area, );
-          const ta = h('textarea', { class: 'essay', rows: 14, spellcheck: 'false', placeholder: set.kind === 'email' ? 'Dear …' : '' });
-          const wc = h('span', { class: 'small muted' }, '0 words');
-          let wcHidden = false;
-          const wcBtn = h('button', { class: 'link small', onclick: () => { wcHidden = !wcHidden; wc.hidden = wcHidden; wcBtn.textContent = wcHidden ? 'Show Word Count' : 'Hide Word Count'; } }, 'Hide Word Count');
-          ta.oninput = () => { wc.textContent = wordCount(ta.value) + ' words'; };
-          const left = total - Math.round((Date.now() - tStart) / 1000);
-          const submit = h('button', { class: 'primary' }, '제출');
-          cdAll = countdown(left, () => finish(true));
-          let ended = false;
-          const finish = timeout => {
-            if (ended) return; ended = true; cdAll.stop(); ta.disabled = true; submit.remove();
-            if (!ta.value.trim() && !timeout) { ended = false; ta.disabled = false; ap(area, submit); toast('답을 써야 제출할 수 있습니다 (소站 규칙)'); return; }
-            review(set, q, ta.value, plan, Date.now() - tStart, !!timeout);
-          };
-          submit.onclick = () => finish(false);
-          ap(area, h('div', { class: 'qhead' }, h('span', { class: 'small muted' }, '계획: ' + plan.fields.map(f => f[1]).join(' / ')), cdAll), ta, h('div', { class: 'row' }, wc, wcBtn), submit);
-          ta.focus();
-        }));
-        function review(set, q, text, plan, ms, timeout) {
-          const kind = set.kind === 'email' ? 'email' : 'discussion';
-          const st = structure(text, kind);
-          const flags = scan(text, kind);
-          const cats = [...new Set(flags.filter(f => f.level !== 'info').map(f => f.cat))];
-          env.logWriting({ kind, task: set.id, q: q.id, text, plan: plan.fields, planMs: plan.ms, ms, timeout, words: wordCount(text), structure: st.checks, cats });
-          if (cats.length) env.log({ item: q.id, skill: null, tier: 'write', correct: false, cause: 'grammar', cats });
-          if (st.score < st.of) env.log({ item: q.id, skill: null, tier: 'write', correct: false, cause: 'structure', missing: st.checks.filter(c => !c[1]).map(c => c[0]) });
-          const res = h('section', { class: 'card' });
-          ap(res, h('h3', null, '결과'), h('p', null, `${wordCount(text)}단어 · 계획 ${Math.round(plan.ms / 1000)}초 · 전체 ${Math.round(ms / 1000)}초${timeout ? ' (시간 종료)' : ''}`),
-            h('h4', null, `구조 체크 ${st.score}/${st.of}`), h('ul', null, st.checks.map(([k, ok]) => h('li', { class: ok ? 'ok' : 'miss' }, (ok ? '✓ ' : '✗ ') + k))),
-            flags.length ? [h('h4', null, '반복 오류 범주'), h('ul', { class: 'small' }, flags.slice(0, 10).map(f => h('li', null, h('b', null, f.match), ' — ', f.msg, f.fix ? ` → ${f.fix}` : '')))] : h('p', { class: 'small muted' }, '반복 오류 검사에 걸린 곳이 없습니다.'),
-            h('h4', null, '모범 답안 구조와 비교'),
-            q.model ? h('div', { class: 'compare' },
-              h('div', null, h('p', { class: 'small muted' }, '내 글'), roleList(st.roles)),
-              h('div', null, h('p', { class: 'small muted' }, '소站 제공 답안'), roleList(roles(q.model))))
-              : h('p', { class: 'muted' }, '모범 답안 없음'),
-            h('p', { class: 'small muted' }, '문장 역할 표시는 규칙 기반 자동 표시입니다 (틀릴 수 있음).'),
-            h('button', { class: 'primary', onclick: () => done({}) }, '다음'));
-          ap(main, res);
-        }
-      });
-    }
-    const ROLE_CLASS = { 입장: 'r-pos', 이유: 'r-why', 예시: 'r-ex', 대조: 'r-con', 맺음: 'r-end' };
-    const roleList = rs => h('ol', { class: 'roles' }, rs.map(r => h('li', { class: ROLE_CLASS[r.role] || '' }, r.role ? h('span', { class: 'chip' }, r.role) : null, ' ', r.s)));
-
-    // ---- 개요 드릴: 10분에 5문제, 계획 카드만 ----
-    function outline(main, task, done) {
-      ensure(() => {
-        const pool = sets('discussion').concat(sets('email'));
-        const used = new Set(env.writingLog().filter(w => w.kind === 'outline').flatMap(w => w.tasks || []));
-        const list = pool.filter(s => !used.has(s.id)).concat(pool).slice(0, task.n || 5);
-        if (!list.length) return noData(main, done);
-        ap(main, h('p', { class: 'kicker' }, `⑤ 쓰기 · 개요 드릴 · ${list.length}문제 ${Math.round(OUTLINE_SEC * list.length / 5 / 60)}분`));
-        const cd = countdown(Math.round(OUTLINE_SEC * list.length / 5), () => finish());
-        ap(main, h('div', { class: 'qhead' }, h('span', { class: 'small muted' }, '글은 쓰지 않고 계획 카드만 빠르게 채웁니다.'), cd));
-        const area = h('div'); ap(main, area);
-        const out = []; let i = 0; const t0 = Date.now();
-        const one = () => {
-          if (i >= list.length) return finish();
-          const set = list[i];
-          rc(area, h('p', { class: 'small muted' }, `${i + 1} / ${list.length}`), promptBox(set, set.qs[0]),
-            planCard(set, set.qs[0], plan => { out.push({ task: set.id, plan: plan.fields, ms: plan.ms }); i++; one(); }));
-        };
-        let ended = false;
-        const finish = () => {
-          if (ended) return; ended = true; cd.stop();
-          env.logWriting({ kind: 'outline', tasks: out.map(o => o.task), plans: out, ms: Date.now() - t0 });
-          rc(area, h('section', { class: 'card' }, h('p', null, `개요 ${out.length}개 완료 · 평균 ${out.length ? Math.round(out.reduce((s, o) => s + o.ms, 0) / out.length / 1000) : '—'}초`),
-            h('button', { class: 'primary', onclick: () => done({ followup: task.key }) }, '다음')));   // 완료 기록: 안 하면 개요 드릴이 매일 다시 나온다
-        };
-        one();
-      });
-    }
-
     // ---- 집중 첨삭: 상위 2~3범주만 고쳐 쓰기 (내가 쓴 글·말한 답에서 걸린 문장) ----
     function fix(main, task, done) {
       const cats = task.cats && task.cats.length ? task.cats : topCats(env.writingLog().filter(w => w.text).map(w => scan(w.text, w.kind)), 3);
@@ -251,27 +141,22 @@
         h('button', { class: 'primary', onclick: () => done({ skipped: true }) }, '넘어가기')));
     }
 
-    // 오늘 계획용 (공개 메타데이터만): 안 쓴 소站 Email·Discussion을 번갈아, 개요 드릴, 반복 오류 상위 범주.
+    // 오늘 계획용 (공개 메타데이터만): 안 푼 BS 세트, 반복 오류 상위 범주.
     function today(content, D) {
       const log = (D && D.writing) || [];
       const done = new Set(log.map(w => w.task));
       const meta = content.pool.sets.filter(s => !s.held);
-      const lastKind = (log.filter(w => w.kind === 'email' || w.kind === 'discussion').slice(-1)[0] || {}).kind;
-      const kind = lastKind === 'discussion' ? 'email' : 'discussion';
-      const pick = meta.filter(s => s.kind === kind).find(s => !done.has(s.id));
       const cats = topCats(log.filter(w => w.cats).map(w => w.cats.map(c => ({ cat: c }))), 3);
       const bsDone = new Set(log.filter(w => w.kind === 'bs').map(w => w.task || w.set));
-      const left = { email: meta.filter(s => s.kind === 'email' && !done.has(s.id)).map(s => s.id), discussion: meta.filter(s => s.kind === 'discussion' && !done.has(s.id)).map(s => s.id),
-        bs: meta.filter(s => s.kind === 'bs' && !done.has(s.id) && !bsDone.has(s.id)).map(s => s.id) };
-      return { task: pick ? pick.id : null, kind, outline: [], errorCats: cats, left };
+      const HK = root.HackersCore;
+      return { errorCats: cats, left: { bs: meta.filter(s => s.kind === 'bs' && !done.has(s.id) && !bsDone.has(s.id)).map(s => s.id), hkD: HK ? HK.left(log, 'D') : [], hkE: HK ? HK.left(log, 'E') : [] } };
     }
     function room(main, content, go) {
       const meta = content.pool.sets.filter(s => !s.held);
       const btns = (kind, label) => h('section', { class: 'card' }, h('h2', null, label), h('div', { class: 'row wrap' }, meta.filter(s => s.kind === kind).map(s => h('button', { class: 'ghost', onclick: () => go(`#/write/${kind}/${s.id}`) }, `독점 TPO ${s.paper}`))));
       ap(main, h('h1', null, '쓰기 (소站 독점 TPO)'),
-        btns('bs', 'Build a Sentence (10문항 · 6분 50초)'), btns('email', 'Write an Email (7분)'), btns('discussion', 'Academic Discussion (10분)'),
+        btns('bs', 'Build a Sentence (10문항 · 6분 50초)'),
         h('section', { class: 'card' }, h('h2', null, '드릴'), h('div', { class: 'row wrap' },
-          h('button', { class: 'ghost', onclick: () => go('#/write/outline') }, '개요 드릴 (10분 · 5문제)'),
           h('button', { class: 'ghost', onclick: () => go('#/write/fix') }, '반복 오류 고쳐 쓰기'))),
         h('section', { class: 'card' }, h('h2', null, '쓴 글 내보내기'), h('p', { class: 'small muted' }, `기록된 글 ${env.writingLog().filter(w => w.text).length}편 — Claude에게 첨삭을 맡길 때 이 파일을 주세요.`),
           h('button', { class: 'ghost', onclick: () => exportWritings() }, '파일로 저장 (Markdown)')));
@@ -286,10 +171,8 @@
     }
 
     function run(main, task, done) {
-      if (task.type === 'write') writeTask(main, task, done);
-      else if (task.type === 'outline') outline(main, task, done);
-      else if (task.type === 'fix') fix(main, task, done);
+      if (task.type === 'fix') fix(main, task, done);
     }
-    return { run, writeTask, outline, fix, bs, today, room, stopAll };
+    return { run, fix, bs, today, room, stopAll };
   } };
 })(typeof window !== 'undefined' ? window : globalThis);

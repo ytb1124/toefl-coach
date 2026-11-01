@@ -398,3 +398,9 @@ span.good { color: var(--good); } span.bad { color: var(--bad); }
 .stopwatch .sw-time { font-variant-numeric: tabular-nums; font-size: 18px; min-width: 4.2em; text-align: right; }
 .stopwatch.paused .sw-time { opacity: .5; }
 .stopwatch button { padding: 4px 8px; }
+/* 해커스 모범답안 재구성 (app/hackers.js) */
+.hk-model b.hk-b { background: var(--mark); border-radius: 3px; padding: 0 2px; }
+.chip.hk-label { background: var(--accent); color: var(--accent-ink); font-size: .7rem; }
+.hk-outline { margin: 4px 0 10px; padding-left: 1.2em; font-size: .92rem; }
+.hk-hits li.ok { color: var(--good); } .hk-hits li.miss { color: var(--warn); }
+input.hk-num { width: 5em; margin-left: 8px; }

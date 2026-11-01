@@ -27,9 +27,8 @@ test('evidence lines and replay span from script timestamps', () => {
   assert.deepStrictEqual(P.lineSpan(lines, [2]), [4.9, null]);
 });
 
-test('wpm and passage markers', () => {
-  assert.strictEqual(P.wpm(200, 60000), 200);
-  assert.strictEqual(P.wpm(10, 0), null);
+test('passage markers (no reading wpm since 2026-11-02)', () => {
+  assert.strictEqual(P.wpm, undefined);
   assert.strictEqual(P.showPassage('A [[iA]]B [[sB]]C'), 'A  ■A B [B] C');
 });
 

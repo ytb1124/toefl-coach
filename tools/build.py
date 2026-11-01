@@ -451,6 +451,7 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 <script src="app/vocab.js"></script>
 <script src="app/sw.js"></script>
 <script src="app/listen.js"></script>
+<script src="app/hackers.js"></script>
 <script src="app/write.js"></script>
 <script src="app/speak.js"></script>
 <script src="app/practice.js"></script>
@@ -471,9 +472,9 @@ def leak_strings(data):
     """공개 번들에 있으면 안 되는 원문 문자열: 소站 지문·스크립트·문항·보기, 원본 오답 원문, C-Test 자료."""
     out = set()
 
-    def add(t):
+    def add(t, min_len=40):
         t = qnorm(re.sub(r"\s+", " ", str(t or "")).strip())
-        if len(t) >= 40:
+        if len(t) >= min_len:
             out.add(t[:60])
     pool = PRIV / "pool.json"
     if pool.exists():
@@ -488,6 +489,14 @@ def leak_strings(data):
                     add(po.get("text"))
                 for c in q.get("choices") or []:
                     add(c)
+    hk = PRIV / "hackers.json"   # 해커스 20일 완성 모범답안 전사본 (tools/hackers.py)
+    if hk.exists():
+        for x in read_json(hk)["items"]:
+            for q in x["parts"]:   # 흔한 인사·맺음 문장("I look forward to your reply.")은 내 글에도 있어 짧은 것은 뺀다
+                add(q["text"], 70)
+            add(x.get("situation")); add((x.get("prof") or {}).get("text"))
+            for st in x.get("students") or []:
+                add(st.get("text"))
     for o in data["originals"]:
         add(o.get("passage")); add(o.get("stem"))
         for c in o.get("options") or []:

@@ -26,7 +26,6 @@
     const ok = out.filter(x => x.ok).length;
     return { words: out, extra, ok, total: n, pct: n ? Math.round(100 * ok / n) : null };
   }
-  const wpm = (nWords, ms) => (ms > 0 ? Math.round(nWords / (ms / 60000)) : null);
   function ctestOk(input, prefix, answer) {
     const s = String(input || '').trim().toLowerCase().replace(/[^a-z'-]/g, '');
     const a = String(answer || '').toLowerCase();
@@ -71,7 +70,7 @@
     const r2 = x => Math.round(x * 100) / 100;
     return { sents: flat.slice(lo, hi + 1).map(s => s.t), span: [r2(Math.max(0, a.at - 0.2)), b && b.at != null ? r2(b.at + 0.1) : null] };
   }
-  const Core = { words, align, wpm, ctestOk, showPassage, evidenceLines, lineSpan, sentenceTarget };
+  const Core = { words, align, ctestOk, showPassage, evidenceLines, lineSpan, sentenceTarget };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
   root.PracticeCore = Core;
 
@@ -85,7 +84,7 @@
     ['memory', '들었는데 잊었다', 'L', '근거 구간만 다시 들어 보세요. 내일 이 세트를 2단계로 다시 듣습니다.'],
     ['vocab', '뜻을 몰랐다', 'RL', '모르는 단어를 눌러 단어장(킵)에 넣으세요. 자주 틀린 단어 후보가 됩니다.'],
     ['judge', '선택지에서 헷갈렸다', 'RL', '이 문제가 노리는 실수를 또 했는지 고르고, 다음에 할 행동을 한 줄로 적으세요. 같은 능력의 새 문제와 비슷한 문제로 다시 확인합니다.'],
-    ['time', '시간이 부족했다', 'R', '내일 학술 지문 timed reading이 먼저 나옵니다.'],
+    ['time', '시간이 부족했다', 'R', '원인만 기록합니다.'],
   ];
   const RECUR = [['same', '네, 같은 실수를 또 했다'], ['rulefail', '규칙은 아는데 풀 때 못 썼다'], ['other', '아니요, 다른 이유로 틀렸다'], ['unknown', '잘 모르겠다']];
   const CONF = [[1, '찍음'], [2, '보통'], [3, '확신']];
@@ -282,22 +281,13 @@
       }
     }
 
-    // Reading (daily/academic): timed reading (academic: read → '다 읽음' → wpm) → questions with the passage → review.
+    // Reading (daily/academic): questions with the passage → review. (먼저 읽기·wpm 측정은 2026-11-02에 없앴다)
     function reading(main, task, meta, full, onDone) {
       const box = h('section', { class: 'card' }); ap(main, box);
       const set = full.set, qs = full.qs;
       const text = showPassage(set.passage);
       const t0 = Date.now();
-      if (task.timed) {
-        const nWords = words(set.passage.replace(/\[\[[is][A-Z]\]\]/g, '')).length;
-        ap(box, h('p', { class: 'muted small' }, `Timed reading: 지문을 다 읽으면 '다 읽음'을 누르세요 (${nWords}단어). 읽는 속도(wpm)를 기록한 뒤 문제가 나옵니다.`),
-          h('div', { class: 'passage' }, para(text)),
-          h('button', { class: 'primary', onclick: e => {
-            const ms = Date.now() - t0; const v = wpm(nWords, ms);
-            env.logSpeed({ item: meta.id, words: nWords, ms, wpm: v });
-            e.currentTarget.remove(); rc(box, h('p', { class: 'small' }, `읽기 속도 ${v} wpm (${Math.round(ms / 1000)}초)`)); questions();
-          } }, '다 읽음'));
-      } else questions();
+      questions();
       // 소站 화면: 왼쪽 지문 + 문항 하나씩, Next만 (Back 없음), 답 없이 넘어가기 가능.
       function questions() {
         const sel = {}; let i = 0;

@@ -97,6 +97,7 @@
     if (P) P.stopAll();
     if (SP) SP.stopAll();
     if (WR) WR.stopAll();
+    if (HK) HK.stopAll();
     const [, view, arg, arg2] = (location.hash || '#/').split('/');
     app.innerHTML = '';
     window.scrollTo(0, 0);
@@ -115,10 +116,12 @@
     else if (view === 'write') {
       const back = () => go('#/write');
       if (arg === 'bs' && arg2) write().bs(main, decodeURIComponent(arg2), back);
-      else if ((arg === 'email' || arg === 'discussion') && arg2) write().writeTask(main, { task: decodeURIComponent(arg2), kind: arg }, back);
-      else if (arg === 'outline') write().outline(main, { n: 5 }, back);
       else if (arg === 'fix') write().fix(main, {}, back);
       else write().room(main, C, go);
+    }
+    else if (view === 'hk') {
+      if (arg) hackers().run(main, { task: decodeURIComponent(arg) }, () => go('#/hk'));
+      else hackers().room(main, go);
     }
     else if (view === 'speak') {
       if (arg === 'lr' && arg2) speak().lr(main, { set: decodeURIComponent(arg2) }, () => go('#/speak'));
@@ -247,7 +250,6 @@
   const practice = () => P || (P = PracticeApp.create({ h, toast, save, letterBlank, skill: id => SKILL[id], log: a => logAttempt(a),
     keep: (w, sent) => { keepApp().add(w, sent); const v = vocabApp(); if (v && v.flagWrong) v.flagWrong(w); },
     rules: { get: skill => myRules(skill), add: (skill, rule, rec) => { D.skillRules = D.skillRules || []; D.skillRules.push({ skill, rule, at: now(), from: rec && (rec.item || rec.ref) }); save(); } },
-    logSpeed: r => { D.readSpeed = D.readSpeed || []; D.readSpeed.push(Object.assign({ at: now() }, r)); save(); },
     logDictation: r => { D.dictation = D.dictation || []; D.dictation.push(Object.assign({ at: now() }, r)); save(); },
     origPool: ref => (ORIG[ref] && ORIG[ref].zq) || null,
     origEvidence: ref => (ORIG[ref] && ORIG[ref].evidence) || null,
@@ -262,11 +264,15 @@
   const speak = () => SP || (SP = SpeakApp.create({ h, toast, log: a => logAttempt(a), scanRules: () => C.sw.scan,
     logSpeak: r => { D.speak = D.speak || []; D.speak.push(Object.assign({ at: now() }, r)); save(); } }));
 
-  // ---------- WRITING: 소站 BS · Email · Discussion, 계획 카드·개요 드릴·고쳐 쓰기 (app/write.js) ----------
+  // ---------- WRITING: 소站 BS · 반복 오류 고쳐 쓰기 (app/write.js) ----------
   let WR = null;
   const write = () => WR || (WR = WriteApp.create({ h, toast, log: a => logAttempt(a), scanRules: () => C.sw.scan, cats: () => C.sw.cats,
     tutorGrammar: cats => C.sw.grammar.filter(g => /^튜터/.test(g.src || '') && cats.includes(g.cat)),
     writingLog: () => D.writing || [],
+    logWriting: r => { D.writing = D.writing || []; D.writing.push(Object.assign({ at: now() }, r)); save(); } }));
+  // 해커스 모범답안 라벨 재구성 (app/hackers.js, 기록은 같은 writing[]에 kind 'hk')
+  let HK = null;
+  const hackers = () => HK || (HK = HackersApp.create({ h, toast, scanRules: () => C.sw.scan, writingLog: () => D.writing || [],
     logWriting: r => { D.writing = D.writing || []; D.writing.push(Object.assign({ at: now() }, r)); save(); } }));
 
   // ---------- VOCAB: the original word page's '오늘 암기' flow, run unchanged (app/vocab.js) ----------
@@ -437,8 +443,8 @@
   const TASK_LABEL = t => ({
     vocab: t.mode === 'hard' ? `자주 틀린 단어${t.n ? ' ' + t.n + '개' : ''}` : '오늘 복습 단어',
     dictation: '받아쓰기 → 쉐도잉', twopass: '2단계 듣기',
-    item: (practice().KIND[(POOL()[t.item] || {}).kind] || '문제') + (t.timed ? ' · timed reading' : '') + (/^verify/.test(t.tier) ? ' · 다시 확인' : t.tier === 'delayed' ? ' · 유지 확인' : ''),
-    lr: 'Listen & Repeat', interview: 'Interview (45초)', bs: 'Build a Sentence', shadow: '쉐도잉 (L&R에서 빠뜨린 문장)', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion'),
+    item: (practice().KIND[(POOL()[t.item] || {}).kind] || '문제') + (/^verify/.test(t.tier) ? ' · 다시 확인' : t.tier === 'delayed' ? ' · 유지 확인' : ''),
+    lr: 'Listen & Repeat', interview: 'Interview (45초)', bs: 'Build a Sentence', hk: `해커스 ${t.kind === 'hkE' ? 'Email' : 'Discussion'} Day ${Number(String(t.task || '').slice(2))}${Number(String(t.task || '').slice(2)) % 3 === 0 ? ' · 처음 보는 문제' : ' · 라벨 재구성'}`, shadow: '쉐도잉 (L&R에서 빠뜨린 문장)', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion'),
     outline: `개요 드릴 ${t.n || 3}개`, fix: '반복 오류 고쳐 쓰기', diag: '원본 빠른 진단', original: '다시 확인 · 원본',
   })[t.type] || t.type;
   let poolIdx = null;
@@ -491,7 +497,7 @@
   function weeklyIndicators() { return E.weeklyIndicatorsFrom(metricsNow()); }
   function todayPlan() {
     const today = E.dayStr(now());
-    if (D.plan && D.plan.date === today && D.plan.v === 3) return D.plan;
+    if (D.plan && D.plan.date === today && D.plan.v === 3 && D.plan.rev === 2) return D.plan;
     const wa = E.weeklyAdjust(D, now(), weeklyIndicators());
     if (!D.weightAuto || wa.week !== D.weightAuto.week) D.weightAuto = wa;
     const vn = vocabNumbers();
@@ -599,7 +605,11 @@
     else if (t.type === 'interview') speak().interview(main, t, done);
     else if (t.type === 'shadow') speak().shadow(main, t, done);
     else if (window.WriteApp && t.type === 'bs') write().bs(main, t.set, done);
-    else if (window.WriteApp && ['write', 'outline', 'fix'].includes(t.type)) write().run(main, t, done);
+    else if (window.HackersApp && t.type === 'hk') hackers().run(main, t, done);
+    else if (window.WriteApp && t.type === 'fix') write().run(main, t, done);
+    else if (t.type === 'write' || t.type === 'outline') {   // 없앤 Email·Discussion·개요 드릴 (예전 계획에 남은 것)
+      main.append(h('section', { class: 'card' }, h('h1', null, TASK_LABEL(t)), h('p', { class: 'muted' }, 'Email·Discussion·개요 드릴은 없어졌습니다.'), h('button', { class: 'primary', onclick: () => done({ skipped: true }) }, '넘어가기')));
+    }
     else {
       main.append(h('section', { class: 'card' }, h('h1', null, TASK_LABEL(t)), h('p', { class: 'muted' }, '말하기·쓰기 탭에서 하세요.'),
         h('button', { class: 'ghost', onclick: () => go('#/sw') }, '말하기·쓰기 탭'), h('button', { class: 'primary', onclick: () => done() }, '다 했어요')));
@@ -631,7 +641,7 @@
 
   // ---------- 연습실: 영역별로 직접 고르기 ----------
   const ROOM = [
-    ['read', '리딩', [['ctest', 'C-Test (소站 + Fill in the blank 자료)'], ['daily', '일상 지문'], ['academic', '학술 지문 (timed reading)']]],
+    ['read', '리딩', [['ctest', 'C-Test (소站 + Fill in the blank 자료)'], ['daily', '일상 지문'], ['academic', '학술 지문']]],
     ['listen', '리스닝', [['reply', '응답 고르기'], ['conversation', '대화'], ['announcement', '공지'], ['lecture', '강의']]],
   ];
   function viewRoom(main, arg, arg2) {
@@ -639,7 +649,7 @@
       const meta = POOL()[decodeURIComponent(arg2)];
       if (!meta) { go('#/room'); return; }
       main.append(h('p', { class: 'kicker' }, h('a', { href: '#/room/' + (meta.sec === 'L' ? 'listen' : 'read') + '/' + meta.kind }, '← 목록')));
-      practice().renderItem(main, { type: 'item', item: meta.id, tier: 'transfer', timed: meta.kind === 'academic', exam: true }, meta, () => go('#/room/' + (meta.sec === 'L' ? 'listen' : 'read') + '/' + meta.kind));
+      practice().renderItem(main, { type: 'item', item: meta.id, tier: 'transfer', exam: true }, meta, () => go('#/room/' + (meta.sec === 'L' ? 'listen' : 'read') + '/' + meta.kind));
       return;
     }
     if ((arg === 'read' || arg === 'listen') && arg2) {
@@ -657,7 +667,8 @@
     }
     main.append(h('section', { class: 'card' }, h('h2', null, '말하기 · 쓰기'), h('div', { class: 'row wrap' },
       h('button', { class: 'ghost', onclick: () => go('#/speak') }, '말하기: Listen & Repeat · Interview'),
-      h('button', { class: 'ghost', onclick: () => go('#/write') }, '쓰기: Build a Sentence · Email · Discussion · 개요 드릴'),
+      h('button', { class: 'ghost', onclick: () => go('#/hk') }, '쓰기: 해커스 모범답안 재구성 (Email · Discussion)'),
+      h('button', { class: 'ghost', onclick: () => go('#/write') }, '쓰기: Build a Sentence · 반복 오류 고쳐 쓰기'),
       h('button', { class: 'ghost', onclick: () => go('#/sw') }, '튜터 교정 문장·반복 오류 (말하기·쓰기 탭)'))),
     h('section', { class: 'card' }, h('h2', null, '단어'), h('div', { class: 'row wrap' }, h('button', { class: 'ghost', onclick: () => go('#/vocab') }, '단어 암기'), h('button', { class: 'ghost', onclick: () => go('#/keep') }, `킵한 단어 ${keepApp().count()}개`))),
     h('section', { class: 'card' }, h('h2', null, '모의 모듈'), h('p', { class: 'small muted' }, '보류 회차(독점 TPO 2·3)로 실전처럼 리딩·리스닝 모듈을 풉니다.'), h('button', { class: 'ghost', onclick: () => go('#/mock') }, '모의 모듈')));
@@ -706,8 +717,7 @@
         h('ul', null,
           h('li', null, `받아쓰기 → 쉐도잉 ${q.dictation.length}개 (안 들렸다)`),
           h('li', null, `2단계 듣기 ${q.twoPass.length}개 (들었는데 잊었다)`),
-          h('li', null, `같은 능력 새 문제 + 쌍둥이 ${q.judge.length}개 (헷갈렸다)`),
-          h('li', null, `timed reading ${q.timed.length}개 (시간 부족)`)),
+          h('li', null, `같은 능력 새 문제 + 쌍둥이 ${q.judge.length}개 (헷갈렸다)`)),
         h('p', { class: 'small muted' }, '지금까지 고른 원인: ' + (Object.keys(by).length ? Object.entries(by).map(([k, n]) => `${names[k] || k} ${n}`).join(' · ') : '아직 없음'))),
       h('section', { class: 'card' }, h('h2', null, '모의고사 오답'), h('div', { class: 'row wrap' },
         h('button', { class: 'ghost', onclick: () => go('#/tests') }, 'TPO 회차 기록'),
@@ -989,11 +999,11 @@
       h('table', { class: 'grid' },
         h('tr', null, h('th', null, ''), h('th', null, '매일 지표'), h('th', null, '실전에 가까운 지표')),
         row('리스닝', [[['받아쓰기 단어 정확도', cmp(am.L.dictation, '%')], ['새 문제 정답률', cmp(am.L.newQ, '%')]], h('div', null, h('span', { class: 'muted small' }, '모의 모듈 L '), mock(am.L.mock))]),
-        row('리딩', [[['읽기 속도', cmp(am.R.wpm, ' wpm')], ['새 문제 정답률', cmp(am.R.newQ, '%')], ['C-Test 정답률', cmp(am.R.ctest, '%')]], h('div', null, h('span', { class: 'muted small' }, '모의 모듈 R '), mock(am.R.mock))]),
+        row('리딩', [[['새 문제 정답률', cmp(am.R.newQ, '%')], ['C-Test 정답률', cmp(am.R.ctest, '%')]], h('div', null, h('span', { class: 'muted small' }, '모의 모듈 R '), mock(am.R.mock))]),
         row('단어', [[['자주 틀린 단어 수', cmp(am.V.frequent, '개', true)]], h('div', null, h('span', { class: 'muted small' }, '틀린 세트 지문의 아는 단어 비율 '), am.V.known == null ? h('span', { class: 'muted' }, '기록 부족') : h('b', null, am.V.known + '%'))]),
         row('말하기', [[['L&R 단어 일치율', cmp(am.S.lr, '%')]], h('span', { class: 'muted' }, '—')]),   // Interview는 45초 타이머만이라 말 속도·멈춤 기록이 없다
-        row('쓰기', [[['계획 카드 시간', cmp(am.W.planSec, '초', true)], ['구조 체크', cmp(am.W.structure, '%')], ['반복 오류 범주 수', cmp(am.W.errors, '개', true)]], h('span', { class: 'muted' }, '—')])),
-      h('p', { class: 'small muted' }, '주 1회 비중 자동 조정은 영역마다 하나의 지표를 봅니다: 리스닝·리딩 새 문제 정답률, 단어 자주 틀린 단어 수, 말하기 L&R 일치율, 쓰기 구조 체크. 그 지표가 지난주보다 오르지 않으면 그 영역 +5%p (설정에서 고정한 영역 제외).')));
+        row('쓰기', [[['해커스 단어 수', cmp(am.W.words, '단어')], ['굵은 표현 적중', cmp(am.W.bold, '%')], ['문법 오류', cmp(am.W.errors, '개', true)]], h('span', { class: 'muted' }, '—')])),
+      h('p', { class: 'small muted' }, '주 1회 비중 자동 조정은 영역마다 하나의 지표를 봅니다: 리스닝·리딩 새 문제 정답률, 단어 자주 틀린 단어 수, 말하기 L&R 일치율, 쓰기 굵은 표현 적중률. 그 지표가 지난주보다 오르지 않으면 그 영역 +5%p (설정에서 고정한 영역 제외).')));
     main.append(h('p', { class: 'muted small' }, '많이 풀었다고 실력이 는 것은 아닙니다. 실력은 처음 보는 문제(새 문제·유지 확인)로만 판단합니다.'));
     main.append(h('div', { class: 'tiles' },
       metricTile('새 문제 정답률', m.transfer.pct + '%', `${m.transfer.n}문항`, m.transfer.n >= 5),

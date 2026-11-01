@@ -3,7 +3,7 @@
 사용자(2026 TOEFL 목표 5.0)의 개인 오답 교정 앱. 정적 웹앱 + 콘텐츠 빌드 파이프라인.
 설계 근거: `DESIGN.md` (PART 12 = 2026-11 개편). 개편 기록: `docs/overhaul-log.md`. 시험 화면 규칙: `docs/exam-rules.md`.
 앱 구조: `app/engine.js`(순수 로직: 하루 계획 `buildPlan` — 블록 5개, 종류마다 ⌈남은 문제 ÷ 남은 날⌉로 오늘 몫을 정하는 완주 할당·원인 대기열·숙달 상태·지표), `app/ui.js`(탭 5개: 오늘·연습실·오답·변화·설정),
-`app/practice.js`(소站 리딩·리스닝 풀이·원인별 후속), `app/speak.js`(L&R·Interview), `app/write.js`(BS·Email·Discussion·계획 카드), `app/store.js`. 콘텐츠: `content/`.
+`app/practice.js`(소站 리딩·리스닝 풀이·원인별 후속), `app/speak.js`(L&R·Interview), `app/write.js`(BS·반복 오류 고쳐 쓰기), `app/hackers.js`(해커스 모범답안 재구성), `app/store.js`. 콘텐츠: `content/`.
 `app/content.js`는 빌드 산출물이므로 직접 고치지 않는다.
 
 ## 개편 후 원칙 (2026-11, OVERHAUL.md)
@@ -83,8 +83,13 @@ node --test tests/*.test.js
 5. `python3 tools/build.py` → `private/zhan`에서 커밋·푸시. 모의 모듈용 보류 회차는 `tools/zhan_pool.py`의 `HELD` (이유는 `docs/exam-rules.md`).
 
 ## 말하기·쓰기
-- 소站 문제: `app/speak.js`(L&R·Interview(질문 → 45초 타이머만, 녹음·비교 없음 — 사용자 결정 2026-11-02)·쉐도잉, `tests/speak.test.js`) · `app/write.js`(BS·Email·Discussion·계획 카드·개요 드릴·고쳐 쓰기·모범 답안 비교, `tests/write.test.js`). 기록은 주 기록 `toeflcoach.v1`의 `speak[]`·`writing[]` (+ 원인은 attempts에 `cause` omit/grammar/structure).
+- 소站 문제: `app/speak.js`(L&R·Interview(질문 → 45초 타이머만, 녹음·비교 없음 — 사용자 결정 2026-11-02)·쉐도잉, `tests/speak.test.js`) · `app/write.js`(BS·반복 오류 고쳐 쓰기, `tests/write.test.js`). 기록은 주 기록 `toeflcoach.v1`의 `speak[]`·`writing[]` (+ 원인은 attempts에 `cause` omit/grammar/structure).
 - 받아쓰기(STT): `tools/serve.py`(정적 파일 + `/stt`, faster-whisper `~/.venvs/whisper`)를 `start.command`가 띄운다. 없는 환경에서는 '내 녹음 ↔ 원문 번갈아 듣고 놓친 단어 탭'.
+- **Email·Academic Discussion은 2026-11-02에 소站·튜터 버전을 화면·오늘 계획에서 뺐다** (소站 풀·`sw.json`의 email/discussion/ideas 데이터와 예전 기록은 남아 있지만 보이지 않음). 다시 넣지 않는다.
+- **쓰기 Task 2·3 = 해커스 모범답안 라벨 재구성** (`#/hk`, `app/hackers.js`, `tests/hackers.test.js`): 해커스 Updated TOEFL Writing '20일 완성 모범 답안' Email Day 1–20 (p.322–341, `HE01`–`HE20`) · Discussion Day 1–20 (p.344–383, `HD01`–`HD20`).
+  한 문제 = ① 읽기(라벨·굵은 표현) → ② 가리고 쓰기(라벨+아웃라인만, 굵은 표현 그대로, 나머지는 짧은 문장; Discussion 8분 · Email 5분) → ③ 비교(굵은 표현 적중 자동, 라벨 자가 체크, 문법 오류 수 입력). Day가 3의 배수면 '처음 보는 문제'(읽기 없이 실전 10/7분).
+  기준: 라벨 다 채움 · Discussion 110단어 / Email 100단어 · 문법 오류 2개 이하 (사용자 목표: 긴 문장보다 짧은 문장을 오류 없이). 오늘 계획 ⑤에 Day 순서로 완주 할당. 기록은 `writing[]`의 kind `hk`.
+  자료(저작물)는 비공개에만: `private/zhan/hackers/raw/*.json`(스캔본 전사) → `python3 tools/hackers.py` → `private/zhan/hackers.js`·`hackers.json`. 누출 검사가 모범답안 문장을 찾는다.
 - 튜터 교정 파트: `app/sw.js`(UI)·`app/swcore.js`(순수 로직, `tests/swcore.test.js`), 콘텐츠 `content/sw.json`, 기록 키 `toefl-sw-v1`.
 - 튜터 피드백을 새로 받으면 `grammar`에 `src: "튜터 M/D"`로 원문 그대로 추가한다. `AI 변형`/`AI 재구성` 문항은 연습 목록에서 빠진다 (기록은 유지). 새로 만들지 않는다.
 - `sw.json`의 문제 문장이 소站 원문과 같으면(누출 검사가 찾음) `tools/split_originals.py`의 `split_sw`처럼 `private/zhan/sw_private.json`으로 옮기고 `"private": true`만 남긴다.
@@ -102,6 +107,7 @@ node --test tests/*.test.js
 - 코드 `app/read.js` (판정·순서는 `ListenCore` 재사용, 자료 로딩은 `app/listen.js`의 `ZhanData` 공용), 기록 키 `toefl-read-v1`.
 - 자료: `private/zhan/reading/Mock_Test_<N>_<workflowId>.json` + `reading/ko.json` → `python3 tools/zhan_read.py` → `private/zhan/reading.js`·`reading.json` (비공개 저장소에 커밋·푸시).
 - 리딩 리포트 workflowId는 리스닝과 다르다: toefl-mokao.zhan.com 페이지에서 `POST /mokaoapi/api/singleSubject/query_completed_practice_records` `{userId: sessionStorage.userId, platform:'BK', practiceType:1}`(1=리딩, 2=리스닝)로 목록을 받는다. 리포트 URL `newMock/report?paperId=&workflowId=&subject=read`.
+- 리딩 지문은 문제와 함께 바로 보인다. **먼저 읽기·wpm 측정은 없앴다** (사용자 결정 2026-11-02, 다시 넣지 않는다).
 - 지문 표기: C-Test 빈칸 `【n】`(앞 글자는 지문에 있음), 문장 삽입 위치 `[[iA]]`, 문장 고르기 표시 `[[sA]]`. 오답은 앱 리딩 원본과 질문 문장 / C-Test 단어로 연결된다.
 
 ## Build a Sentence 오답 (독점 TPO 라이팅 Task 1, `#/sw/bsz`)
