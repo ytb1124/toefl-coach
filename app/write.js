@@ -260,7 +260,10 @@
       const kind = lastKind === 'discussion' ? 'email' : 'discussion';
       const pick = meta.filter(s => s.kind === kind).find(s => !done.has(s.id));
       const cats = topCats(log.filter(w => w.cats).map(w => w.cats.map(c => ({ cat: c }))), 3);
-      return { task: pick ? pick.id : null, kind, outline: [], errorCats: cats };
+      const bsDone = new Set(log.filter(w => w.kind === 'bs').map(w => w.task || w.set));
+      const left = { email: meta.filter(s => s.kind === 'email' && !done.has(s.id)).map(s => s.id), discussion: meta.filter(s => s.kind === 'discussion' && !done.has(s.id)).map(s => s.id),
+        bs: meta.filter(s => s.kind === 'bs' && !done.has(s.id) && !bsDone.has(s.id)).map(s => s.id) };
+      return { task: pick ? pick.id : null, kind, outline: [], errorCats: cats, left };
     }
     function room(main, content, go) {
       const meta = content.pool.sets.filter(s => !s.held);

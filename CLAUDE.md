@@ -2,7 +2,7 @@
 
 사용자(2026 TOEFL 목표 5.0)의 개인 오답 교정 앱. 정적 웹앱 + 콘텐츠 빌드 파이프라인.
 설계 근거: `DESIGN.md` (PART 12 = 2026-11 개편). 개편 기록: `docs/overhaul-log.md`. 시험 화면 규칙: `docs/exam-rules.md`.
-앱 구조: `app/engine.js`(순수 로직: 하루 계획 `buildPlan`·원인 대기열·숙달 상태·지표), `app/ui.js`(탭 5개: 오늘·연습실·오답·변화·설정),
+앱 구조: `app/engine.js`(순수 로직: 하루 계획 `buildPlan` — 블록 5개, 종류마다 ⌈남은 문제 ÷ 남은 날⌉로 오늘 몫을 정하는 완주 할당·원인 대기열·숙달 상태·지표), `app/ui.js`(탭 5개: 오늘·연습실·오답·변화·설정),
 `app/practice.js`(소站 리딩·리스닝 풀이·원인별 후속), `app/speak.js`(L&R·Interview), `app/write.js`(BS·Email·Discussion·계획 카드), `app/store.js`. 콘텐츠: `content/`.
 `app/content.js`는 빌드 산출물이므로 직접 고치지 않는다.
 
@@ -118,6 +118,8 @@ node --test tests/*.test.js
 - `app/vocab.js`는 빌드 생성 파일: `content/vocab/source.html`(원본 단어장) + `content/vocab/patch.js`(연동). 학습 방식은 원본 그대로.
 - 세트 750 (2026-11-01, `content/vocab/set750.json`, 빌드가 patch.js에 넣음): 50개씩 15세트. 단어장에 없던 252개는 `added`(통합 문서1의 뜻)로 WORDS 끝에 'Day 31'로 붙는다 (기존 순번 유지). 계획 키 `toefl-vocab-chunk-plan-v2`는 처음 열 때 만들어지고 `base`(그때의 직접 입력 틀린 횟수)를 남긴다. 예전 30개 계획 `-v1`은 지우지 않는다.
 - '자주 틀린 단어'(patch.js `frequentWords`): 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(`base` 차감) + 문제 풀다 '뜻을 몰랐다'로 킵한 단어(`keepFlagAt`, 킵 목록과 `flagKept`로 맞춤). 마지막 틀린 날 뒤 서로 다른 2일 연속 맞히면 빠짐. 새 필드만 쓰고 기존 필드는 바꾸지 않는다.
+- 세트 스톱워치(`app/ui.js` `VSW`, 키 `toefl-vocab-timer-v1`): 세트·자주 틀린 단어를 시작하면 우측 상단에 뜨고 일시정지 가능, 끝나면 세트 버튼에 걸린 시간 표시. patch.js가 `__hooks.started/finished`를 부른다.
+- 단어는 오늘 계획(`buildPlan`)에 들어가지 않는다 (2026-11-01부터, 단어 탭에서만).
 - Safari 기록 비교: `python3 tools/vocab_compare.py` (`~/Downloads/vocab-export-*.txt` 요약, 읽기만). 가져오기는 사용자가 단어 탭에서 직접.
 
 ## 단어 킵 (`#/keep`)

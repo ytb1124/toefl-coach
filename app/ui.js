@@ -267,13 +267,43 @@
   function vocabApp() {
     if (!V && window.VocabApp) {
       V = VocabApp.create(vocabStage, window.Sync || localStorage, {
-        home: () => { vocabMode = 'home'; if (vocabReturn && (location.hash || '').startsWith('#/vocab')) { const r = vocabReturn; vocabReturn = null; go(r); return; } if (V && (location.hash || '').startsWith('#/vocab')) render(); },
+        home: () => { VSW.pause(); vocabMode = 'home'; if (vocabReturn && (location.hash || '').startsWith('#/vocab')) { const r = vocabReturn; vocabReturn = null; go(r); return; } if (V && (location.hash || '').startsWith('#/vocab')) render(); },
         toast,
         changed: () => {},
+        started: (key, label) => { VSW.start(key, label); setTimeout(() => { const m = document.querySelector('.vocab-flow'); if (vocabMode === 'flow' && m && !m.querySelector('.stopwatch')) { const w = VSW.widget(); if (w) m.append(w); } }); },
+        finished: () => VSW.finish(),
       });
     }
     return V;
   }
+
+  // 단어 세트 스톱워치 (우측 상단): 세트마다 걸린 시간, 일시정지 가능. 세트 목록으로 나가면 멈춘다.
+  // 기록 키 toefl-vocab-timer-v1 = { cur: {key, label, acc, since}, times: {set0: ms, …, freq: ms} } (Sync로 기기 간 공유).
+  const VSW = (() => {
+    const KEY = 'toefl-vocab-timer-v1', store = () => window.Sync || localStorage;
+    const load = () => { try { return JSON.parse(store().getItem(KEY)) || { cur: null, times: {} }; } catch (e) { return { cur: null, times: {} }; } };
+    const save = s => { try { store().setItem(KEY, JSON.stringify(s)); } catch (e) { /* storage off */ } };
+    const ms = c => c ? c.acc + (c.since ? Date.now() - c.since : 0) : 0;
+    const fmt = t => { const s = Math.floor(t / 1000), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0'); };
+    let tick = null;
+    return {
+      fmt, times: () => load().times,
+      start(key, label) { const s = load(); if (!s.cur || s.cur.key !== key) s.cur = { key, label, acc: 0, since: Date.now() }; else if (!s.cur.since) s.cur.since = Date.now(); save(s); },
+      pause() { const s = load(); if (s.cur && s.cur.since) { s.cur.acc = ms(s.cur); s.cur.since = null; save(s); } },
+      toggle() { const s = load(); if (!s.cur) return; if (s.cur.since) { s.cur.acc = ms(s.cur); s.cur.since = null; } else s.cur.since = Date.now(); save(s); },
+      finish() { const s = load(); if (!s.cur) return; s.times[s.cur.key] = ms(s.cur); s.cur = null; save(s); },
+      widget() {
+        if (tick) clearInterval(tick);
+        const s0 = load(); if (!s0.cur) return null;
+        const time = h('b', { class: 'sw-time' }), btn = h('button', { class: 'ghost small', onclick: () => { VSW.toggle(); draw(); } });
+        const box = h('div', { class: 'stopwatch', role: 'timer' }, h('span', { class: 'muted small' }, s0.cur.label), time, btn);
+        const draw = () => { const s = load(); if (!box.isConnected && tick && box.dataset.on) { clearInterval(tick); tick = null; return; } box.dataset.on = 1;
+          if (!s.cur) { box.remove(); return; } time.textContent = fmt(ms(s.cur)); btn.textContent = s.cur.since ? '일시정지' : '계속'; box.classList.toggle('paused', !s.cur.since); };
+        draw(); tick = setInterval(draw, 500);
+        return box;
+      },
+    };
+  })();
   function vocabFlow(startFn) { if (startFn()) { vocabMode = 'flow'; render(); } }
 
   function viewVocab(main) {
@@ -281,7 +311,8 @@
     if (!api) { main.append(h('p', { class: 'notice' }, '단어 모듈을 불러오지 못했습니다. 새로고침해 주세요.')); return; }
     if (vocabMode === 'flow') {
       main.classList.add('vocab-flow');
-      main.append(h('button', { class: 'link small', onclick: () => { api.deactivate(); vocabMode = 'home'; render(); } }, '← 세트 목록 (진행 상황은 저장됩니다)'), vocabStage);
+      main.append(h('button', { class: 'link small', onclick: () => { VSW.pause(); api.deactivate(); vocabMode = 'home'; render(); } }, '← 세트 목록 (진행 상황은 저장됩니다)'), vocabStage);
+      const sw = VSW.widget(); if (sw) main.append(sw);
       return;
     }
     main.append(h('h1', null, '단어 암기'),
@@ -324,7 +355,8 @@
       for (let i = 0; i < total; i++) {
         const d = plan.done[i];
         grid.append(h('button', { class: 'setb' + (d ? ' done' : '') + (i === next ? ' next' : ''), title: api.chunkWords(i).map(w => w.en).join(', '),
-          onclick: () => vocabFlow(() => api.start(i)) }, h('b', null, `세트 ${i + 1}`), h('span', null, d ? d.slice(5).replace('-', '/') + ' 완료' : `${api.chunkWords(i).length}개`)));
+          onclick: () => vocabFlow(() => api.start(i)) }, h('b', null, `세트 ${i + 1}`), h('span', null, d ? d.slice(5).replace('-', '/') + ' 완료' : `${api.chunkWords(i).length}개`),
+          VSW.times()['set' + i] ? h('span', { class: 'muted small' }, '⏱ ' + VSW.fmt(VSW.times()['set' + i])) : null));
       }
       sec.append(grid);
       if (next != null) sec.append(h('details', null, h('summary', null, `세트 ${next + 1} 단어 미리 보기`),
@@ -398,7 +430,7 @@
     vocab: t.mode === 'hard' ? `자주 틀린 단어${t.n ? ' ' + t.n + '개' : ''}` : '오늘 복습 단어',
     dictation: '받아쓰기 → 쉐도잉', twopass: '2단계 듣기',
     item: (practice().KIND[(POOL()[t.item] || {}).kind] || '문제') + (t.timed ? ' · timed reading' : '') + (/^verify/.test(t.tier) ? ' · 다시 확인' : t.tier === 'delayed' ? ' · 유지 확인' : ''),
-    lr: 'Listen & Repeat 1세트', interview: 'Interview 4/3/2', shadow: '쉐도잉 (L&R에서 빠뜨린 문장)', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion') + ' 1편',
+    lr: 'Listen & Repeat', interview: 'Interview 4/3/2', bs: 'Build a Sentence', shadow: '쉐도잉 (L&R에서 빠뜨린 문장)', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion'),
     outline: `개요 드릴 ${t.n || 3}개`, fix: '반복 오류 고쳐 쓰기', diag: '원본 빠른 진단', original: '다시 확인 · 원본',
   })[t.type] || t.type;
   let poolIdx = null;
@@ -451,7 +483,7 @@
   function weeklyIndicators() { return E.weeklyIndicatorsFrom(metricsNow()); }
   function todayPlan() {
     const today = E.dayStr(now());
-    if (D.plan && D.plan.date === today && D.plan.v === 2) return D.plan;
+    if (D.plan && D.plan.date === today && D.plan.v === 3) return D.plan;
     const wa = E.weeklyAdjust(D, now(), weeklyIndicators());
     if (!D.weightAuto || wa.week !== D.weightAuto.week) D.weightAuto = wa;
     const vn = vocabNumbers();
@@ -480,12 +512,16 @@
     }
     const p = todayPlan();
     main.append(h('p', { class: 'dday' }, left > 0 ? `D-${left}` : left === 0 ? 'D-day' : '시험일 지남', h('span', { class: 'muted' }, ` · ${fmtDate(E.dayStart(D.settings.examDate))} 시험 · 하루 ${p.minutes}분`)));
+    if (p.cover) main.append(h('section', { class: 'card' },
+      h('h2', null, `시험 전까지 전 문제 한 번씩 · 오늘 예상 ${p.need}분`, p.need > p.minutes ? h('span', { class: 'chip' }, `설정 ${p.minutes}분보다 ${p.need - p.minutes}분 많음`) : null),
+      h('p', { class: 'small muted' }, '종류마다 남은 문제를 남은 날로 나눠 오늘 몫을 정합니다 (모의 모듈용 회차 제외). 못 한 것은 다음 날로 넘어가 그날 몫에 포함됩니다.'),
+      h('ul', { class: 'cover' }, Object.entries(p.cover).filter(([, c]) => c.left).map(([k, c]) => h('li', null, h('b', null, k), ` 오늘 ${c.today} · 남은 ${c.left}`)))));
     const cur = p.blocks.findIndex(b => !b.done);
     const allDone = cur < 0;
     main.append(h('section', { class: 'card hero' },
       h('h1', null, allDone ? '오늘 계획 완료' : '오늘의 계획'),
       h('ol', { class: 'blocks' }, p.blocks.map((b, i) => h('li', { class: (b.done ? 'done' : '') + (i === cur ? ' cur' : '') },
-        h('div', { class: 'bname' }, `${BLOCK[b.key][0]} ${BLOCK[b.key][1]}`, h('span', { class: 'muted small' }, ` ${b.minutes}분 · ${b.weight}%`),
+        h('div', { class: 'bname' }, `${BLOCK[b.key][0]} ${BLOCK[b.key][1]}`, h('span', { class: 'muted small' }, p.cover ? ` ${b.minutes}분` : ` ${b.minutes}분 · ${b.weight}%`),
           b.carried ? h('span', { class: 'chip' }, `어제에서 ${b.carried}개`) : null, b.done ? h('span', { class: 'chip st-IMPROVED' }, '완료') : null),
         h('div', { class: 'small muted' }, b.tasks.length ? b.tasks.map(TASK_LABEL).filter((x, k, a) => a.indexOf(x) === k).join(' · ') + (b.cursor ? ` (${b.cursor}/${b.tasks.length})` : '') : '오늘은 없음')))),
       p.originals.left ? h('p', { class: 'small' }, `원본 오답: 오늘 진단 ${p.originals.today}개 · 아직 안 본 원본 ${p.originals.left}/${p.originals.total}개를 시험 전까지 나눠서`) : null,
@@ -554,6 +590,7 @@
     } else if (t.type === 'lr') speak().lr(main, t, done);
     else if (t.type === 'interview') speak().interview(main, t, done);
     else if (t.type === 'shadow') speak().shadow(main, t, done);
+    else if (window.WriteApp && t.type === 'bs') write().bs(main, t.set, done);
     else if (window.WriteApp && ['write', 'outline', 'fix'].includes(t.type)) write().run(main, t, done);
     else {
       main.append(h('section', { class: 'card' }, h('h1', null, TASK_LABEL(t)), h('p', { class: 'muted' }, '말하기·쓰기 탭에서 하세요.'),

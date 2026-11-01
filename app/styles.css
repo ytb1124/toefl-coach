@@ -392,3 +392,9 @@ li.ok { color: var(--good); } li.miss { color: var(--bad); }
 .insert-s { background: var(--sel); padding: 6px 10px; border-radius: 8px; }
 span.good { color: var(--good); } span.bad { color: var(--bad); }
 .card.scroll { overflow-x: auto; }
+
+/* 단어 세트 스톱워치 (우측 상단 고정) */
+.stopwatch { position: fixed; top: 64px; right: 12px; z-index: 50; display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--card, #fff); border: 1px solid var(--line, #ddd); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.stopwatch .sw-time { font-variant-numeric: tabular-nums; font-size: 18px; min-width: 4.2em; text-align: right; }
+.stopwatch.paused .sw-time { opacity: .5; }
+.stopwatch button { padding: 4px 8px; }

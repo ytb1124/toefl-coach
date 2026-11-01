@@ -57,6 +57,7 @@ function startChunkSession(i) {
   learningState = null; delayedRetries = []; finalReviewQueue = []; finalReviewActive = false;
   sameDayState = {targets: candidates.map(w => w.en), sourceMode: 'review', sourceQuizMode: selectedQuizMode, chunk: {index: i, total: chunkCount(plan)}, nextNewIndex: 0, activityIndex: 0, pending: [], finalQueue: [], current: null, lastEns: [], phase: 'encoding', stats: {firstRecallSuccess:0, quick:0, deep:0, memory:0}};
   candidates.forEach(w => resetTodayLearningIfNeeded(w.en)); saveMeta(); saveSession(); renderCard();
+  if (__hooks.started) __hooks.started('set' + i, '세트 ' + (i + 1));
   return true;
 }
 function markChunkDone() {
@@ -78,6 +79,7 @@ const renderBaseSameDaySummary = renderSameDaySummary;
 renderSameDaySummary = function () {
   const chunk = sameDayState && sameDayState.chunk;
   const plan = markChunkDone();
+  if (__hooks.finished) __hooks.finished();  // 스톱워치: 이 세트(또는 자주 틀린 단어) 시간 기록
   renderBaseSameDaySummary();
   if (!chunk || !plan) return;
   const wrap = app.firstElementChild; if (!wrap) return;
@@ -111,6 +113,7 @@ function resumeSession() {
   learningGoalMode = resumable.learningGoalMode || 'standard';
   sameDayState = resumable.sameDayState || null;
   renderCard();
+  if (__hooks.started) { const c = sameDayState && sameDayState.chunk; __hooks.started(c ? 'set' + c.index : 'freq', c ? '세트 ' + (c.index + 1) : '자주 틀린 단어'); }
   return true;
 }
 
@@ -178,6 +181,7 @@ function startFrequentSession() {
   learningState = null; delayedRetries = []; finalReviewQueue = []; finalReviewActive = false;
   sameDayState = {targets: candidates.map(w => w.en), sourceMode: 'frequent', sourceQuizMode: 'flash', chunk: null, nextNewIndex: 0, activityIndex: 0, pending: [], finalQueue: [], current: null, lastEns: [], phase: 'encoding', stats: {firstRecallSuccess:0, quick:0, deep:0, memory:0}};
   candidates.forEach(w => resetTodayLearningIfNeeded(w.en)); saveMeta(); saveSession(); renderCard();
+  if (__hooks.started) __hooks.started('freq', '자주 틀린 단어');
   return true;
 }
 

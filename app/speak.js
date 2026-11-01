@@ -244,7 +244,10 @@
       const meta = content.pool.sets.filter(s => !s.held);
       const lrSet = meta.filter(s => s.kind === 'lr').find(s => !done.has(s.id)) || meta.filter(s => s.kind === 'lr')[0];
       const ivQ = meta.filter(s => s.kind === 'interview').flatMap(s => s.qs).find(q => !done.has(q.id));
-      return { lr: lrSet ? lrSet.id : null, interview: ivQ ? ivQ.id : null };
+      // 안 한 것 전부 (오늘 계획이 남은 날로 나눠 하루 몫을 정한다)
+      const lrLeft = meta.filter(s => s.kind === 'lr' && !done.has(s.id)).map(s => s.id);
+      const ivLeft = meta.filter(s => s.kind === 'interview').flatMap(s => s.qs).filter(q => !done.has(q.id)).map(q => q.id);
+      return { lr: lrSet ? lrSet.id : null, interview: ivQ ? ivQ.id : null, lrLeft, ivLeft };
     }
     // 연습실 목록
     function room(main, content, go) {

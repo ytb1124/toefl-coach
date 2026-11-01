@@ -144,23 +144,26 @@ test('pool: 소站 TPO独家 문항만, 메타데이터만 (공개 번들에 원
   assert.ok(!('items' in ALL), 'AI 연습 문제(items) 번들에서 제거');
 });
 
-test('(a) block minutes follow the weights; custom total and fixed weights', () => {
+test('(a) 완주 할당: 종류마다 ⌈남은 문제 ÷ 남은 날⌉, 블록 시간 = 할 일 합, 마무리는 남은 시간', () => {
   const d = blank(); d.settings.minutes = 60; d.settings.examDate = '2026-11-14';
   const p = plan(d, T0);
-  const m = Object.fromEntries(p.blocks.map(b => [b.key, b.minutes]));
-  assert.deepStrictEqual(m, { vocab: 6, listen: 18, read: 9, speak: 9, write: 12, wrap: 6 });
-  assert.deepStrictEqual(p.blocks.map(b => b.key), ['vocab', 'listen', 'read', 'speak', 'write', 'wrap']);
-  d.settings.minutes = 95; d.settings.weights = { listen: 40 };
+  assert.deepStrictEqual(p.blocks.map(b => b.key), ['listen', 'read', 'speak', 'write', 'wrap'], 'no vocab block (2026-11-01)');
+  const left = p.daysLeft;
+  for (const [k, c] of Object.entries(p.cover)) assert.strictEqual(c.today, Math.min(c.left, Math.ceil(c.left / left)), k);
+  const ct = tasks(p).filter(t => t.item && E.poolIndex(ALL)[t.item].kind === 'ctest' && t.tier === 'transfer').length;
+  assert.strictEqual(ct, p.cover['R C-Test'].today);
+  for (const b of p.blocks.filter(b => b.key !== 'wrap')) assert.strictEqual(b.minutes, Math.round(b.tasks.reduce((s, t) => s + t.min, 0)), b.key);
+  assert.ok(p.blocks.find(b => b.key === 'wrap').minutes >= Math.round(60 * E.weights(d).wrap / 100));
+  assert.ok(p.need >= p.blocks.filter(b => b.key !== 'wrap').reduce((s, b) => s + b.minutes, 0));
+  // speak/write lists from the UI are split over the days left too
+  const q = plan(d, T0, { speak: { lrLeft: Array.from({ length: 13 }, (_, i) => 'lr' + i), ivLeft: Array.from({ length: 52 }, (_, i) => 'iv' + i) }, write: { left: { email: ['e1', 'e2'], discussion: [], bs: ['b1'] } } });
+  assert.strictEqual(tasks(q).filter(t => t.type === 'interview').length, Math.ceil(52 / left));
+  assert.strictEqual(tasks(q).filter(t => t.type === 'bs').length, 1);
+  // fixed weights still parse (wrap floor uses them)
+  d.settings.weights = { listen: 40 };
   const w = E.weights(d);
   assert.strictEqual(w.listen, 40);
   assert.ok(Math.abs(Object.values(w).reduce((s, x) => s + x, 0) - 100) < 1e-9);
-  assert.strictEqual(plan(d, T0).blocks.find(b => b.key === 'listen').minutes, 38);
-  // Each block's tasks fit its time (within one task).
-  d.settings.weights = {};
-  for (const b of plan(d, T0, { speak: { lr: 'x', interview: 'y' }, write: { task: 'w', kind: 'discussion' } }).blocks) {
-    const used = b.tasks.reduce((s, t) => s + t.min, 0);
-    assert.ok(used <= b.minutes + 6, b.key + ' ' + used + ' > ' + b.minutes);
-  }
 });
 
 test('(b) "안 들렸다" → 받아쓰기 대기열 (다음 날 ② 리스닝); 처리하면 빠진다', () => {
@@ -212,7 +215,7 @@ test('(e) 옛 기록(사용자 내보내기 2026-11-01 형식)으로 계획 생�
   assert.ok(d.legacySession && d.session === null, 'old v1 session kept aside, not rendered');
   const now = new Date(2026, 10, 1, 9).getTime();
   const p = plan(d, now, { vocab: { hard: 12, due: 30 } });
-  assert.strictEqual(p.v, 2);
+  assert.strictEqual(p.v, 3);
   assert.ok(tasks(p).length > 5);
   assert.ok(E.skillTable(d, ALL, now).length === 8);
   assert.ok(E.metrics(d).activity.attempts === rec.attempts.length);
@@ -279,7 +282,7 @@ test('weekly auto weights: an area whose indicator did not improve gets +5%p, on
   const d = blank();
   const ind = { listen: { now: 0.6, prev: 0.6 }, read: { now: 0.8, prev: 0.6 }, vocab: { now: 30, prev: 20, higherIsBetter: false } };
   const a = E.weeklyAdjust(d, T0, ind);
-  assert.deepStrictEqual(a.adj, { listen: 5, vocab: 5 });
+  assert.deepStrictEqual(a.adj, { listen: 5 });   // vocab is no longer a plan block
   d.weightAuto = a;
   assert.strictEqual(E.weeklyAdjust(d, T0 - E.DAY, ind), a, 'same week (Sat) → unchanged');
   const w = E.weights(d);
