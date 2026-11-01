@@ -1,9 +1,10 @@
 /* 해커스 모범답안 라벨 재구성 (쓰기 Task 2 Email · Task 3 Academic Discussion, 2026-11-02 사용자 결정).
  * 자료: 해커스 Updated TOEFL Writing '20일 완성 모범 답안' (p.322–341 Email, p.344–383 Discussion) 전사본 —
  *   저작물이라 비공개 저장소에만 (private/zhan/hackers.js · hackers.json, tools/hackers.py가 만든다).
- * 한 문제 = ① 읽기 (라벨·굵은 표현 표시) → ② 가리고 쓰기 (라벨+아웃라인만 보고, 굵은 표현은 그대로, 나머지는 짧은 문장) → ③ 비교.
+ * 한 문제 = ① 읽기 (라벨·굵은 표현 표시) → ② 가리고 쓰기 (라벨+아웃라인만 보고, 굵은 표현은 그대로, 나머지는 짧은 문장) → ③ 비교
+ *   → ④ 실전 다시 쓰기 (문제만 보고 실전 시간 Email 7분 · Discussion 10분, 처음부터 다시) → 비교.
  * Day가 3의 배수인 문제는 '처음 보는 문제' (모범답안을 읽지 않고 문제만 보고 실전 시간에 쓴 뒤 비교).
- * 기준: 라벨 다 채움 · 110단어(Email 100) 이상 · 문법 오류 2개 이하. 기록은 주 기록 writing[]에 kind 'hk'.
+ * 기준: 라벨 다 채움 · 110단어(Email 100) 이상 · 문법 오류 2개 이하. 기록은 주 기록 writing[]에 kind 'hk' (mode recon·cold·final).
  * 순수 로직(HackersCore)은 node 테스트에서도 쓴다 (tests/hackers.test.js). */
 (function (root) {
   'use strict';
@@ -114,43 +115,46 @@
         ap(main, h('p', { class: 'kicker' }, `⑤ 쓰기 · 해커스 ${name} Day ${dayOf(it.id)} · ${it.title} · `, h('span', { class: 'muted' }, cold ? '처음 보는 문제 (실전)' : '라벨 재구성')));
         const card = h('section', { class: 'card' }); ap(main, card);
         const t0 = Date.now();
-        if (cold) return write(null);
+        if (cold) return write(null, 'cold');
         // ① 읽기
         const ck = clock(T.read, true);
         rc(card, h('div', { class: 'qhead' }, h('h3', null, '① 읽기'), ck),
           h('p', { class: 'small muted' }, '라벨 순서와 굵은 표현을 눈에 넣으세요. 굵은 표현은 쓸 때 그대로 씁니다.'),
           promptBox(it), h('h4', null, '모범 답안'), modelBox(it),
-          h('button', { class: 'primary', onclick: () => { ck.stop(); write(Date.now() - t0); } }, '가리고 쓰기'));
+          h('button', { class: 'primary', onclick: () => { ck.stop(); write(Date.now() - t0, 'recon'); } }, '가리고 쓰기'));
 
-        // ② 쓰기
-        function write(readMs) {
-          const sec = cold ? T.cold : T.write;
+        // ② 쓰기 (recon) · 처음 보는 문제 (cold) · ④ 실전 다시 쓰기 (final): cold·final은 문제만, 실전 시간.
+        function write(readMs, stage) {
+          const exam = stage !== 'recon';
+          const sec = exam ? T.cold : T.write;
+          const title = stage === 'final' ? '④ 실전 다시 쓰기' : stage === 'cold' ? '실전 쓰기' : '② 가리고 쓰기';
           const ck2 = clock(sec);
           const ta = h('textarea', { class: 'essay', rows: 12, spellcheck: 'false', autocorrect: 'off', placeholder: type === 'E' ? (it.greeting || 'Dear …,') : '' });
           const wc = h('span', { class: 'small muted' }, `0 / ${T.words}단어`);
           ta.oninput = () => { const n = wordCount(ta.value); wc.textContent = `${n} / ${T.words}단어`; wc.classList.toggle('good-text', n >= T.words); };
           const t1 = Date.now();
-          rc(card, h('div', { class: 'qhead' }, h('h3', null, cold ? '실전 쓰기' : '② 가리고 쓰기'), ck2),
-            h('p', { class: 'small muted' }, cold ? `문제만 보고 ${sec / 60}분 안에 쓰세요. 마지막 1분은 전치사·관사·수일치·철자만 보세요.`
+          rc(card, h('div', { class: 'qhead' }, h('h3', null, title), ck2),
+            h('p', { class: 'small muted' }, stage === 'final' ? `이제 문제만 보고 처음부터 다시 씁니다. 실전처럼 ${sec / 60}분. 마지막 1분은 전치사·관사·수일치·철자만 보세요.`
+              : exam ? `문제만 보고 ${sec / 60}분 안에 쓰세요. 마지막 1분은 전치사·관사·수일치·철자만 보세요.`
               : '굵은 표현은 그대로, 나머지는 짧은 문장으로. 라벨 하나에 1–2문장.'),
-            promptBox(it), cold ? null : [labelRow(it), outlineBox(it)],
+            promptBox(it), exam ? null : [labelRow(it), outlineBox(it)],
             ta, h('div', { class: 'row' }, wc),
             h('button', { class: 'primary', onclick: () => {
               if (!ta.value.trim()) { toast('답을 써야 비교할 수 있습니다'); return; }
-              ck2.stop(); compare(ta.value, readMs, Date.now() - t1);
+              ck2.stop(); compare(ta.value, readMs, Date.now() - t1, stage);
             } }, '제출하고 비교'));
           setTimeout(() => ta.focus(), 30);
         }
 
-        // ③ 비교
-        function compare(text, readMs, writeMs) {
+        // ③ 비교 (④ 다음에도 같은 화면)
+        function compare(text, readMs, writeMs, stage) {
           const hits = boldHits(text, it.bold), flags = scan(text, type), words = wordCount(text);
           const labelBoxes = it.parts.map(p => h('input', { type: 'checkbox' }));
           const err = h('input', { type: 'number', min: 0, max: 20, class: 'hk-num', value: '' });
           const fix = h('textarea', { rows: 2, placeholder: '틀린 문장 하나를 고쳐 쓰기 (선택)' });
           const out = h('div');
           const saveBtn = h('button', { class: 'primary', onclick: () => save() }, '저장');
-          rc(card, h('h3', null, '③ 비교'),
+          rc(card, h('h3', null, stage === 'final' ? '④ 실전 다시 쓰기 · 비교' : '③ 비교'),
             h('p', null, `${words}단어 (목표 ${T.words}) · 굵은 표현 ${hits.filter(x => x.ok).length}/${hits.length} · 쓰기 ${mmss(Math.round(writeMs / 1000))}`),
             h('div', { class: 'compare' },
               h('div', null, h('p', { class: 'small muted' }, '내 글'), h('pre', { class: 'essaytext' }, text)),
@@ -168,11 +172,13 @@
               if (err.value === '') { toast('문법 오류 수를 적어 주세요 (없으면 0)'); return; }
               const r = { words, errors: Number(err.value), labelsOk: labelBoxes.filter(b => b.checked).length, labelsTotal: labelBoxes.length };
               const v = verdict(type, r);
-              env.logWriting({ kind: 'hk', task: it.id, type, mode: cold ? 'cold' : 'recon', text, fix: fix.value.trim() || undefined, words,
+              env.logWriting({ kind: 'hk', task: it.id, type, mode: stage, text, fix: fix.value.trim() || undefined, words,
                 bold: [hits.filter(x => x.ok).length, hits.length], labels: [r.labelsOk, r.labelsTotal], errors: r.errors, flags: flags.length, readMs, ms: writeMs, pass: v.pass });
               rc(out, h('ul', null, v.checks.map(([k, ok]) => h('li', { class: ok ? 'ok' : 'miss' }, (ok ? '✓ ' : '✗ ') + k))));
               saveBtn.remove();
-              ap(card, h('button', { class: 'primary', onclick: () => done({}) }, '다음'));
+              if (stage === 'final') ap(card, h('button', { class: 'primary', onclick: () => done({}) }, '다음'));
+              else ap(card, h('button', { class: 'primary', onclick: () => { window.scrollTo(0, 0); write(null, 'final'); } }, `④ 실전 다시 쓰기 (${T.cold / 60}분)`),
+                h('button', { class: 'link small', onclick: () => done({}) }, '이번엔 건너뛰고 다음'));
           }
         }
       });
@@ -191,11 +197,11 @@
       const avg = f => recent.length ? Math.round(recent.reduce((s, w) => s + f(w), 0) / recent.length * 10) / 10 : '—';
       ap(main, h('h1', null, '해커스 모범답안 재구성'),
         h('section', { class: 'card' },
-          h('p', { class: 'small' }, '① 읽기 → ② 가리고 쓰기 (라벨·아웃라인만 보고, 굵은 표현은 그대로, 나머지는 짧은 문장) → ③ 비교. ★ = 처음 보는 문제 (모범답안 없이 실전 시간에 쓰고 비교).'),
+          h('p', { class: 'small' }, '① 읽기 → ② 가리고 쓰기 (라벨·아웃라인만 보고, 굵은 표현은 그대로, 나머지는 짧은 문장) → ③ 비교 → ④ 실전 다시 쓰기 (문제만, 실전 시간) → 비교. ★ = 처음 보는 문제 (모범답안 없이 실전 시간에 쓰고 비교, 그다음 ④).'),
           h('p', { class: 'small muted' }, `기준: 라벨 다 채움 · Discussion 110단어 / Email 100단어 이상 · 문법 오류 ${MAX_ERRORS}개 이하. ✓ 기준 통과 · △ 미통과.`),
           h('p', { class: 'small' }, `최근 ${recent.length}편 평균: ${avg(w => w.words)}단어 · 굵은 표현 ${avg(w => w.bold[1] ? 100 * w.bold[0] / w.bold[1] : 0)}% · 오류 ${avg(w => w.errors)}개`)),
-        h('section', { class: 'card' }, h('h2', null, 'Academic Discussion (재구성 8분 · ★ 10분)'), grid('D')),
-        h('section', { class: 'card' }, h('h2', null, 'Write an Email (재구성 5분 · ★ 7분)'), grid('E')));
+        h('section', { class: 'card' }, h('h2', null, 'Academic Discussion (재구성 8분 · ★·④ 10분)'), grid('D')),
+        h('section', { class: 'card' }, h('h2', null, 'Write an Email (재구성 5분 · ★·④ 7분)'), grid('E')));
     }
     return { run, room, stopAll };
   } };

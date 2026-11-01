@@ -471,9 +471,9 @@
     const wLeft = wr.left || {};
     if (!wr.left && wr.task) wLeft[wr.kind] = [wr.task];
     takeQuota('write', notCarried('set:', wLeft.bs || []), ['bs'], 'W Build a Sentence', id => take('write', { type: 'bs', set: id }, 7));
-    // 해커스 모범답안 라벨 재구성 (Day 순서, Day가 3의 배수면 처음 보는 문제 — app/hackers.js)
-    takeQuota('write', notCarried('task:', wLeft.hkD || []), ['hkD'], 'W 해커스 Discussion', id => take('write', { type: 'hk', task: id, kind: 'hkD' }, 13));
-    takeQuota('write', notCarried('task:', wLeft.hkE || []), ['hkE'], 'W 해커스 Email', id => take('write', { type: 'hk', task: id, kind: 'hkE' }, 8));
+    // 해커스 모범답안 라벨 재구성 → ④ 실전 다시 쓰기 (Day 순서, Day가 3의 배수면 처음 보는 문제 — app/hackers.js)
+    takeQuota('write', notCarried('task:', wLeft.hkD || []), ['hkD'], 'W 해커스 Discussion', id => take('write', { type: 'hk', task: id, kind: 'hkD' }, 25));
+    takeQuota('write', notCarried('task:', wLeft.hkE || []), ['hkE'], 'W 해커스 Email', id => take('write', { type: 'hk', task: id, kind: 'hkE' }, 16));
     const fixCats = [...new Set((wr.errorCats || []).concat(cq.fix.flatMap(f => f.cats || [])))].slice(0, 3);
     if (fixCats.length && !Object.values(blocks).some(b => b.tasks.some(t => t.type === 'fix'))) take('write', { type: 'fix', cats: fixCats, key: cq.fix.length ? cq.fix[0].key : undefined }, 4);
     for (const k of ['listen', 'read', 'speak', 'write']) blocks[k].minutes = Math.round(blocks[k].tasks.reduce((s, t) => s + (t.min || 0), 0));

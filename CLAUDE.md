@@ -87,7 +87,7 @@ node --test tests/*.test.js
 - 받아쓰기(STT): `tools/serve.py`(정적 파일 + `/stt`, faster-whisper `~/.venvs/whisper`)를 `start.command`가 띄운다. 없는 환경에서는 '내 녹음 ↔ 원문 번갈아 듣고 놓친 단어 탭'.
 - **Email·Academic Discussion은 2026-11-02에 소站·튜터 버전을 화면·오늘 계획에서 뺐다** (소站 풀·`sw.json`의 email/discussion/ideas 데이터와 예전 기록은 남아 있지만 보이지 않음). 다시 넣지 않는다.
 - **쓰기 Task 2·3 = 해커스 모범답안 라벨 재구성** (`#/hk`, `app/hackers.js`, `tests/hackers.test.js`): 해커스 Updated TOEFL Writing '20일 완성 모범 답안' Email Day 1–20 (p.322–341, `HE01`–`HE20`) · Discussion Day 1–20 (p.344–383, `HD01`–`HD20`).
-  한 문제 = ① 읽기(라벨·굵은 표현) → ② 가리고 쓰기(라벨+아웃라인만, 굵은 표현 그대로, 나머지는 짧은 문장; Discussion 8분 · Email 5분) → ③ 비교(굵은 표현 적중 자동, 라벨 자가 체크, 문법 오류 수 입력). Day가 3의 배수면 '처음 보는 문제'(읽기 없이 실전 10/7분).
+  한 문제 = ① 읽기(라벨·굵은 표현) → ② 가리고 쓰기(라벨+아웃라인만, 굵은 표현 그대로, 나머지는 짧은 문장; Discussion 8분 · Email 5분) → ③ 비교(굵은 표현 적중 자동, 라벨 자가 체크, 문법 오류 수 입력) → ④ 실전 다시 쓰기(문제만 보고 실전 10/7분, 처음부터 다시 → 같은 비교; 사용자 요청 2026-11-02). Day가 3의 배수면 '처음 보는 문제'(① 없이 실전 10/7분으로 시작, 그다음 ④). 기록 mode: recon·cold·final.
   기준: 라벨 다 채움 · Discussion 110단어 / Email 100단어 · 문법 오류 2개 이하 (사용자 목표: 긴 문장보다 짧은 문장을 오류 없이). 오늘 계획 ⑤에 Day 순서로 완주 할당. 기록은 `writing[]`의 kind `hk`.
   자료(저작물)는 비공개에만: `private/zhan/hackers/raw/*.json`(스캔본 전사) → `python3 tools/hackers.py` → `private/zhan/hackers.js`·`hackers.json`. 누출 검사가 모범답안 문장을 찾는다.
 - 튜터 교정 파트: `app/sw.js`(UI)·`app/swcore.js`(순수 로직, `tests/swcore.test.js`), 콘텐츠 `content/sw.json`, 기록 키 `toefl-sw-v1`.
