@@ -8,7 +8,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 Z = ROOT / "private" / "zhan"
 OUT = Z / "align.json"
+SENT = Z / "align_sent.json"   # {세트 id: [[{t, at}, …] 줄마다 문장들]} — 받아쓰기를 문장 단위로
 norm = lambda t: re.findall(r"[a-z0-9']+", t.lower().replace("’", "'"))
+
+
+def split_sentences(text):
+    """문장 나누기 (Mr./Dr. 같은 약어 뒤는 나누지 않음)."""
+    prot = re.sub(r"\b(Mr|Mrs|Ms|Dr|Prof|St|vs|e\.g|i\.e|etc)\.", lambda m: m.group(1) + "§", text.strip())
+    return [s.replace("§", ".") for s in re.split(r'(?<=[.!?])\s+(?=[A-Z"\'“‘])', prot) if s.strip()]
 
 
 def align_lines(lines, words):
@@ -51,21 +58,34 @@ def main():
     for s in pool["sets"]:
         if s["sec"] != "L" or s["kind"] == "reply" or s["id"] in done or not s.get("audio"):
             continue
+        cache = {}
+        def hear(**kw):
+            k = json.dumps(kw, sort_keys=True)
+            if k not in cache:
+                segs, _ = model.transcribe(str(ROOT / s["audio"]), language="en", word_timestamps=True, **kw)
+                cache[k] = [(t, w.start) for seg in segs for w in (seg.words or []) for t in norm(w.word)]
+            return cache[k]
         def run(**kw):
-            segs, _ = model.transcribe(str(ROOT / s["audio"]), language="en", word_timestamps=True, **kw)
-            words = []
-            for seg in segs:
-                for w in seg.words or []:
-                    for t in norm(w.word):
-                        words.append((t, w.start))
-            return align_lines([l["t"] for l in s["script"]], words)
+            return align_lines([l["t"] for l in s["script"]], hear(**kw))
+        best = {}
         ats = run()
         if sum(a is None for a in ats[1:]) > 0:   # Whisper가 첫 문장 뒤를 건너뛰는 경우가 있다 → 앞 문맥 없이·무음 거르고 다시
             again = run(condition_on_previous_text=False, vad_filter=True)
             if sum(a is None for a in again) < sum(a is None for a in ats):
-                ats = again
+                ats, best = again, {"condition_on_previous_text": False, "vad_filter": True}
+        run_sents = lambda flat: align_lines(flat, hear(**best))
         done[s["id"]] = ats
         OUT.write_text(json.dumps(done))
+        # 문장 단위 시각: 줄을 문장으로 나눠 같은 방식으로 맞춘다
+        sents = [split_sentences(l["t"]) for l in s["script"]]
+        flat = [x for ss in sents for x in ss]
+        sat = run_sents(flat) if flat else []
+        k, rows = 0, []
+        for ss in sents:
+            rows.append([{"t": x, "at": sat[k + j]} for j, x in enumerate(ss)]); k += len(ss)
+        sd = json.loads(SENT.read_text()) if SENT.exists() else {}
+        sd[s["id"]] = rows
+        SENT.write_text(json.dumps(sd))
         print(s["id"], f"{sum(a is not None for a in ats)}/{len(ats)} 줄", flush=True)
     print("정렬 완료:", len(done), "세트")
 

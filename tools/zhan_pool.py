@@ -278,6 +278,14 @@ def load():
             for l, a in zip(s["script"], ats):
                 if a is not None and (l.get("at") is None or abs(l["at"] - a) > 1.5):
                     l["at"], l["atSrc"] = a, "whisper"
+    # 문장 단위 시각 (tools/zhan_align.py → align_sent.json): 받아쓰기가 근거 문장만 재생·채점하도록 줄마다 ss = [{t, at}]
+    sa = json.loads((Z / "align_sent.json").read_text()) if (Z / "align_sent.json").exists() else {}
+    for s in out:
+        rows = sa.get(s["id"])
+        if rows and len(rows) == len(s.get("script") or []):
+            for l, ss in zip(s["script"], rows):
+                if len(ss) > 1 and all(x["at"] is not None for x in ss):
+                    l["ss"] = ss
     # Kokoro로 만든 질문 음성 (tools/zhan_kokoro.py): 소站 음원이 없는 Interview 질문만.
     for s in out:
         for q in s["qs"]:

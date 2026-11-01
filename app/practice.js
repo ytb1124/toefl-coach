@@ -52,7 +52,26 @@
     const r2 = x => Math.round(x * 100) / 100;
     return [r2(Math.max(0, a.at - 0.2)), b && b.at != null ? r2(b.at + 0.1) : null];
   }
-  const Core = { words, align, wpm, ctestOk, showPassage, evidenceLines, lineSpan };
+  // 받아쓰기 대상 문장: 근거 줄(hl) 안에서 근거 구절이 든 문장만 (줄이 문단이면 문장 시각 ss 사용), 최대 max개.
+  // → { sents: [문장], span: [시작, 끝 또는 null] }. 문장 시각이 없으면 줄 단위 (lineSpan과 같음).
+  function sentenceTarget(lines, hl, evidence, max) {
+    max = max || 3;
+    const norm = s => ' ' + words(s).join(' ') + ' ';
+    const flat = [];   // {t, at, line}
+    lines.forEach((l, i) => (l.ss && l.ss.length ? l.ss : [{ t: l.t, at: l.at }]).forEach(s => flat.push({ t: s.t, at: s.at, line: i })));
+    const inHl = flat.map((s, k) => k).filter(k => hl.includes(flat[k].line));
+    if (!inHl.length) return null;
+    const frags = (evidence || []).map(e => norm(e)).filter(e => e.trim());
+    const hit = inHl.filter(k => frags.some(f => norm(flat[k].t).includes(f) || f.includes(norm(flat[k].t)) || norm(flat[k].t).includes(' ' + f.trim().split(' ').slice(0, 5).join(' ') + ' ')));
+    let lo = hit.length ? Math.min(...hit) : inHl[0], hi = hit.length ? Math.max(...hit) : inHl[inHl.length - 1];
+    if (hi - lo + 1 > max) hi = lo + max - 1;
+    while (hi > lo && flat.slice(lo, hi + 1).reduce((n, s) => n + words(s.t).length, 0) > 45) hi--;   // 한 번에 받아쓰기 45단어 이하
+    const a = flat[lo], b = flat[hi + 1];
+    if (a.at == null) return null;
+    const r2 = x => Math.round(x * 100) / 100;
+    return { sents: flat.slice(lo, hi + 1).map(s => s.t), span: [r2(Math.max(0, a.at - 0.2)), b && b.at != null ? r2(b.at + 0.1) : null] };
+  }
+  const Core = { words, align, wpm, ctestOk, showPassage, evidenceLines, lineSpan, sentenceTarget };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
   root.PracticeCore = Core;
 
@@ -84,7 +103,8 @@
       return index[id] || null;
     }
     let playing = [];
-    const stopAll = () => { playing.forEach(a => { try { a.pause(); } catch (e) { /* gone */ } }); playing = []; };
+    let timers = [];   // 문항 카운트다운: 화면을 떠나면 멈춘다 (안 그러면 '시간 초과 오답'이 계속 기록된다)
+    const stopAll = () => { playing.forEach(a => { try { a.pause(); } catch (e) { /* gone */ } }); playing = []; timers.forEach(clearInterval); timers = []; };
     window.addEventListener('hashchange', stopAll);
     // 새로 재생하기 전에 이 화면에서 재생 중인 소리를 모두 멈춘다 (버튼을 여러 번 눌러도 겹치지 않게)
     function audioEl(path) {
@@ -190,7 +210,7 @@
       const btn = h('button', { class: 'link small', onclick: () => { hidden = !hidden; btn.textContent = hidden ? 'Show Time' : 'Hide Time'; draw(); } }, 'Hide Time');
       const el = h('div', { class: 'cdown' }, t, ' ', btn);
       draw();
-      el.start = () => { timer = setInterval(() => { left--; draw(); if (left <= 0) { clearInterval(timer); onEnd && onEnd(); } }, 1000); };
+      el.start = () => { timer = setInterval(() => { left--; draw(); if (left <= 0) { clearInterval(timer); onEnd && onEnd(); } }, 1000); timers.push(timer); };
       el.stop = () => clearInterval(timer);
       el.left = () => left;
       return el;
@@ -354,21 +374,33 @@
     // target: {path, lines(index list) of a pool set or a reply prompt}. Listening is unlimited here (practice, not exam).
     function dictation(main, task, onDone) {
       ensure(() => {
-        const full = task.of ? lookup(task.of) : null;
+        // 원본 오답(ref)은 같은 문항의 소站 원본 음원 세트(zq)를 먼저 쓴다. 없을 때만 재구성 음성.
+        const zq = !task.of && task.ref && env.origPool ? env.origPool(task.ref) : null;
+        const full = task.of ? lookup(task.of) : zq ? lookup(zq[0]) : null;
+        const qIdx = zq ? zq[1] : (task.q || 0);
         ap(main, h('p', { class: 'kicker' }, '받아쓰기 → 쉐도잉 · 전에 "안 들렸다"고 고른 부분'));
         const box = h('section', { class: 'card' }); ap(main, box);
-        let lines, path, span = null;
+        let lines, path, span = null, whole = false;   // whole: 짧은 음성 하나가 곧 문제 (응답 고르기)
         if (full) {
           const set = full.set;
-          if (set.kind === 'reply') { const q = full.qs[0]; lines = [{ sp: '', t: q.stem }]; path = q.audio; }
+          if (set.kind === 'reply') { const q = full.qs[qIdx] || full.qs[0]; lines = [{ sp: '', t: q.stem }]; path = q.audio; whole = true; }
           else {
-            const q = full.qs[task.q || 0] || full.qs[0];
-            let hl = evidenceLines(set.script, q.evidence);
+            const q = full.qs[qIdx] || full.qs[0];
+            let ev = q.evidence || [];
+            let hl = evidenceLines(set.script, ev);
+            // 풀 문항에 근거 인용이 없으면 원본 오답에 기록한 근거 문장으로 찾는다
+            if (!hl.length && zq && env.origEvidence) {
+              ev = String(env.origEvidence(task.ref) || '').split(/ \/ |…|\.\.\./).map(s => s.replace(/^[MW]\d?: /, '').trim()).filter(s => s.length > 8);
+              hl = evidenceLines(set.script, ev);
+            }
             if (!hl.length) hl = set.script.map((l, i) => i).filter(i => set.script[i].sp !== 'N').slice(0, 2);
             if (!hl.length) hl = set.script.length > 1 ? [1] : [0];   // 내레이터만 있는 공지: 도입 문장 다음 줄
             // 재생 구간(첫 근거 줄 ~ 마지막 근거 줄)과 받아쓰기 대상 줄을 똑같이: 사이 줄도 포함
             hl = Array.from({ length: Math.max(...hl) - Math.min(...hl) + 1 }, (_, k) => Math.min(...hl) + k);
-            lines = hl.map(i => set.script[i]); path = set.audio; span = lineSpan(set.script, hl);
+            path = set.audio;
+            const st = sentenceTarget(set.script, hl, ev, 3);   // 문단 줄이면 근거 문장만 (최대 3문장)
+            if (st) { lines = st.sents.map(t => ({ t })); span = st.span; }
+            else { lines = hl.map(i => set.script[i]); span = lineSpan(set.script, hl); }
           }
         } else if (task.ref && env.origAudio) {
           const r = env.origAudio(task.ref);
@@ -379,7 +411,7 @@
           return;
         }
         const target = lines.map(l => l.t).join(' ');
-        const play = h('button', { class: 'ghost' }, span ? '▶ 이 부분 듣기' : '▶ 듣기 (처음부터 — 문장 시각 기록 없음)');
+        const play = h('button', { class: 'ghost' }, span ? '▶ 이 부분 듣기' : whole ? '▶ 듣기' : '▶ 듣기 (처음부터 — 문장 시각 기록 없음)');
         play.onclick = () => audioEl(path).then(a => { if (span) { a.currentTime = span[0]; a.ontimeupdate = () => { if (span[1] != null && a.currentTime >= span[1]) a.pause(); }; } a.play(); }).catch(e => toast(e.message));
         const ta = h('textarea', { rows: 3, placeholder: `들은 대로 적기 (${words(target).length}단어)` });
         const res = h('div');
@@ -400,22 +432,28 @@
     // ---- 2단계 듣기 (원인 '들었는데 잊었다'의 다음 날): 1) 노트 없이 큰 흐름 2) 노트하며 다시 → 틀렸던 문제 다시 ----
     function twoPass(main, task, onDone) {
       ensure(() => {
-        const full = task.of ? lookup(task.of) : null;
+        const zq = !task.of && task.ref && env.origPool ? env.origPool(task.ref) : null;   // 원본 오답 → 소站 원본 음원 세트
+        const full = task.of ? lookup(task.of) : zq ? lookup(zq[0]) : null;
         ap(main, h('p', { class: 'kicker' }, '2단계 듣기 · 전에 "들었는데 잊었다"고 고른 세트'));
         const box = h('section', { class: 'card' }); ap(main, box);
-        if (!full || !full.set.audio) { ap(box, h('p', { class: 'muted' }, '이 세트의 음원을 찾지 못했습니다.'), h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '넘어가기')); return; }
+        // 문항 번호: 원본 연결(zq) → 할 일의 q → ref의 '#n'. 응답 고르기는 세트 음원이 없고 문항마다 음원이 있다.
+        const qIdx = zq ? zq[1] : task.q != null ? task.q : +((/#(\d+)$/.exec(task.ref || '') || [])[1] || 0);
+        const q0 = full && (full.qs[qIdx] || full.qs[0]);
+        const audioPath = full && (full.set.kind === 'reply' ? q0 && q0.audio : full.set.audio);
+        if (!full || !audioPath) { ap(box, h('p', { class: 'muted' }, '이 세트의 음원을 찾지 못했습니다.'), h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '넘어가기')); return; }
         const set = full.set; let pass = 0;
         const notes = h('textarea', { class: 'notes', rows: 5, placeholder: '2회차: 대상 → 특징/이유를 짧게' });
         const btn = h('button', { class: 'primary' }, '▶ 1회차: 노트 없이 흐름만 듣기');
         const st = h('p', { class: 'small muted' });
-        btn.onclick = () => { btn.disabled = true; audioEl(set.audio).then(a => { a.onended = () => { pass++; btn.disabled = false; if (pass === 1) { btn.textContent = '▶ 2회차: 노트하며 듣기'; ap(box, notes); } else { btn.remove(); again(); } }; a.play(); st.textContent = '듣는 중…'; }).catch(e => toast(e.message)); };
+        btn.onclick = () => { btn.disabled = true; audioEl(audioPath).then(a => { a.onended = () => { pass++; btn.disabled = false; if (pass === 1) { btn.textContent = '▶ 2회차: 노트하며 듣기'; ap(box, notes); } else { btn.remove(); again(); } }; a.play(); st.textContent = '듣는 중…'; }).catch(e => toast(e.message)); };
         ap(box, st, btn);
         function again() {
-          const q = full.qs[task.q || 0] || full.qs[0];
+          const q = q0;
+          const script = set.script && set.script.length ? set.script : [{ sp: '', t: q.stem }];
           let sel = null;
           ap(box, h('p', { class: 'stem' }, q.stem), h('div', { class: 'opts' }, q.choices.map((c, k) => h('button', { class: 'opt', onclick: e => {
             sel = k; box.querySelectorAll('.opt').forEach(x => { x.disabled = true; }); e.currentTarget.classList.add(k === q.answer ? 'right' : 'wrong');
-            ap(box, h('p', null, k === q.answer ? '맞혔습니다 (다시 푼 문제라 새 문제 정답률에는 넣지 않음)' : `정답은 ${L[q.answer]}`), evidence(q), scriptBox(set.script, evidenceLines(set.script, q.evidence)),
+            ap(box, h('p', null, k === q.answer ? '맞혔습니다 (다시 푼 문제라 새 문제 정답률에는 넣지 않음)' : `정답은 ${L[q.answer]}`), evidence(q), scriptBox(script, evidenceLines(script, q.evidence)),
               h('button', { class: 'primary', onclick: () => onDone({ followup: task.key }) }, '다음'));
           } }, h('b', null, L[k]), ' ', c))));
         }

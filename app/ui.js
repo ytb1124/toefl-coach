@@ -249,6 +249,8 @@
     rules: { get: skill => myRules(skill), add: (skill, rule, rec) => { D.skillRules = D.skillRules || []; D.skillRules.push({ skill, rule, at: now(), from: rec && (rec.item || rec.ref) }); save(); } },
     logSpeed: r => { D.readSpeed = D.readSpeed || []; D.readSpeed.push(Object.assign({ at: now() }, r)); save(); },
     logDictation: r => { D.dictation = D.dictation || []; D.dictation.push(Object.assign({ at: now() }, r)); save(); },
+    origPool: ref => (ORIG[ref] && ORIG[ref].zq) || null,
+    origEvidence: ref => (ORIG[ref] && ORIG[ref].evidence) || null,
     // 받아쓰기 대상 = 재생 구간(o.seg)에 들어가는 문장만 (구간이 없으면 세트 전체를 처음부터)
     origAudio: ref => { const o = ORIG[ref]; const m = o && o.audio && C.audio[o.audio]; if (!m || !m.lines) return null;
       const cues = o.seg ? (m.cues || []).filter(c => c.end > o.seg[0] + 0.1 && c.start < o.seg[1] - 0.1) : [];
@@ -567,7 +569,7 @@
     const t = b.tasks[b.cursor];
     runTask(main, t, res => {
       if (res && res.followup) { D.followups = D.followups || {}; D.followups[res.followup] = now(); }
-      if (t.because === 'judge' && t.key) { D.followups = D.followups || {}; D.followups[t.key] = now(); }
+      if ((t.because === 'judge' || t.because === 'timed') && t.key) { D.followups = D.followups || {}; D.followups[t.key] = now(); }
       advance();
     });
     main.append(h('div', { class: 'row' }, h('button', { class: 'link small', onclick: () => { practice().stopAll(); advance(); } }, '이 할 일 건너뛰기'), skipBlock));
@@ -696,7 +698,7 @@
 
   // ---------- 오답: 원인별 대기열 + TPO 회차 기록 + 한국어로 풀어 보기 ----------
   function viewWrong(main) {
-    const q = E.causeQueues(D, now());
+    const q = E.causeQueues(D, now(), { content: C });
     const by = {}; for (const a of D.attempts) { const c = E.causeOf(a); if (c && a.correct === false) by[c] = (by[c] || 0) + 1; }
     const names = { sound: '안 들렸다', memory: '들었는데 잊었다', vocab: '뜻을 몰랐다', judge: '선택지에서 헷갈렸다', time: '시간 부족', omit: '빠뜨림 (L&R)', grammar: '문법', structure: '구조·아이디어' };
     main.append(h('h1', null, '오답'),
@@ -989,7 +991,7 @@
         row('리스닝', [[['받아쓰기 단어 정확도', cmp(am.L.dictation, '%')], ['새 문제 정답률', cmp(am.L.newQ, '%')]], h('div', null, h('span', { class: 'muted small' }, '모의 모듈 L '), mock(am.L.mock))]),
         row('리딩', [[['읽기 속도', cmp(am.R.wpm, ' wpm')], ['새 문제 정답률', cmp(am.R.newQ, '%')], ['C-Test 정답률', cmp(am.R.ctest, '%')]], h('div', null, h('span', { class: 'muted small' }, '모의 모듈 R '), mock(am.R.mock))]),
         row('단어', [[['자주 틀린 단어 수', cmp(am.V.frequent, '개', true)]], h('div', null, h('span', { class: 'muted small' }, '틀린 세트 지문의 아는 단어 비율 '), am.V.known == null ? h('span', { class: 'muted' }, '기록 부족') : h('b', null, am.V.known + '%'))]),
-        row('말하기', [[['L&R 단어 일치율', cmp(am.S.lr, '%')], ['Interview 말 속도', cmp(am.S.wpm, ' wpm')], ['Interview 멈춤(0.8초+)', cmp(am.S.pauses, '번', true)]], h('span', { class: 'muted' }, '—')]),
+        row('말하기', [[['L&R 단어 일치율', cmp(am.S.lr, '%')]], h('span', { class: 'muted' }, '—')]),   // Interview는 45초 타이머만이라 말 속도·멈춤 기록이 없다
         row('쓰기', [[['계획 카드 시간', cmp(am.W.planSec, '초', true)], ['구조 체크', cmp(am.W.structure, '%')], ['반복 오류 범주 수', cmp(am.W.errors, '개', true)]], h('span', { class: 'muted' }, '—')])),
       h('p', { class: 'small muted' }, '주 1회 비중 자동 조정은 영역마다 하나의 지표를 봅니다: 리스닝·리딩 새 문제 정답률, 단어 자주 틀린 단어 수, 말하기 L&R 일치율, 쓰기 구조 체크. 그 지표가 지난주보다 오르지 않으면 그 영역 +5%p (설정에서 고정한 영역 제외).')));
     main.append(h('p', { class: 'muted small' }, '많이 풀었다고 실력이 는 것은 아닙니다. 실력은 처음 보는 문제(새 문제·유지 확인)로만 판단합니다.'));
@@ -1206,7 +1208,10 @@
       if (what === 'status') { const el = document.getElementById('sync-label'); if (el) el.replaceWith(syncLabel()); return; }
       if (what !== 'remote') return;
       const view = (location.hash || '#/').split('/')[1];
-      if (key === 'toeflcoach.v1' && view !== 'do') { D = E.migrateRecord(Store.load()); if (view !== 'sw') render(); }
+      // 다른 기기 기록이 오면 목록·현황 화면만 다시 그린다. 문제를 푸는 중이거나 글을 쓰는 화면은 그대로 둔다 (쓰던 글·풀던 문제가 날아가지 않게).
+      const [, , arg] = (location.hash || '#/').split('/');
+      const idle = ['', 'wrong', 'progress', 'settings'].includes(view) || (view === 'room' && arg !== 'item');
+      if (key === 'toeflcoach.v1' && view !== 'do') { D = E.migrateRecord(Store.load()); if (idle) render(); }
       if (key.startsWith('toefl-sw') && view === 'sw' && !swApp().busy()) render();
       if (key.startsWith('toefl-keep') && view === 'keep') render();
       if (key.startsWith('toefl-vocab') && vocabMode !== 'flow') { if (V) V.deactivate(); V = null; if (view === 'vocab') render(); }

@@ -12,6 +12,7 @@ if (fs.existsSync(SWP)) { const pv = JSON.parse(fs.readFileSync(SWP, 'utf8')); f
 for (const k of ['email', 'discussion']) SW[k] = SW[k].filter(it => !it.private || it.prof || it.tasks);
 SW.ideas = SW.ideas.filter(q => !q.ad || SW.discussion.some(d => d.id === q.ad));
 const T0 = new Date(2026, 9, 22, 9).getTime();
+const D0 = new Date(2026, 9, 22, 4).getTime();   // T0이 속한 날의 시작 (새벽 4시)
 
 test('tokens: digits, times, contractions and punctuation normalize like the TTS script', () => {
   assert.deepStrictEqual(K.tokens('Quiet hours begin at 10 each night.'), 'quiet hours begin at ten each night'.split(' '));
@@ -36,9 +37,9 @@ test('every tutor wrong sentence fails its own answers, and every answer passes'
 
 test('review: Leitner boxes — right moves up, wrong drops to box 1 due tomorrow', () => {
   let c = K.review(undefined, true, T0);
-  assert.strictEqual(c.box, 1); assert.strictEqual(c.due, T0 + K.DAY);
-  c = K.review(c, true, T0); assert.strictEqual(c.box, 2); assert.strictEqual(c.due, T0 + 3 * K.DAY);
-  c = K.review(c, false, T0); assert.strictEqual(c.box, 1); assert.strictEqual(c.bad, 1); assert.strictEqual(c.due, T0 + K.DAY);
+  assert.strictEqual(c.box, 1); assert.strictEqual(c.due, D0 + K.DAY);
+  c = K.review(c, true, T0); assert.strictEqual(c.box, 2); assert.strictEqual(c.due, D0 + 3 * K.DAY);
+  c = K.review(c, false, T0); assert.strictEqual(c.box, 1); assert.strictEqual(c.bad, 1); assert.strictEqual(c.due, D0 + K.DAY);
 });
 
 test('drillQueue: due reviews first, then at most 6 new, 10 total; mastered and not-due are skipped', () => {
@@ -156,7 +157,7 @@ test('mastered: first-try right is mastered at once; after a miss it takes two r
   let c = K.review(undefined, true, T0);
   assert.ok(K.mastered(c));
   c = K.review(undefined, false, T0); assert.ok(!K.mastered(c));
-  c = K.review(c, true, T0 + K.DAY); assert.ok(!K.mastered(c)); assert.strictEqual(c.due, T0 + K.DAY + 3 * K.DAY);
+  c = K.review(c, true, T0 + K.DAY); assert.ok(!K.mastered(c)); assert.strictEqual(c.due, D0 + K.DAY + 3 * K.DAY);
   c = K.review(c, true, T0 + 4 * K.DAY); assert.ok(K.mastered(c));
   assert.ok(K.mastered({ box: K.MASTER }));
 });

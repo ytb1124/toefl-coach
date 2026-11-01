@@ -169,7 +169,7 @@
           if (ended) return; ended = true; cd.stop();
           env.logWriting({ kind: 'outline', tasks: out.map(o => o.task), plans: out, ms: Date.now() - t0 });
           rc(area, h('section', { class: 'card' }, h('p', null, `개요 ${out.length}개 완료 · 평균 ${out.length ? Math.round(out.reduce((s, o) => s + o.ms, 0) / out.length / 1000) : '—'}초`),
-            h('button', { class: 'primary', onclick: () => done({}) }, '다음')));
+            h('button', { class: 'primary', onclick: () => done({ followup: task.key }) }, '다음')));   // 완료 기록: 안 하면 개요 드릴이 매일 다시 나온다
         };
         one();
       });

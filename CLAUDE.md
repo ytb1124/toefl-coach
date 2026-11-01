@@ -79,7 +79,7 @@ node --test tests/*.test.js
 1. 크롬(Claude in Chrome)의 toefl-mokao.zhan.com 페이지에서 `POST /mokaoapi/api/singleSubject/query_completed_practice_records` (practiceType 1 리딩 · 2 리스닝 · 3 말하기 · 4 쓰기) → `private/zhan/raw/records.json`.
 2. 리포트 `newMock/report?paperId=&workflowId=&subject=read|listen|speak|write`의 Vue props `scoreData`를 `private/zhan/raw/<R|L|S|W>_<paperId>_<workflowId>.json`으로 저장 (`paperName`이 "Mock Test N"인 것만 = TPO独家 N; "New TPO"는 제외). 제출·응시 시작·설정 변경 금지.
 3. 음원 URL(`file-corpus.zhan.com/prod/audio/…mp3`)을 `private/zhan/audio/`에 받는다. 받을 수 없는 것만 Kokoro (`~/.venvs/kokoro/bin/python tools/zhan_kokoro.py`, "원본 음원 아님" 표시).
-4. `~/.venvs/whisper/bin/python tools/zhan_align.py` (시각 없는 스크립트 줄 정렬) → `python3 tools/zhan_pool.py` (풀·공개 메타데이터·한국어 해설 병합) → 해설 번역이 없는 문항은 `private/zhan/ko_pool/in_K.json`→`out_K.json` (소站 해설 AI 번역).
+4. `~/.venvs/whisper/bin/python tools/zhan_align.py` (새 세트의 줄·문장 시각 정렬 → `align.json`·`align_sent.json`; `--all`이면 전 세트 다시. 받아쓰기는 문장 시각 `ss`로 근거 문장만 재생·채점) → `python3 tools/zhan_pool.py` (풀·공개 메타데이터·한국어 해설 병합) → 해설 번역이 없는 문항은 `private/zhan/ko_pool/in_K.json`→`out_K.json` (소站 해설 AI 번역).
 5. `python3 tools/build.py` → `private/zhan`에서 커밋·푸시. 모의 모듈용 보류 회차는 `tools/zhan_pool.py`의 `HELD` (이유는 `docs/exam-rules.md`).
 
 ## 말하기·쓰기

@@ -378,6 +378,34 @@ def duration(path):
         return None
 
 
+def zhan_pool_links():
+    """원본 오답 id → [소站 풀 세트 id, 문항 번호] (리스닝). 받아쓰기·2단계 듣기가 원본 음원을 쓰도록.
+    private/zhan/listen.json의 orig 연결 → 같은 음원의 풀 세트 → 같은 질문 문장. 비공개 자료가 없으면 빈 dict."""
+    lf, pf = ROOT / "private" / "zhan" / "listen.json", ROOT / "private" / "zhan" / "pool.json"
+    if not lf.exists() or not pf.exists():
+        return {}
+    by_audio = {}
+    for s in json.loads(pf.read_text())["sets"]:
+        if s["sec"] != "L":
+            continue
+        by_audio.setdefault(s.get("audio"), []).append(s)
+        for q in s["qs"]:
+            if q.get("audio"):
+                by_audio.setdefault(q["audio"], []).append(s)
+    key = lambda t: re.sub(r"[^a-z]", "", (t or "").lower())
+    out = {}
+    for s in json.loads(lf.read_text())["sets"]:
+        for q in s["qs"]:
+            if not q.get("orig"):
+                continue
+            for ps in by_audio.get(s["audio"] if s["kind"] != "reply" else q.get("audio"), []):
+                hit = [i for i, pq in enumerate(ps["qs"]) if key(pq.get("stem")) == key(q["stem"])]
+                if hit:
+                    out[q["orig"]] = [ps["id"], hit[0]]
+                    break
+    return out
+
+
 def zhan_linked():
     """원본 id 중 소站 리스닝 오답과 연결된 것 (비공개 자료가 없는 환경이면 빈 집합)."""
     f = ROOT / "private" / "zhan" / "listen.json"
@@ -524,10 +552,13 @@ def main():
                                "lines": aset["lines"], "cues": cues, "note": aset.get("note", "")}
 
     full = {o["id"]: o for o in data["originals"]}
+    zq = zhan_pool_links()
     originals = []
     for o in data["public"]["originals"]:
         o = dict(o)
         fo = full[o["id"]]
+        if o["id"] in zq:
+            o["zq"] = zq[o["id"]]
         if fo.get("audio") and fo["audio"] in priv_audio:
             o["seg"] = segment_for(priv_audio[fo["audio"]]["cues"], fo.get("evidence"))
         originals.append(o)

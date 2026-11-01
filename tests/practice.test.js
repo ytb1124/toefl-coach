@@ -32,3 +32,19 @@ test('wpm and passage markers', () => {
   assert.strictEqual(P.wpm(10, 0), null);
   assert.strictEqual(P.showPassage('A [[iA]]B [[sB]]C'), 'A  ■A B [B] C');
 });
+
+test('sentenceTarget: only the evidence sentence(s) of a paragraph line, with sentence times', () => {
+  const lines = [
+    { sp: 'N', t: 'Listen to a talk.', at: 0 },
+    { sp: 'M', t: 'One. Two has the key idea. Three. Four.', at: 3, ss: [{ t: 'One.', at: 3 }, { t: 'Two has the key idea.', at: 4 }, { t: 'Three.', at: 7 }, { t: 'Four.', at: 8 }] },
+    { sp: 'M', t: 'Next part.', at: 10 },
+  ];
+  const r = P.sentenceTarget(lines, [1], ['the key idea'], 3);
+  assert.deepStrictEqual(r.sents, ['Two has the key idea.']);
+  assert.deepStrictEqual(r.span, [3.8, 7.1]);
+  const all = P.sentenceTarget(lines, [1], [], 3);   // no evidence → first 3 sentences of the line
+  assert.deepStrictEqual(all.sents, ['One.', 'Two has the key idea.', 'Three.']);
+  assert.deepStrictEqual(all.span, [2.8, 8.1]);
+  const plain = P.sentenceTarget(lines, [2], ['next part'], 3);   // no ss → whole line, end = to the end
+  assert.deepStrictEqual(plain.sents, ['Next part.']); assert.strictEqual(plain.span[1], null);
+});

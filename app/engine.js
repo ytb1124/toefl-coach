@@ -315,13 +315,18 @@
   const CAUSES = ['sound', 'memory', 'vocab', 'judge', 'time', 'omit', 'grammar', 'structure'];
   function causeOf(a) { return a.cause || a.stuck || null; }
   // Queues for the next days, from wrong answers with a cause that have not been followed up yet.
+  // extra.content가 있으면, 없어진 문제(개편 때 지운 AI 연습 문제·없는 원본)의 오답은 넣지 않는다: 자료가 없어 후속 과제를 할 수 없다.
   function causeQueues(data, now, extra) {
+    const content = extra && extra.content;
+    const idx = content ? poolIndex(content) : null;
+    const origIds = content ? new Set((content.originals || []).map(o => o.id)) : null;
+    const gone = a => !!content && (isLegacy(a, idx) || (a.tier === 'original' && a.ref && !origIds.has(a.ref)));
     const done = data.followups || {};   // key → at (dictation done, two-pass listen done, …)
     const q = { dictation: [], twoPass: [], judge: [], timed: [], shadow: [], fix: [], outline: [] };
     const seenKey = new Set();
     const list = data.attempts.concat((extra && extra.attempts) || []).filter(a => !a.correct && causeOf(a)).sort((a, b) => a.at - b.at);
     for (const a of list) {
-      const target = a.item || a.ref; if (!target) continue;
+      const target = a.item || a.ref; if (!target || gone(a)) continue;
       const c = causeOf(a);
       const route = c === 'sound' ? 'dictation' : c === 'memory' ? 'twoPass' : c === 'judge' ? 'judge' : c === 'time' ? 'timed' : c === 'omit' ? 'shadow' : c === 'grammar' ? 'fix' : c === 'structure' ? 'outline' : null;
       if (!route) continue;
@@ -394,7 +399,7 @@
     const used = new Set();
     const table = skillTable(data, content, now);
     const prio = Object.fromEntries(table.map(r => [r.skill.id, r.pr]));
-    const cq = causeQueues(data, now, { attempts: ctx.extraAttempts });
+    const cq = causeQueues(data, now, { attempts: ctx.extraAttempts, content });
     const blocks = Object.fromEntries(BLOCKS.map(k => [k, { key: k, minutes: mins[k], tasks: [], carried: 0 }]));
     const take = (blk, task, m) => { const b = blocks[blk]; b.tasks.push(Object.assign({ min: m }, task)); if (task.item) used.add(task.item); };
     const room = blk => blocks[blk].minutes - blocks[blk].tasks.reduce((s, t) => s + (t.min || 0), 0);
@@ -419,6 +424,18 @@
       }
     }
 
+    // 넘어온 할 일은 아래 대기열·몫에서 다시 뽑지 않는다 (같은 할 일이 두 번 들어가던 버그).
+    const carriedSig = new Set();
+    for (const b of Object.values(blocks)) for (const t of b.tasks) {
+      if (t.key) carriedSig.add('key:' + t.key);
+      if (t.type === 'diag' || t.type === 'original') carriedSig.add(t.type + ':' + t.ref);
+      if (t.set) carriedSig.add('set:' + t.set);
+      if (t.type === 'interview') carriedSig.add('iv:' + t.q);
+      if (t.task) carriedSig.add('task:' + t.task);
+    }
+    const notCarried = (pre, list) => list.filter(x => !carriedSig.has(pre + x));
+    const cqFresh = list => list.filter(d => !carriedSig.has('key:' + d.key));
+
     // 완주 할당 (2026-11-01): 종류마다 오늘 몫 = ⌈(안 푼 문제 + 넘어온 것) ÷ 남은 날⌉ − 넘어온 것.
     // 시험일까지 풀 전체(모의 모듈용 보류 회차 제외)를 한 번씩 풀도록 하루 양을 정한다. 하루 시간이 모자라면 계획의 예상 시간(need)이 설정보다 커진다.
     const D = Math.max(1, left == null ? 14 : left);
@@ -429,21 +446,24 @@
     const takeQuota = (blk, list, kinds, label, mk) => { const q = share(list.length, kinds); cover[label] = { left: list.length, today: Math.min(q, list.length) }; list.slice(0, q).forEach(x => mk(x)); };
 
     // ② 리스닝: 받아쓰기→쉐도잉 대기열 · 2단계 듣기 · 강의/대화/안내 · 응답 문제.
-    for (const d of cq.dictation.slice(0, 3)) take('listen', { type: 'dictation', item: null, of: d.item, ref: d.ref, q: d.q, key: d.key, skill: d.skill }, 4);
-    for (const d of cq.shadow.slice(0, 3)) take('listen', { type: 'shadow', of: d.item, key: d.key, missed: d.missed }, 1.5);
-    for (const d of cq.twoPass.slice(0, 1)) take('listen', { type: 'twopass', of: d.item, ref: d.ref, key: d.key, skill: d.skill }, 5);
+    for (const d of cqFresh(cq.dictation).slice(0, 3)) take('listen', { type: 'dictation', item: null, of: d.item, ref: d.ref, q: d.q, key: d.key, skill: d.skill }, 4);
+    for (const d of cqFresh(cq.shadow).slice(0, 3)) take('listen', { type: 'shadow', of: d.item, key: d.key, missed: d.missed }, 1.5);
+    for (const d of cqFresh(cq.twoPass).slice(0, 1)) take('listen', { type: 'twopass', of: d.item, ref: d.ref, key: d.key, skill: d.skill }, 5);
     const lsets = freshOf({ sec: 'L', kinds: ['lecture', 'conversation', 'announcement'] }).sort((a, b) => (b.kind === 'lecture') - (a.kind === 'lecture') || byPrio(a, b));
     takeQuota('listen', lsets, ['lecture', 'conversation', 'announcement'], 'L 대화·안내·강의', it => take('listen', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
     takeQuota('listen', freshOf({ sec: 'L', kinds: ['reply'] }).sort(byPrio), ['reply'], 'L 응답', it => take('listen', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
 
     // ③ 리딩: 학술 지문 timed reading(wpm) · C-Test · 일상 지문.
+    // '시간이 부족했다'고 고른 오답이 있으면 학술 지문 timed reading 하나를 먼저 (끝내면 그 원인 후속이 완료된다).
+    const tq = cqFresh(cq.timed)[0];
+    if (tq) { const it = freshOf({ sec: 'R', kinds: ['academic'] }).sort(byPrio)[0]; if (it) take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, timed: true, exam: true, because: 'timed', key: tq.key }, it.minutes); }
     takeQuota('read', freshOf({ sec: 'R', kinds: ['academic'] }).sort(byPrio), ['academic'], 'R 학술 지문', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, timed: true, exam: true }, it.minutes));
     takeQuota('read', freshOf({ sec: 'R', kinds: ['ctest'] }).sort(byPrio), ['ctest'], 'R C-Test', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
     takeQuota('read', freshOf({ sec: 'R', kinds: ['daily'] }).sort(byPrio), ['daily'], 'R 일상 지문', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
 
     // ④ 말하기: Listen & Repeat 세트 · Interview 문제 (45초 타이머만) (ctx.speak.lrLeft/ivLeft = 안 한 것, 없으면 오늘 것 하나).
     const sp = ctx.speak || {};
-    const lrLeft = sp.lrLeft || (sp.lr ? [sp.lr] : []), ivLeft = sp.ivLeft || (sp.interview ? [sp.interview] : []);
+    const lrLeft = notCarried('set:', sp.lrLeft || (sp.lr ? [sp.lr] : [])), ivLeft = notCarried('iv:', sp.ivLeft || (sp.interview ? [sp.interview] : []));
     takeQuota('speak', lrLeft, ['lr'], 'S Listen & Repeat', id => take('speak', { type: 'lr', set: id }, 3));
     takeQuota('speak', ivLeft, ['interview'], 'S Interview', id => take('speak', { type: 'interview', q: id }, 1.5));
 
@@ -451,12 +471,12 @@
     const wr = ctx.write || {};
     const wLeft = wr.left || {};
     if (!wr.left && wr.task) wLeft[wr.kind] = [wr.task];
-    takeQuota('write', wLeft.email || [], ['email'], 'W Email', id => take('write', { type: 'write', task: id, kind: 'email', plan: true }, 9));
-    takeQuota('write', wLeft.discussion || [], ['discussion'], 'W Discussion', id => take('write', { type: 'write', task: id, kind: 'discussion', plan: true }, 12));
-    takeQuota('write', wLeft.bs || [], ['bs'], 'W Build a Sentence', id => take('write', { type: 'bs', set: id }, 7));
-    if (cq.outline.length) take('write', { type: 'outline', n: 3, key: cq.outline[0].key }, 6);
+    takeQuota('write', notCarried('task:', wLeft.email || []), ['email'], 'W Email', id => take('write', { type: 'write', task: id, kind: 'email', plan: true }, 9));
+    takeQuota('write', notCarried('task:', wLeft.discussion || []), ['discussion'], 'W Discussion', id => take('write', { type: 'write', task: id, kind: 'discussion', plan: true }, 12));
+    takeQuota('write', notCarried('set:', wLeft.bs || []), ['bs'], 'W Build a Sentence', id => take('write', { type: 'bs', set: id }, 7));
+    if (cqFresh(cq.outline).length) take('write', { type: 'outline', n: 3, key: cqFresh(cq.outline)[0].key }, 6);
     const fixCats = [...new Set((wr.errorCats || []).concat(cq.fix.flatMap(f => f.cats || [])))].slice(0, 3);
-    if (fixCats.length) take('write', { type: 'fix', cats: fixCats, key: cq.fix.length ? cq.fix[0].key : undefined }, 4);
+    if (fixCats.length && !Object.values(blocks).some(b => b.tasks.some(t => t.type === 'fix'))) take('write', { type: 'fix', cats: fixCats, key: cq.fix.length ? cq.fix[0].key : undefined }, 4);
     for (const k of ['listen', 'read', 'speak', 'write']) blocks[k].minutes = Math.round(blocks[k].tasks.reduce((s, t) => s + (t.min || 0), 0));
     // 마무리는 남은 시간 (최소 비중만큼).
     const solveMin = ['listen', 'read', 'speak', 'write'].reduce((s, k) => s + blocks[k].minutes, 0);
@@ -469,7 +489,7 @@
     const quota = originalQuota(oq.fresh.length, oq.again.length, left, diagCap);
     const vPool = verifyPool(content, data, now, nearExam ? 1 : 3);
     // 'judge' cause → a new question of the same skill + a twin check.
-    for (const j of cq.judge.slice(0, 2)) {
+    for (const j of cqFresh(cq.judge).slice(0, 2)) {
       const it = freshOf({ skill: j.skill })[0];
       if (it) take('wrap', { type: 'item', item: it.id, tier: 'mixed', skill: j.skill, exam: true, because: 'judge', key: j.key }, it.minutes);
     }
@@ -487,7 +507,7 @@
       if (t.item) take('wrap', { type: 'item', item: t.item.id, tier: t.twin ? 'verify-twin' : 'verify', skill: v.skill, verifyOf: v.key, exam: true }, Math.min(itemMinutes(t.item), 3));
       else take('wrap', { type: 'original', ref: t.ref, verify: true, verifyOf: v.key, skill: v.skill }, 2);
     }
-    for (const o of oq.again.slice(0, quota.again).concat(oq.fresh.slice(0, quota.fresh))) take('wrap', { type: 'diag', ref: o.id, skill: o.skill, again: oq.again.includes(o) || undefined }, 1);
+    for (const o of oq.again.slice(0, quota.again).concat(oq.fresh.slice(0, quota.fresh))) if (!carriedSig.has('diag:' + o.id)) take('wrap', { type: 'diag', ref: o.id, skill: o.skill, again: oq.again.includes(o) || undefined }, 1);
     const mixedFrom = table.slice().sort((a, b) => b.pr - a.pr);
     for (const r of mixedFrom) {
       if (room('wrap') < 1.5) break;

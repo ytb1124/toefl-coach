@@ -20,7 +20,7 @@
     const LR = byId(S.lr), IV = byId(S.interview), EM = byId(S.email), AD = byId(S.discussion), BS = byId(S.buildSentence);
     const now = () => Date.now();
     const today = () => new Date(Date.now() - 4 * 3600000).toDateString();   // 하루는 새벽 4시에 바뀐다
-    const isToday = t => t && new Date(t).toDateString() === today();
+    const isToday = t => t && new Date(t - 4 * 3600000).toDateString() === today();
     const fmtDate = t => { const d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate(); };
     const mmss = s => (s < 0 ? '+' : '') + Math.floor(Math.abs(s) / 60) + ':' + String(Math.floor(Math.abs(s) % 60)).padStart(2, '0');
     const srcChip = src => h('span', { class: 'chip ' + (/^튜터/.test(src) ? 'src-tutor' : 'src-ai'), title: /^튜터/.test(src) ? 'PDF에 튜터가 직접 교정·출제한 내용' : 'AI가 만든 연습 (튜터 확인 없음)' }, src);

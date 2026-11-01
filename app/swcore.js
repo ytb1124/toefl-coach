@@ -62,7 +62,9 @@
   function review(card, correct, now) {
     const c = Object.assign({ box: 0, due: 0, ok: 0, bad: 0 }, card);
     if (correct) { c.box = Math.min(MASTER, c.box + 1); c.ok++; } else { c.box = 1; c.bad++; }
-    c.due = now + INTERVAL[c.box] * DAY;
+    // 복습일은 '그날'(새벽 4시 기준) 단위: 밤에 틀린 문장도 다음 날 아침부터 나온다
+    const d = new Date(now - 4 * 3600000); d.setHours(4, 0, 0, 0);
+    c.due = d.getTime() + INTERVAL[c.box] * DAY;
     c.last = now; c.lastOk = !!correct;
     return c;
   }

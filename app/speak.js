@@ -54,7 +54,13 @@
       }));
     }
     let cur = null;
-    const stopAll = () => { if (cur) try { cur.pause(); } catch (e) { /* gone */ } cur = null; if (record.stop) record.stop(); };
+    // 화면을 떠나면(건너뛰기·나가기·다른 탭) 진행 중인 흐름을 끊는다: gen이 바뀌면 L&R 다음 문장·채점·기록이 이어지지 않는다.
+    let gen = 0, ivTimer = null;
+    const stopAll = () => {
+      gen++; spaceHandler = null;
+      if (ivTimer) { clearInterval(ivTimer); ivTimer = null; }
+      if (cur) try { cur.pause(); } catch (e) { /* gone */ } cur = null; if (record.stop) record.stop();
+    };
     window.addEventListener('hashchange', () => { stopAll(); if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } });
     const play = path => ZD().audioUrl(path).then(u => new Promise((res, rej) => { const a = new Audio(u); cur = a; a.onended = res; a.onerror = () => rej(new Error('재생 실패')); a.play().catch(rej); }));
     const playBlob = blob => new Promise(res => { const a = new Audio(URL.createObjectURL(blob)); cur = a; a.onended = res; a.play(); });
@@ -78,17 +84,20 @@
         let qs = set.qs.slice();
         const runRound = () => new Promise(resolve => {
           let i = 0;
+          const g = gen;
           const step = () => {
+            if (g !== gen) { resolve(null); return; }   // 화면을 떠남: 아무것도 기록하지 않는다
             if (i >= qs.length) { spaceHandler = null; resolve(true); return; }
             const q = qs[i];
             status.textContent = `${i + 1} / ${qs.length} · 듣는 중…`;
             spaceHandler = null;
             play(q.audio).then(() => {
+              if (g !== gen) throw new Error('left');
               beep();
               spaceHandler = () => record.stop && record.stop();
               return record(q.limit || 10, left => { status.textContent = `${i + 1} / ${qs.length} · 따라 말하기 ${left}초`; });
-            }).then(blob => { results.push({ q, blob }); i++; step(); })
-              .catch(e => { status.textContent = '오류: ' + e.message + ' (마이크 권한을 확인하세요)'; spaceHandler = null; resolve(false); });
+            }).then(blob => { if (g !== gen) return resolve(null); results.push({ q, blob }); i++; step(); })
+              .catch(e => { if (g !== gen) return resolve(null); status.textContent = '오류: ' + e.message + ' (마이크 권한을 확인하세요)'; spaceHandler = null; resolve(false); });
           };
           step();
         });
@@ -96,6 +105,7 @@
         const go = () => { startBtn.remove(); spaceHandler = null; runRound().then(after); };
         // 녹음이 중간에 실패하면 (마이크 없음·거부) 채점·기록하지 않고 다시 하기/넘어가기만 보여 준다
         function after(completed) {
+          if (completed === null) return;   // 화면을 떠남
           if (completed && results.length) return review();
           ap(box, h('p', { class: 'notice' }, '녹음을 하지 못해 이 세트는 기록하지 않았습니다. 마이크를 연결하거나 브라우저의 마이크 권한을 허용한 뒤 다시 하세요.'),
             h('div', { class: 'row' }, h('button', { class: 'ghost', onclick: () => { results.length = 0; rc(main); lr(main, task, done); } }, '다시 하기'),
@@ -173,22 +183,22 @@
         const startBtn = big('▶ 질문 듣고 시작 (스페이스바)', () => run());
         spaceHandler = () => run();
         ap(box, status, clock, startBtn);
-        let started = false, timer = null;
+        let started = false;
+        const g = gen;
         function run() {
           if (started) return; started = true; startBtn.remove(); spaceHandler = null;
           status.textContent = '질문 듣는 중…';
           play(qAudio).catch(() => { status.textContent = '질문 음성을 재생하지 못했습니다 — 글로 읽고 답하세요.'; ap(box, h('p', { class: 'stem' }, q.text)); })
-            .then(answer);
+            .then(() => { if (g === gen) answer(); });
         }
         function answer() {
           beep();
           let left = limit;
           const tick = () => { clock.textContent = `${left}초`; status.textContent = '말하는 중 — 다 말했으면 스페이스바'; };
           tick();
-          const end = () => { if (!timer) return; clearInterval(timer); timer = null; spaceHandler = null; finish(); };
-          timer = setInterval(() => { left--; if (left <= 0) { clock.textContent = '0초'; end(); } else tick(); }, 1000);
+          const end = () => { if (!ivTimer || g !== gen) return; clearInterval(ivTimer); ivTimer = null; spaceHandler = null; finish(); };
+          ivTimer = setInterval(() => { left--; if (left <= 0) { clock.textContent = '0초'; end(); } else tick(); }, 1000);
           spaceHandler = end;
-          window.addEventListener('hashchange', () => { if (timer) { clearInterval(timer); timer = null; } }, { once: true });
         }
         function finish() {
           status.textContent = '끝';
