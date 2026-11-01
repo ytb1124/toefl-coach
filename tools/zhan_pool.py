@@ -10,7 +10,7 @@
 근거(evidence)는 소站 해설에서 인용한 영어 구절 중 지문/스크립트에 실제로 있는 것만 (원문 그대로).
   python3 tools/zhan_pool.py
 """
-import html, json, re, sys
+import html, json, re, subprocess, sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -324,6 +324,25 @@ def zres(q):
     return 0 if not t else (1 if t[-1]["ok"] else -1)
 
 
+_DUR = {}
+
+
+def audio_seconds(s):
+    """리스닝 세트 음원 길이(초, 정수) — 계획의 예상 시간용. 음원이 없으면 스크립트 마지막 줄 시각 + 10초, 그것도 없으면 None."""
+    path = s.get("audio") if isinstance(s.get("audio"), str) else None
+    if path and (ROOT / path).exists():
+        if path not in _DUR:
+            try:
+                out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(ROOT / path)], capture_output=True, text=True, timeout=30).stdout.strip()
+                _DUR[path] = round(float(out)) if out else None
+            except (OSError, ValueError, subprocess.SubprocessError):
+                _DUR[path] = None
+        if _DUR[path]:
+            return _DUR[path]
+    ats = [l.get("at") for l in s.get("script") or [] if isinstance(l, dict) and l.get("at") is not None]
+    return round(max(ats) + 10) if ats else None
+
+
 def meta(papers, sets):
     """공개 번들용: 원문 문자열 없이 id·유형·능력만."""
     return {
@@ -332,6 +351,7 @@ def meta(papers, sets):
         "sets": [{"id": s["id"], "paper": s["paper"], "sec": s["sec"], "kind": s["kind"], "module": s["module"], "task": s["task"],
                   "held": s["paper"] in HELD, "audio": bool(s.get("audio") or any(q.get("audio") for q in s["qs"])),
                   "zdate": max((t.get("date") or "" for q in s["qs"] for t in q.get("zhanTries") or []), default="") or None,
+                  **({"dur": audio_seconds(s)} if s["sec"] == "L" and s["kind"] in ("lecture", "conversation", "announcement") else {}),
                   "qs": [dict({k: q[k] for k in ("id", "type", "skill") if k in q}, z=zres(q)) for q in s["qs"]]} for s in sets],
     }
 

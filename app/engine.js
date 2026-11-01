@@ -150,7 +150,10 @@
   // ---------- practice pool: 소站 TPO独家 문항 (content.pool = 공개 메타데이터; 원문은 비공개 ZHAN_POOL) ----------
   // Unit of practice ('item'): a reading set (C-Test passage, daily/academic passage), a listening set
   // (conversation/announcement/lecture), or one Listen & Reply question (each has its own audio).
-  const ITEM_MIN = { ctest: 6, daily: 1.6, academic: 2, reply: 0.6, conversation: 2.5, announcement: 2, lecture: 5 };
+  // 예상 시간 (2026-11-01 사용자 기준): C-Test 3분 · 일상 지문 문항당 1분+1분 · 학술 지문 문항당 1분+읽기 3분 · 응답 문항당 0.5분
+  // · 대화/안내/강의 = 음원 길이(pool의 dur, 초) + 문항당 20초 (소站 화면). dur가 없으면 아래 세트 값.
+  const ITEM_MIN = { ctest: 3, daily: 1, academic: 1, reply: 0.5, conversation: 1.5, announcement: 1.5, lecture: 3 };
+  const Q_SEC = 20;
   const poolCache = new WeakMap();
   function dominant(qs) {
     const c = {}; for (const q of qs) if (q.skill) c[q.skill] = (c[q.skill] || 0) + 1;
@@ -169,7 +172,8 @@
       } else {
         const skills = [...new Set(s.qs.map(q => q.skill).filter(Boolean))];
         const z = s.qs.some(q => q.z === -1) ? -1 : s.qs.some(q => q.z === 1) ? 1 : 0;
-        const m = s.kind === 'daily' || s.kind === 'academic' ? ITEM_MIN[s.kind] * s.qs.length + (s.kind === 'academic' ? 3 : 1) : (ITEM_MIN[s.kind] || 2);
+        const m = s.kind === 'daily' || s.kind === 'academic' ? ITEM_MIN[s.kind] * s.qs.length + (s.kind === 'academic' ? 3 : 1)
+          : s.sec === 'L' && s.dur ? Math.round((s.dur + Q_SEC * s.qs.length) / 6) / 10 : (ITEM_MIN[s.kind] || 2);
         out.push(Object.assign({}, base, { id: s.id, skill: dominant(s.qs), skills, qs: s.qs, z, minutes: m }));
       }
     }
@@ -438,7 +442,7 @@
     // ④ 말하기: Listen & Repeat 세트 · Interview 문제 4/3/2 (ctx.speak.lrLeft/ivLeft = 안 한 것, 없으면 오늘 것 하나).
     const sp = ctx.speak || {};
     const lrLeft = sp.lrLeft || (sp.lr ? [sp.lr] : []), ivLeft = sp.ivLeft || (sp.interview ? [sp.interview] : []);
-    takeQuota('speak', lrLeft, ['lr'], 'S Listen & Repeat', id => take('speak', { type: 'lr', set: id }, 5));
+    takeQuota('speak', lrLeft, ['lr'], 'S Listen & Repeat', id => take('speak', { type: 'lr', set: id }, 3));
     takeQuota('speak', ivLeft, ['interview'], 'S Interview', id => take('speak', { type: 'interview', q: id, rounds: [45, 34, 23] }, 4));
 
     // ⑤ 쓰기: 2분 계획 카드 → 이메일·토론 · Build a Sentence · 구조 원인이면 개요 드릴 · 반복 오류 고쳐 쓰기.
@@ -447,7 +451,7 @@
     if (!wr.left && wr.task) wLeft[wr.kind] = [wr.task];
     takeQuota('write', wLeft.email || [], ['email'], 'W Email', id => take('write', { type: 'write', task: id, kind: 'email', plan: true }, 9));
     takeQuota('write', wLeft.discussion || [], ['discussion'], 'W Discussion', id => take('write', { type: 'write', task: id, kind: 'discussion', plan: true }, 12));
-    takeQuota('write', wLeft.bs || [], ['bs'], 'W Build a Sentence', id => take('write', { type: 'bs', set: id }, 8));
+    takeQuota('write', wLeft.bs || [], ['bs'], 'W Build a Sentence', id => take('write', { type: 'bs', set: id }, 7));
     if (cq.outline.length) take('write', { type: 'outline', n: 3, key: cq.outline[0].key }, 6);
     const fixCats = [...new Set((wr.errorCats || []).concat(cq.fix.flatMap(f => f.cats || [])))].slice(0, 3);
     if (fixCats.length) take('write', { type: 'fix', cats: fixCats, key: cq.fix.length ? cq.fix[0].key : undefined }, 4);
