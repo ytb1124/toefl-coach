@@ -14,11 +14,13 @@
   const MINUTES = { ctest: 0.6, mc: 1.6, insert: 2, reply: 0.6, listen: 4, original: 2, move: 0.7 };
 
   // ---------- dates ----------
+  // 하루는 새벽 4시에 바뀐다: 00:00–03:59는 전날로 친다.
+  const DAY_HOUR = 4;
   function dayStr(t) {
-    const d = new Date(t);
+    const d = new Date(new Date(t).getTime() - DAY_HOUR * 3600000);
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
-  function dayStart(str) { const [y, m, d] = str.split('-').map(Number); return new Date(y, m - 1, d).getTime(); }
+  function dayStart(str) { const [y, m, d] = str.split('-').map(Number); return new Date(y, m - 1, d, DAY_HOUR).getTime(); }
   function daysLeft(examDate, now) {
     if (!examDate) return null;
     return Math.round((dayStart(examDate) - dayStart(dayStr(now))) / DAY);

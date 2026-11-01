@@ -177,8 +177,9 @@ function wordTitle(word, style = '') {
   row.appendChild(audioBtn); return row;
 }
 function getRecallSpeed(ms) { return ms <= 3000 ? 'strong' : ms <= 7000 ? 'normal' : 'slow'; }
-function dayKey(time = Date.now()) { return new Date(time).toLocaleDateString('en-CA'); }
-function tomorrowStart() { const d = new Date(); d.setHours(24,0,0,0); return d.getTime(); }
+// 하루는 새벽 4시에 바뀐다 (00:00–03:59는 전날)
+function dayKey(time = Date.now()) { return new Date(time - 4 * 3600000).toLocaleDateString('en-CA'); }
+function tomorrowStart() { const d = new Date(Date.now() - 4 * 3600000); d.setHours(28,0,0,0); return d.getTime(); }
 function getCoreMeaning(word) { return (normalizeKo(word.ko)[0] || word.ko).trim(); }
 function dailyMeta(en) {
   const m = getWordMeta(en), today = dayKey();

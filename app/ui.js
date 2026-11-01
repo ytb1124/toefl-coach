@@ -797,7 +797,7 @@
     if (o.audio || o.sec === 'L') {
       const p = o.audio ? Player(o.audio, { onPlay: () => {} }) : null;
       if (p) activePlayers.push(p);
-      const note = h('div', { class: 'small muted' }, o.audio ? (C.audio[o.audio].note || '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).')
+      const note = h('div', { class: 'small muted' }, o.audio ? (C.audio[o.audio].note || '기록된 스크립트로 Kokoro가 만든 음성입니다 (원본 음원 아님).')
         : '원본 음원은 독점 TPO 자료를 불러올 수 있는 기기에서만 재생됩니다.');
       box.append(note);
       if (p) box.append(p);
@@ -809,7 +809,7 @@
         activePlayers.push({ stop: () => a.pause() });
         if (!p) { note.textContent = '원본 음원 (세트 전체)'; note.after(a); return; }
         p.stop(); p.style.display = 'none';
-        note.replaceChildren('원본 음원 (세트 전체) · ', h('a', { href: 'javascript:void 0', onclick: () => { a.pause(); a.remove(); p.style.display = ''; note.textContent = '기록된 스크립트로 만든 음성입니다 (원본 음원 아님).'; } }, '재구성 음성으로 듣기'));
+        note.replaceChildren('원본 음원 (세트 전체) · ', h('a', { href: 'javascript:void 0', onclick: () => { a.pause(); a.remove(); p.style.display = ''; note.textContent = '기록된 스크립트로 Kokoro가 만든 음성입니다 (원본 음원 아님).'; } }, '재구성 음성(Kokoro)으로 듣기'));
         note.after(a);
       });
     }

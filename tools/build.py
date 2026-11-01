@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build pipeline: QA-check content, synthesize audio (macOS `say` + ffmpeg), bundle app/content.js.
+"""Build pipeline: QA-check content, synthesize audio (Kokoro + ffmpeg), bundle app/content.js.
 
 Content sources (all merged):
   content/skills.json            8 skills
@@ -35,15 +35,16 @@ PRIV = ROOT / "private" / "zhan"
 TTS = PRIV / "tts"
 APP = ROOT / "app"
 
-# Speaker role -> macOS voice. TOEFL uses several English accents.
+# Speaker role -> Kokoro voice (a* = American, b* = British). 원본 음원이 없을 때만 쓰는 음성 (OVERHAUL.md 원칙 6).
 VOICES = {
-    "N": "Karen",                   # narrator (AU)
-    "W": "Samantha",                # woman (US)
-    "M": "Daniel",                  # man (UK)
-    "W2": "Moira",                  # woman (IE)
-    "M2": "Reed (English (US))",    # man (US)
+    "N": "af_heart",       # narrator (US)
+    "W": "af_bella",       # woman (US)
+    "M": "am_michael",     # man (US)
+    "W2": "bf_emma",       # woman (UK)
+    "M2": "bm_george",     # man (UK)
 }
-RATE = 172          # words per minute, close to TOEFL lecture pace
+RATE = 1.25         # Kokoro speed (사용자 설정: 1.25배)
+KOKORO_PY = Path.home() / ".venvs" / "kokoro" / "bin" / "python"
 GAP_LINE = 0.55     # pause between speakers / lines
 GAP_SENT = 0.22     # pause between sentences of one line
 SR = 22050
@@ -323,7 +324,7 @@ def audio_dir(set_id, data):
 
 def tts_set(set_id, aset, force=False, out_dir=AUDIO):
     """Render one audio set sentence by sentence; write <id>.mp3 and <id>.cues.json (start/end per sentence)."""
-    sig = hashlib.sha1(json.dumps([aset["lines"], VOICES, RATE, GAP_LINE, GAP_SENT, "v2"]).encode()).hexdigest()[:12]
+    sig = hashlib.sha1(json.dumps([aset["lines"], VOICES, RATE, GAP_LINE, GAP_SENT, "kokoro1"]).encode()).hexdigest()[:12]
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"{set_id}.mp3"
     cues_f = out_dir / f"{set_id}.cues.json"
@@ -338,15 +339,20 @@ def tts_set(set_id, aset, force=False, out_dir=AUDIO):
             subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", f"anullsrc=r={SR}:cl=mono",
                             "-t", str(sec), "-c:a", "pcm_s16le", str(g)], check=True)
             gaps[name] = (g, wav_seconds(g))
+        jobs = []
+        for li, line in enumerate(aset["lines"]):
+            for si, sent in enumerate(split_sentences(line["t"])):
+                jobs.append({"voice": VOICES[line["v"]], "text": sent, "out": str(td / f"{len(jobs)}.raw.wav")})
+        subprocess.run([str(KOKORO_PY), str(ROOT / "tools" / "kokoro_render.py"), str(RATE)],
+                       input=json.dumps(jobs), text=True, check=True, capture_output=True)
         parts, cues, t = [], [], 0.0
         k = 0
         for li, line in enumerate(aset["lines"]):
             sents = split_sentences(line["t"])
             for si, sent in enumerate(sents):
-                aiff, wav = td / f"{k}.aiff", td / f"{k}.wav"
+                raw, wav = td / f"{k}.raw.wav", td / f"{k}.wav"
                 k += 1
-                subprocess.run(["say", "-v", VOICES[line["v"]], "-r", str(RATE), "-o", str(aiff), sent], check=True)
-                subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(aiff), "-ar", str(SR), "-ac", "1",
+                subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(raw), "-ar", str(SR), "-ac", "1",
                                 "-c:a", "pcm_s16le", str(wav)], check=True)
                 d = wav_seconds(wav)
                 cues.append({"line": li, "start": round(t, 2), "end": round(t + d, 2), "t": sent})
@@ -493,8 +499,8 @@ def main():
         return
 
     if "--no-audio" not in args:
-        if not shutil.which("say") or not shutil.which("ffmpeg"):
-            sys.exit("need macOS `say` and ffmpeg for audio")
+        if not KOKORO_PY.exists() or not shutil.which("ffmpeg"):
+            sys.exit(f"need Kokoro ({KOKORO_PY}) and ffmpeg for audio")
         AUDIO.mkdir(exist_ok=True)
         for sid, aset in data["audioSets"].items():
             if "lines" not in aset:
@@ -502,7 +508,9 @@ def main():
             tts_set(sid, aset, force="--force-audio" in args, out_dir=audio_dir(sid, data))
 
     audio_meta, priv_audio = {}, {}
+    kokoro_note = "Kokoro 생성 (원본 음원 아님)"
     for sid, aset in data["audioSets"].items():
+        aset = dict(aset, note=" · ".join(x for x in (aset.get("note", ""), kokoro_note) if x))
         d = audio_dir(sid, data)
         f, cf = d / f"{sid}.mp3", d / f"{sid}.cues.json"
         cues = read_json(cf) if cf.exists() else []

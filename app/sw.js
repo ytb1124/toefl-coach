@@ -19,7 +19,7 @@
     const byId = list => Object.fromEntries(list.map(x => [x.id, x]));
     const LR = byId(S.lr), IV = byId(S.interview), EM = byId(S.email), AD = byId(S.discussion), BS = byId(S.buildSentence);
     const now = () => Date.now();
-    const today = () => new Date().toDateString();
+    const today = () => new Date(Date.now() - 4 * 3600000).toDateString();   // 하루는 새벽 4시에 바뀐다
     const isToday = t => t && new Date(t).toDateString() === today();
     const fmtDate = t => { const d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate(); };
     const mmss = s => (s < 0 ? '+' : '') + Math.floor(Math.abs(s) / 60) + ':' + String(Math.floor(Math.abs(s) % 60)).padStart(2, '0');
@@ -61,13 +61,8 @@
       a.play().catch(() => { a.removeEventListener('timeupdate', tick); speak(fallbackText, onEnded); });
       later(() => { a.pause(); a.removeEventListener('timeupdate', tick); });
     }
-    function speak(text, onEnded) {
-      try {
-        speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.95; u.onend = () => onEnded && onEnded();
-        speechSynthesis.speak(u); later(() => speechSynthesis.cancel());
-      } catch (e) { toast('음성을 재생할 수 없습니다'); onEnded && onEnded(); }
-    }
+    // 음원은 원본 또는 Kokoro로 만든 파일만 쓴다: 브라우저 음성합성으로 대신 읽지 않는다
+    function speak(text, onEnded) { toast('음원 파일을 재생할 수 없습니다'); onEnded && onEnded(); }
 
     // ---------- microphone: recording + (optional) browser speech recognition ----------
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -178,7 +173,7 @@
       const drilledToday = Object.values(d.g).filter(c => isToday(c.last)).length;
       const lrToday = Object.values(d.lr).flat().some(r => isToday(r.at));
       const nextLr = S.lr.slice().sort((a, b) => lrRank(d, a) - lrRank(d, b))[0];
-      const rot = ['iv', 'em', 'ad'][Math.floor(new Date().setHours(0, 0, 0, 0) / 864e5) % 3];
+      const rot = ['iv', 'em', 'ad'][Math.floor(new Date(Date.now() - 4 * 3600000).setHours(0, 0, 0, 0) / 864e5) % 3];
       const rotName = { iv: '인터뷰 1세트 (4문항)', em: '이메일 1개 (7분)', ad: '토론 글 1개 (10분)' }[rot];
       const rotDone = d.log.some(l => l.kind === rot && isToday(l.at));
       const rotNext = nextPrompt(d, rot);

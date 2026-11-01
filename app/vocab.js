@@ -156,8 +156,9 @@ function wordTitle(word, style = '') {
   row.appendChild(audioBtn); return row;
 }
 function getRecallSpeed(ms) { return ms <= 3000 ? 'strong' : ms <= 7000 ? 'normal' : 'slow'; }
-function dayKey(time = Date.now()) { return new Date(time).toLocaleDateString('en-CA'); }
-function tomorrowStart() { const d = new Date(); d.setHours(24,0,0,0); return d.getTime(); }
+// 하루는 새벽 4시에 바뀐다 (00:00–03:59는 전날)
+function dayKey(time = Date.now()) { return new Date(time - 4 * 3600000).toLocaleDateString('en-CA'); }
+function tomorrowStart() { const d = new Date(Date.now() - 4 * 3600000); d.setHours(28,0,0,0); return d.getTime(); }
 function getCoreMeaning(word) { return (normalizeKo(word.ko)[0] || word.ko).trim(); }
 function dailyMeta(en) {
   const m = getWordMeta(en), today = dayKey();
@@ -2207,7 +2208,8 @@ function loadChunkPlan() {
   return plan;
 }
 function saveChunkPlan(plan) { localStorage.setItem(CHUNK_PLAN_KEY, JSON.stringify(plan)); }
-function chunkToday() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function chunkToday() { const d = new Date(Date.now() - 4 * 3600000);   // 하루는 새벽 4시에 바뀐다 (dayKey와 같게)
+ return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 
 // 복습 단어 = 원본의 '복습 단어 모드'와 같은 기준(찍음 tier, 마스터 아님). 전체 Day 기준, 교재 순서.
 function reviewWordsFor(qMode) {
@@ -2390,7 +2392,7 @@ const __api = {
   // 킵 목록 중 단어장에 있는데 아직 표시가 없는 단어를 '문제 풀다 모름'으로 (단어장에 새로 들어온 단어 포함)
   flagKept(list) {
     let n = 0;
-    (list || []).forEach(k => { const hit = __api.lookup(k.w); if (!hit) return; const m = getWordMeta(hit.en); if (m.keepFlagAt) return; m.keepFlagAt = k.at ? new Date(k.at).toLocaleDateString('en-CA') : dayKey(); n++; });
+    (list || []).forEach(k => { const hit = __api.lookup(k.w); if (!hit) return; const m = getWordMeta(hit.en); if (m.keepFlagAt) return; m.keepFlagAt = k.at ? dayKey(k.at) : dayKey(); n++; });
     if (n) saveMeta();
     return n;
   },
