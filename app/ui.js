@@ -543,7 +543,7 @@
   // ---------- 계획 실행 (#/do): 블록 순서대로, 블록 안의 할 일을 하나씩 ----------
   function viewDo() {
     const p = D.plan;
-    if (!p || p.v !== 2 || p.date !== E.dayStr(now())) { go('#/'); return; }
+    if (!p || p.v !== 3 || p.date !== E.dayStr(now())) { go('#/'); return; }
     const bi = p.blocks.findIndex(b => !b.done);
     if (bi < 0) { go('#/'); return; }
     const b = p.blocks[bi];
