@@ -301,25 +301,29 @@
     function ctest(main, task, meta, full, onDone) {
       const box = h('section', { class: 'card' }); ap(main, box);
       const set = full.set, qs = full.qs;
+      const submit = h('button', { class: 'primary' }, '제출');
       const inputs = {};
       const t0 = Date.now();
+      // 빈칸마다 빠진 글자 수만큼 칸 (앞 글자는 지문에 있음). 한 빈칸을 다 채우면 다음 빈칸으로.
+      const next = i => () => { const b = inputs[i + 1]; if (b && inputs[i].value().length === qs[i].answer.length) b.focus(); };
       const parts = set.passage.split(/(【\d+】)/);
       const p = h('p', { class: 'ctest-passage' });
       for (const part of parts) {
         const m = part.match(/^【(\d+)】$/);
         if (!m) { p.append(part); continue; }
         const q = qs[+m[1] - 1];
-        const inp = h('input', { class: 'blank', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', size: Math.max(2, q.answer.length + 1), maxlength: q.answer.length + 4, 'aria-label': '빈칸 ' + m[1] });
-        inputs[+m[1] - 1] = inp; p.append(inp);
+        const i = +m[1] - 1;
+        const b = inputs[i] = env.letterBlank('', q.answer, { onChange: next(i), onEnter: () => submit.click() });
+        p.append(b.el);
       }
       ap(box, h('p', { class: 'muted small' }, set.src === 'Fill in the blank 자료' ? '출처: Fill in the blank 자료 · 빈칸의 나머지 글자를 입력하세요.' : '빈칸의 나머지 글자를 입력하세요 (앞 글자는 지문에 있음).'), p);
-      const submit = h('button', { class: 'primary' }, '제출');
       ap(box, submit);
+      setTimeout(() => inputs[0] && inputs[0].focus(), 50);
       submit.onclick = () => {
         submit.remove();
         const recs = qs.map((q, i) => {
-          const v = inputs[i].value; const ok = ctestOk(v, q.prefix, q.answer);
-          inputs[i].disabled = true; inputs[i].classList.add(ok ? 'right' : 'wrong');
+          const v = inputs[i].value(); const ok = ctestOk(v, q.prefix, q.answer);
+          inputs[i].disable(); inputs[i].mark(ok);
           return env.log({ item: meta.id, q: i, ref: meta.id + '#' + i, skill: q.skill, tier: task.tier, correct: ok, answer: v, conf: 2, verify: /^verify/.test(task.tier) || undefined, verifyOf: task.verifyOf, exam: true, ms: Date.now() - t0 });
         });
         const wrong = qs.map((q, i) => [q, i]).filter(([, i]) => !recs[i].correct);

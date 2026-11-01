@@ -232,7 +232,7 @@
   };
   const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
   let RD = null;
-  const readApp = () => RD || (RD = ReadApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
+  const readApp = () => RD || (RD = ReadApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink, letterBlank }));
   // 단어 킵: 어느 화면에서든 영어 단어를 선택해 저장 (app/keep.js). 단어장에 있으면 뜻을 채운다.
   let KP = null;
   const keepApp = () => KP || (KP = KeepWords.create({ h, toast, storage: window.Sync || localStorage,
@@ -242,7 +242,7 @@
 
   // ---------- PRACTICE: 소站 문제 풀이 (app/practice.js) ----------
   let P = null;
-  const practice = () => P || (P = PracticeApp.create({ h, toast, save, log: a => logAttempt(a),
+  const practice = () => P || (P = PracticeApp.create({ h, toast, save, letterBlank, log: a => logAttempt(a),
     keep: (w, sent) => { keepApp().add(w, sent); const v = vocabApp(); if (v && v.flagWrong) v.flagWrong(w); },
     rules: { get: skill => myRules(skill), add: (skill, rule, rec) => { D.skillRules = D.skillRules || []; D.skillRules.push({ skill, rule, at: now(), from: rec && (rec.item || rec.ref) }); save(); } },
     logSpeed: r => { D.readSpeed = D.readSpeed || []; D.readSpeed.push(Object.assign({ at: now() }, r)); save(); },
@@ -931,8 +931,8 @@
         let j = k;
         for (const ch of [...letters].slice(0, n - k)) { cells[j].value = ch; j++; }
         if (!letters) c.value = '';
-        changed();
         if (letters) (cells[j] || cells[n - 1]).focus();
+        changed();   // 포커스 이동 뒤에: onChange가 다음 빈칸으로 옮길 수 있게
       });
       c.addEventListener('beforeinput', () => { c._prev = c.value; });
       c.addEventListener('focus', () => c.select());

@@ -109,11 +109,11 @@
         card.append(h('p', { class: 'small muted' }, `C-Test · 빈칸 ${set.qs.length}개 (시험에서 틀린 것 ${set.qs.filter(q => q.wrong).length}개). 빠진 글자를 채우세요.`),
           passage(set, n => {
             const q = set.qs[n - 1];
-            const inp = h('input', { class: 'cblank', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', size: Math.max(3, q.answer.length + 1), 'aria-label': `빈칸 ${n}` });
-            inputs[n] = inp;
-            return h('span', { class: 'cword' }, inp);   // 앞 글자는 지문에 이미 있음
+            // 빠진 글자 수만큼 칸 (앞 글자는 지문에 이미 있음). 다 채우면 다음 빈칸으로.
+            const b = inputs[n] = env.letterBlank('', q.answer, { onChange: v => { if (v.length === q.answer.length && inputs[n + 1]) inputs[n + 1].focus(); } });
+            return h('span', { class: 'cword' }, b.el);
           }),
-          h('button', { class: 'primary', onclick: () => { cur.ans = set.qs.map(q => normTyped(inputs[q.n].value)); finish(); } }, '채점'));
+          h('button', { class: 'primary', onclick: () => { cur.ans = set.qs.map(q => normTyped(inputs[q.n].value())); finish(); } }, '채점'));
         setTimeout(() => inputs[1] && inputs[1].focus(), 50);
         return;
       }

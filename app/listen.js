@@ -114,7 +114,8 @@
       if (!path) throw new Error('음원 없음');
       if (localHost && !(state.pool && state.pool.remote)) return path;
       if (blobs[path]) return blobs[path];
-      const key = API + path; let res = null, cache = null;
+      // 재구성 음성(tts/)은 2026-11-02에 Kokoro로 다시 만들었다: 예전에 보관한 macOS 음성을 쓰지 않도록 키를 바꾼다
+      const key = API + path + (/\/tts\//.test(path) ? '?v=kokoro1' : ''); let res = null, cache = null;
       try { cache = await caches.open(AUDIO_CACHE); res = await cache.match(key); } catch (e) { /* no Cache API */ }
       if (!res) {
         const r = await ghFetch(path.replace(/^private\/zhan\//, ''));
