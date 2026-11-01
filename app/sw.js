@@ -190,7 +190,7 @@
       put(main, weakCard(d));
 
       const lrDone = S.lr.filter(s => (d.lr[s.id] || []).length).length;
-      const mastered = Object.values(d.g).filter(c => c.box >= K.MASTER).length;
+      const mastered = S.grammar.filter(g => K.mastered(d.g[g.id])).length;
       const bsOk = Object.entries(d.bs).filter(([id, b]) => !/^Z\d+-BS/.test(id) && b.lastOk).length;
       const ideaOk = Object.values(d.idea).filter(b => b.lastOk).length;
       const count = k => d.log.filter(l => l.kind === k).length;
@@ -253,8 +253,8 @@
         const q = K.drillQueue(S.grammar, d.g, now());
         if (!q.length) {
           put(main, back('#/sw', '스피킹·라이팅'), h('section', { class: 'card' }, h('h1', null, '오늘 교정 문장 완료'),
-            h('p', null, '오늘 복습할 문장이 없습니다. 틀린 문장은 다음 날, 맞힌 문장은 1·3·7·14·30일 간격으로 다시 나옵니다.'),
-            h('button', { class: 'ghost', onclick: () => { drill = { list: S.grammar.slice().sort(() => Math.random() - 0.5).slice(0, 10), idx: 0, res: [], retry: [], extra: true }; render(); } }, '그래도 10문장 더 풀기 (기록은 남고 복습 일정은 그대로)')));
+            h('p', null, '오늘 풀 문장이 없습니다. 처음에 맞힌 문장은 바로 익힘이고 다시 나오지 않습니다. 틀린 문장만 다음 날, 그다음 3일 뒤에 다시 나오고, 두 번 연속 맞히면 익힘입니다.'),
+            K.extraList(S.grammar, d.g, 10).length ? h('button', { class: 'ghost', onclick: () => { drill = { list: K.extraList(S.grammar, d.g, 10), idx: 0, res: [], retry: [], extra: true }; render(); } }, '익히지 않은 문장 더 풀기 (복습 일정은 그대로)') : h('p', { class: 'small muted' }, '모든 문장을 익혔습니다.')));
           return;
         }
         drill = { list: q, idx: 0, res: [], retry: [] };

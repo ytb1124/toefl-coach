@@ -93,6 +93,13 @@ def load():
                 "my": my,
                 "point": tr.get("point") or "", "whyKo": tr.get("why"), "whyZh": q.get("why"),
             })
+    # 리포트에서 말풍선 문맥을 못 찾은 문항은 같은 문항의 풀 자료(pool.json)의 context로 채운다
+    pf = Z / "pool.json"
+    if pf.exists():
+        pool_ctx = {q["template"]: q.get("context") for s in json.loads(pf.read_text())["sets"] if s["kind"] == "bs" for q in s["qs"]}
+        for it in items:
+            if not it["context"] and pool_ctx.get(it["template"]):
+                it["context"] = pool_ctx[it["template"]]
     return tests, items
 
 

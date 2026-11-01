@@ -72,6 +72,10 @@ def app_originals(sec="L"):
     o = o if isinstance(o, list) else o.get("originals", [])
     for f in sorted((ROOT / "content" / "tests").glob("*.json")):
         o += json.loads(f.read_text()).get("originals", [])
+    # 원문 필드(stem·options·ctest)는 tools/split_originals.py가 비공개로 옮겼다 → private/zhan/orig.json에서 다시 합친다
+    pf = Z / "orig.json"
+    priv = json.loads(pf.read_text()).get("originals", {}) if pf.exists() else {}
+    o = [dict(x, **priv.get(x["id"], {})) for x in o]
     return [x for x in o if x.get("sec") == sec and (x.get("options") or x.get("ctest"))]
 
 
@@ -118,7 +122,23 @@ def load():
                     qs[-1]["orig"] = match_orig(qs[-1], origs, used)
             sets.append({"id": sid, "test": tid, "module": s["m"], "task": s["task"], "title": s["title"], "kind": k,
                          "audio": local_audio(s.get("audio")), "script": script_lines(s.get("script")), "qs": qs})
+    fill_times_from_pool(sets)
     return tests, sets
+
+
+def fill_times_from_pool(sets):
+    """리포트 스크립트에 줄 시각이 없으면, 같은 음원의 풀 세트(tools/zhan_align.py로 정렬됨)에서 같은 줄의 시각을 가져온다."""
+    f = Z / "pool.json"
+    if not f.exists():
+        return
+    by_audio = {s.get("audio"): s for s in json.loads(f.read_text())["sets"] if s.get("audio") and s.get("script")}
+    for s in sets:
+        p = by_audio.get(s["audio"])
+        if not p or len(p["script"]) != len(s["script"]):
+            continue
+        for l, pl in zip(s["script"], p["script"]):
+            if l.get("at") is None and pl.get("at") is not None and norm(l["t"])[:40] == norm(pl["t"])[:40]:
+                l["at"] = pl["at"]
 
 
 def check(tests, sets):

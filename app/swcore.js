@@ -52,6 +52,12 @@
     for (const a of answers) { const c = diff(a, input).filter(o => o.op !== 'eq').length; if (c < bestCost) { best = a; bestCost = c; } }
     return best;
   }
+  // 익힘 (2026-11-02 개편): 처음부터 맞힌 문장은 바로 익힘. 한 번이라도 틀렸으면 그 뒤 서로 다른 날 2번 연속 맞혀야 익힘
+  // (틀림 → box 1, 다음 날 맞힘 → box 2, 3일 뒤 맞힘 → box 3). 예전 6단계 기준(box 6)도 그대로 익힘으로 친다.
+  function mastered(c) {
+    if (!c) return false;
+    return c.box >= MASTER || (!!c.lastOk && (!c.bad || c.box >= 3));
+  }
   // card = {box, due, ok, bad}; returns the updated card
   function review(card, correct, now) {
     const c = Object.assign({ box: 0, due: 0, ok: 0, bad: 0 }, card);
@@ -66,12 +72,19 @@
   // A backlog of due reviews never takes every slot: up to minNew slots stay for new items, so new sentences keep coming.
   function drillQueue(items, cards, now, size, maxNew, minNew) {
     size = size || 10; maxNew = maxNew == null ? 6 : maxNew; minNew = minNew == null ? 4 : minNew;
-    const due = items.filter(i => cards[i.id] && cards[i.id].box < MASTER && cards[i.id].due <= now)
+    const due = items.filter(i => cards[i.id] && !mastered(cards[i.id]) && cards[i.id].due <= now)
       .sort((a, b) => cards[a.id].due - cards[b.id].due);
     const fresh = items.filter(i => !cards[i.id]).sort((a, b) => srcDate(b.src) - srcDate(a.src));
     const q = due.slice(0, size - Math.min(minNew, maxNew, fresh.length));
     for (const i of fresh) { if (q.length >= size || q.filter(x => !cards[x.id]).length >= maxNew) break; q.push(i); }
     return q;
+  }
+
+  // '더 풀기': 익힌 문장은 빼고, 안 푼 문장 → 틀린 적 있는 문장 순으로 (각각 무작위)
+  function extraList(items, cards, size) {
+    const rnd = list => list.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+    const fresh = items.filter(i => !cards[i.id]), weak = items.filter(i => cards[i.id] && !mastered(cards[i.id]));
+    return rnd(fresh).concat(rnd(weak)).slice(0, size || 10);
   }
 
   // ---------- word diff (LCS) ----------
@@ -200,6 +213,6 @@
     return a;
   }
 
-  const API = { DAY, INTERVAL, MASTER, tokens, norm, matchAnswer, nearest, review, drillQueue, diff, lrScore, LR_CAT, scan, ideaOverlap, wordCount, paragraphs, bsCorrect, shuffle };
+  const API = { DAY, INTERVAL, MASTER, mastered, extraList, tokens, norm, matchAnswer, nearest, review, drillQueue, diff, lrScore, LR_CAT, scan, ideaOverlap, wordCount, paragraphs, bsCorrect, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.SWCore = API;
 })(typeof window !== 'undefined' ? window : globalThis);

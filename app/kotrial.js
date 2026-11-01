@@ -121,7 +121,7 @@
         if (set.sec === 'R') card.append(passage(set.passage));
         card.append(h('p', { class: 'small muted' }, `문항 ${cur.qi + 1} / ${set.qs.length}`),
           h('p', { class: 'stem' }, q.stem),
-          q.sentence ? h('p', { class: 'insert-s' }, h('b', null, '넣을 문장: '), q.sentence) : null,
+          q.sentence ? h('p', { class: 'insert-s' }, h('b', null, '넣을 문장: '), q.sentence) : '',   // DOM append(null)은 'null' 글자를 넣는다
           h('div', { class: 'opts' }, cur.perm[cur.qi].map((i, pos) => h('button', { class: 'opt', onclick: () => {
             cur.ans[cur.qi] = i;
             if (cur.qi + 1 < set.qs.length) { cur.qi++; redraw(); return; }

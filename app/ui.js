@@ -89,7 +89,9 @@
 
   // ---------- routing ----------
   function go(hash) { location.hash = hash; }
-  window.addEventListener('hashchange', render);
+  // 화면마다 등록된 정리 리스너(타이머·오디오 멈춤)가 먼저 돌고 나서 새 화면을 그린다.
+  // 바로 그리면, 나중에 등록된 정리 리스너가 방금 만든 새 화면의 타이머를 지운다 (쓰기 타이머가 멈추던 버그).
+  window.addEventListener('hashchange', () => setTimeout(render, 0));
   function render() {
     stopAudio();
     if (P) P.stopAll();
@@ -242,12 +244,16 @@
 
   // ---------- PRACTICE: 소站 문제 풀이 (app/practice.js) ----------
   let P = null;
-  const practice = () => P || (P = PracticeApp.create({ h, toast, save, letterBlank, log: a => logAttempt(a),
+  const practice = () => P || (P = PracticeApp.create({ h, toast, save, letterBlank, skill: id => SKILL[id], log: a => logAttempt(a),
     keep: (w, sent) => { keepApp().add(w, sent); const v = vocabApp(); if (v && v.flagWrong) v.flagWrong(w); },
     rules: { get: skill => myRules(skill), add: (skill, rule, rec) => { D.skillRules = D.skillRules || []; D.skillRules.push({ skill, rule, at: now(), from: rec && (rec.item || rec.ref) }); save(); } },
     logSpeed: r => { D.readSpeed = D.readSpeed || []; D.readSpeed.push(Object.assign({ at: now() }, r)); save(); },
     logDictation: r => { D.dictation = D.dictation || []; D.dictation.push(Object.assign({ at: now() }, r)); save(); },
-    origAudio: ref => { const o = ORIG[ref]; const m = o && o.audio && C.audio[o.audio]; if (!m || !m.lines) return null; return { lines: m.lines.map(l => ({ sp: l.v, t: l.t })), path: m.src, span: o.seg || null }; } }));
+    // 받아쓰기 대상 = 재생 구간(o.seg)에 들어가는 문장만 (구간이 없으면 세트 전체를 처음부터)
+    origAudio: ref => { const o = ORIG[ref]; const m = o && o.audio && C.audio[o.audio]; if (!m || !m.lines) return null;
+      const cues = o.seg ? (m.cues || []).filter(c => c.end > o.seg[0] + 0.1 && c.start < o.seg[1] - 0.1) : [];
+      const lines = cues.length ? cues.map(c => ({ sp: (m.lines[c.line] || {}).v, t: c.t })) : m.lines.map(l => ({ sp: l.v, t: l.t }));
+      return { lines, path: m.src, span: cues.length ? o.seg : null }; } }));
 
   // ---------- SPEAKING: 소站 L&R · Interview (app/speak.js) ----------
   let SP = null;
@@ -430,7 +436,7 @@
     vocab: t.mode === 'hard' ? `자주 틀린 단어${t.n ? ' ' + t.n + '개' : ''}` : '오늘 복습 단어',
     dictation: '받아쓰기 → 쉐도잉', twopass: '2단계 듣기',
     item: (practice().KIND[(POOL()[t.item] || {}).kind] || '문제') + (t.timed ? ' · timed reading' : '') + (/^verify/.test(t.tier) ? ' · 다시 확인' : t.tier === 'delayed' ? ' · 유지 확인' : ''),
-    lr: 'Listen & Repeat', interview: 'Interview 4/3/2', bs: 'Build a Sentence', shadow: '쉐도잉 (L&R에서 빠뜨린 문장)', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion'),
+    lr: 'Listen & Repeat', interview: 'Interview (45초)', bs: 'Build a Sentence', shadow: '쉐도잉 (L&R에서 빠뜨린 문장)', write: '계획 카드 → ' + (t.kind === 'email' ? 'Email' : 'Academic Discussion'),
     outline: `개요 드릴 ${t.n || 3}개`, fix: '반복 오류 고쳐 쓰기', diag: '원본 빠른 진단', original: '다시 확인 · 원본',
   })[t.type] || t.type;
   let poolIdx = null;
@@ -648,7 +654,7 @@
       main.append(h('section', { class: 'card' }, h('h2', null, name), h('div', { class: 'row wrap' }, kinds.map(([k, l]) => h('button', { class: 'ghost', onclick: () => go(`#/room/${sec}/${k}`) }, l)))));
     }
     main.append(h('section', { class: 'card' }, h('h2', null, '말하기 · 쓰기'), h('div', { class: 'row wrap' },
-      h('button', { class: 'ghost', onclick: () => go('#/speak') }, '말하기: Listen & Repeat · Interview 4/3/2'),
+      h('button', { class: 'ghost', onclick: () => go('#/speak') }, '말하기: Listen & Repeat · Interview'),
       h('button', { class: 'ghost', onclick: () => go('#/write') }, '쓰기: Build a Sentence · Email · Discussion · 개요 드릴'),
       h('button', { class: 'ghost', onclick: () => go('#/sw') }, '튜터 교정 문장·반복 오류 (말하기·쓰기 탭)'))),
     h('section', { class: 'card' }, h('h2', null, '단어'), h('div', { class: 'row wrap' }, h('button', { class: 'ghost', onclick: () => go('#/vocab') }, '단어 암기'), h('button', { class: 'ghost', onclick: () => go('#/keep') }, `킵한 단어 ${keepApp().count()}개`))),
@@ -752,15 +758,16 @@
 
   // After a wrong answer: (listening) where did it break down? → replay the key part → (new questions) did the same cause recur?
   const STUCK = [['sound', '안 들렸다', '소리 듣기'], ['memory', '들었는데 잊었다', '기억하기'], ['judge', '기억했지만 선택지에서 헷갈렸다', '선택지 고르기'], ['vocab', '들었지만 뜻을 몰랐다', '어휘·표현']];
-  const RECUR = [['same', '같은 원인으로 또 틀림'], ['rulefail', '규칙은 알았는데 적용 못함'], ['other', '다른 원인'], ['unknown', '모르겠음']];
+  const RECUR = [['same', '네, 같은 실수를 또 했다'], ['rulefail', '규칙은 아는데 풀 때 못 썼다'], ['other', '아니요, 다른 이유로 틀렸다'], ['unknown', '잘 모르겠다']];
   function wrongFollowup(rec, opts, onDone) {
     const wrap = h('div', { class: 'follow' });
     const stage2 = () => {
       if (!opts.askRecur) return onDone();
       const rules = myRules(rec.skill);
       wrap.append(h('div', { class: 'ask' },
-        h('p', { class: 'stem' }, '이번 오답은?'),
-        rules.length ? h('p', { class: 'small' }, '내가 정한 규칙: ', h('b', null, rules[0].rule)) : h('p', { class: 'small muted' }, '이 능력에는 아직 내 규칙이 없습니다. 원본 오답을 확인할 때 만들 수 있습니다.'),
+        h('p', { class: 'stem' }, SKILL[rec.skill] ? `이번에도 '${SKILL[rec.skill].name}'에서 틀렸나요?` : '이번에도 같은 실수로 틀렸나요?'),
+        SKILL[rec.skill] && SKILL[rec.skill].warning ? h('p', { class: 'small' }, '이 능력에서 자주 하는 실수: ', h('b', null, SKILL[rec.skill].warning)) : null,
+        rules.length ? h('p', { class: 'small' }, '내가 전에 정한 규칙: ', h('b', null, rules[0].rule)) : h('p', { class: 'small muted' }, '이 능력에는 아직 내가 정한 규칙이 없습니다. 원본 오답을 확인할 때 만들 수 있습니다.'),
         h('div', { class: 'row' }, RECUR.map(([k, label]) => h('button', { class: 'tagb', onclick: e => {
           rec.recur = k; save(); e.currentTarget.parentNode.querySelectorAll('.tagb').forEach(x => { x.disabled = true; }); e.currentTarget.classList.add('sel'); onDone();
         } }, label)))));
@@ -1000,7 +1007,7 @@
     const st = m.stuck, nSt = Object.values(st).reduce((a, b) => a + b, 0);
     const bar = (label, n, of) => h('div', { class: 'hbar' }, h('span', null, label), h('div', { class: 'hb' }, h('div', { style: `width:${of ? 100 * n / of : 0}%` })), h('b', null, n));
     main.append(h('section', { class: 'card' }, h('h2', null, '새 문제를 틀렸을 때 내가 고른 원인'),
-      nRc ? [bar('같은 원인으로 또', rc.same, nRc), bar('규칙은 알았는데 적용 못함', rc.rulefail, nRc), bar('다른 원인', rc.other, nRc), bar('모르겠음', rc.unknown, nRc),
+      nRc ? [bar('같은 실수를 또', rc.same, nRc), bar('규칙은 아는데 못 씀', rc.rulefail, nRc), bar('다른 이유', rc.other, nRc), bar('모르겠음', rc.unknown, nRc),
         h('p', { class: 'small muted' }, '"같은 원인"은 줄었는데 "적용 못함"이 남아 있다면, 규칙은 이해했으니 실전에서 적용하는 연습이 더 필요하다는 뜻입니다.')]
         : h('p', { class: 'muted small' }, '아직 기록이 없습니다. 새 문제를 틀리면 같은 원인으로 틀렸는지 묻습니다.')),
       h('section', { class: 'card' }, h('h2', null, '리스닝 오답: 어디서 막혔나'),

@@ -269,13 +269,14 @@ def load():
                     if t and q["questionId"] in byq:
                         tries[byq[q["questionId"]]["id"]].append(dict(t, wf=int(wf), date=dates.get(wf)))
     out = sorted(sets.values(), key=lambda s: (s["paper"], "RLSW".index(s["sec"]), s["module"], s["task"]))
-    # Whisper로 붙인 줄 시각 (tools/zhan_align.py): 소站 스크립트에 시각이 없는 줄만 채운다 (atSrc 'whisper').
+    # Whisper로 맞춘 줄 시각 (tools/zhan_align.py): 소站 시각이 없거나 Whisper와 1.5초 넘게 어긋나는 줄을 고친다 (atSrc 'whisper').
+    # 받아쓰기·'근거 구간만 다시 듣기'가 실제로 그 문장을 재생하도록 (2026-11-02 전수 검사에서 어긋난 세트가 나옴).
     al = json.loads((Z / "align.json").read_text()) if (Z / "align.json").exists() else {}
     for s in out:
         ats = al.get(s["id"])
         if ats and len(ats) == len(s.get("script") or []):
             for l, a in zip(s["script"], ats):
-                if l.get("at") is None and a is not None:
+                if a is not None and (l.get("at") is None or abs(l["at"] - a) > 1.5):
                     l["at"], l["atSrc"] = a, "whisper"
     # Kokoro로 만든 질문 음성 (tools/zhan_kokoro.py): 소站 음원이 없는 Interview 질문만.
     for s in out:

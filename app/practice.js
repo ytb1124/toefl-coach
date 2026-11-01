@@ -65,10 +65,10 @@
     ['sound', '안 들렸다', 'L', '스크립트만 보여 줍니다. 내일 이 부분을 받아쓰기 → 쉐도잉합니다.'],
     ['memory', '들었는데 잊었다', 'L', '근거 구간만 다시 들어 보세요. 내일 이 세트를 2단계로 다시 듣습니다.'],
     ['vocab', '뜻을 몰랐다', 'RL', '모르는 단어를 눌러 단어장(킵)에 넣으세요. 자주 틀린 단어 후보가 됩니다.'],
-    ['judge', '선택지에서 헷갈렸다', 'RL', '같은 원인인지 확인하고 내 규칙을 적으세요. 같은 능력의 새 문제와 쌍둥이 확인이 나옵니다.'],
+    ['judge', '선택지에서 헷갈렸다', 'RL', '이 문제가 노리는 실수를 또 했는지 고르고, 다음에 할 행동을 한 줄로 적으세요. 같은 능력의 새 문제와 비슷한 문제로 다시 확인합니다.'],
     ['time', '시간이 부족했다', 'R', '내일 학술 지문 timed reading이 먼저 나옵니다.'],
   ];
-  const RECUR = [['same', '같은 원인으로 또 틀림'], ['rulefail', '규칙은 알았는데 적용 못함'], ['other', '다른 원인'], ['unknown', '모르겠음']];
+  const RECUR = [['same', '네, 같은 실수를 또 했다'], ['rulefail', '규칙은 아는데 풀 때 못 썼다'], ['other', '아니요, 다른 이유로 틀렸다'], ['unknown', '잘 모르겠다']];
   const CONF = [[1, '찍음'], [2, '보통'], [3, '확신']];
 
   root.PracticeApp = { create(env) {
@@ -86,7 +86,9 @@
     let playing = [];
     const stopAll = () => { playing.forEach(a => { try { a.pause(); } catch (e) { /* gone */ } }); playing = []; };
     window.addEventListener('hashchange', stopAll);
+    // 새로 재생하기 전에 이 화면에서 재생 중인 소리를 모두 멈춘다 (버튼을 여러 번 눌러도 겹치지 않게)
     function audioEl(path) {
+      stopAll();
       return ZD().audioUrl(path).then(url => { const a = new Audio(url); a.preload = 'auto'; playing.push(a); return a; });
     }
     const para = t => String(t || '').split(/\n+/).filter(Boolean).map(x => h('p', null, x));
@@ -106,7 +108,16 @@
         ? h('span', { class: 'tw', onclick: e => { const w = tok.replace(/^[^A-Za-z]+|[^A-Za-z'-]+$/g, ''); if (!w) return; e.currentTarget.classList.add('kept'); onWord(w, text); } }, tok) : tok));
     }
 
+    // '이번에도 같은 실수?' 질문: 무엇과 같은지(이 문제의 능력·대표 실수·내 규칙)를 먼저 보여 준다.
+    function recurAsk(sk, rules) {
+      return h('div', null,
+        h('p', { class: 'stem' }, sk.name ? `이번에도 '${sk.name}'에서 틀렸나요?` : '이번에도 같은 실수로 틀렸나요?'),
+        sk.warning ? h('p', { class: 'small' }, '이 능력에서 자주 하는 실수: ', h('b', null, sk.warning)) : null,
+        rules.length ? h('p', { class: 'small' }, '내가 전에 정한 규칙: ', h('b', null, rules[0].rule)) : h('p', { class: 'small muted' }, '이 능력에는 아직 내가 정한 규칙이 없습니다 (아래에 적을 수 있어요).'));
+    }
+
     // After a wrong answer: pick the cause → the immediate action. rec = the logged attempt.
+    // ctx.ctest: C-Test에는 선택지가 없어 '선택지에서 헷갈렸다'를 빼고 보여 준다.
     function causePanel(rec, ctx) {
       const wrap = h('div', { class: 'ask cause-pick' });
       const act = h('div');
@@ -136,15 +147,16 @@
             idx.slice(0, 12).map(i => tappable(lines[i], (w, sent) => { env.keep(w, sent); rec.vocabWords.push(w); env.save(); })));
         } else if (k === 'judge') {
           const rules = env.rules.get(rec.skill);
-          const ta = h('textarea', { class: 'myrule', rows: 2, placeholder: '다음엔 무엇을 할지 내 말로 한 줄' }, '');
-          ap(act, h('p', { class: 'stem' }, '같은 원인인가요?'),
-            rules.length ? h('p', { class: 'small' }, '내 규칙: ', h('b', null, rules[0].rule)) : h('p', { class: 'small muted' }, '이 능력에는 아직 내 규칙이 없습니다.'),
+          const sk = (env.skill && env.skill(rec.skill)) || {};
+          const ta = h('textarea', { class: 'myrule', rows: 2, placeholder: sk.warning ? '예: ' + sk.warning : '예: 정답 근거 문장을 찾은 뒤에 보기를 고른다' }, '');
+          ap(act, recurAsk(sk, rules),
             h('div', { class: 'row' }, RECUR.map(([kk, l]) => h('button', { class: 'tagb', onclick: ev => { rec.recur = kk; env.save(); ev.currentTarget.parentNode.querySelectorAll('.tagb').forEach(x => x.classList.remove('sel')); ev.currentTarget.classList.add('sel'); } }, l))),
+            h('p', { class: 'small', style: 'margin-top:14px' }, h('b', null, '내 규칙'), ' — 다음에 이런 문제를 만나면 무엇을 할지 내 말로 한 줄 (선택)'),
             ta, h('button', { class: 'link small', onclick: ev => { const v = ta.value.trim(); if (!v) return; env.rules.add(rec.skill, v, rec); ev.currentTarget.textContent = '저장했습니다'; } }, '내 규칙 저장'));
         }
       };
       ap(wrap, h('p', { class: 'stem' }, '왜 틀렸나요?'),
-        h('div', { class: 'row' }, CAUSE.filter(c => c[2].includes(ctx.sec)).map(([k, l]) => h('button', { class: 'tagb', onclick: e => pick(k, e) }, l))), act);
+        h('div', { class: 'row' }, CAUSE.filter(c => c[2].includes(ctx.sec) && !(ctx.ctest && c[0] === 'judge')).map(([k, l]) => h('button', { class: 'tagb', onclick: e => pick(k, e) }, l))), act);
       return wrap;
     }
 
@@ -329,8 +341,8 @@
         const wrong = qs.map((q, i) => [q, i]).filter(([, i]) => !recs[i].correct);
         ap(box, h('p', { class: 'small' }, `${qs.length - wrong.length} / ${qs.length} 정답`));
         for (const [q, i] of wrong) {
-          ap(box, h('div', { class: 'fb bad' }, h('p', null, `${i + 1}. `, h('b', null, q.prefix + q.answer), q.glossKo ? ` (${q.glossKo})` : '', ' · 내 답: ', q.prefix + (recs[i].answer || '—')),
-            causePanel(recs[i], { sec: 'R', passage: set.passage.replace(/【(\d+)】/g, (m, n) => qs[n - 1].answer) })));
+          ap(box, h('div', { class: 'fb bad' }, h('p', null, `${i + 1}. `, h('b', null, q.prefix + q.answer), q.glossKo ? ` (${q.glossKo})` : '', ' · 내 답: ', recs[i].answer ? q.prefix + recs[i].answer : '(비워 둠)'),
+            causePanel(recs[i], { sec: 'R', ctest: true, passage: set.passage.replace(/【(\d+)】/g, (m, n) => qs[n - 1].answer) })));
         }
         if (set.noteKo) ap(box, h('p', null, h('span', { class: 'lbl' }, '해설'), ' ', set.noteKo));
         else if (qs[0] && (qs[0].whyKo || qs[0].whyZh)) ap(box, why(qs[0]));
@@ -353,6 +365,9 @@
             const q = full.qs[task.q || 0] || full.qs[0];
             let hl = evidenceLines(set.script, q.evidence);
             if (!hl.length) hl = set.script.map((l, i) => i).filter(i => set.script[i].sp !== 'N').slice(0, 2);
+            if (!hl.length) hl = set.script.length > 1 ? [1] : [0];   // 내레이터만 있는 공지: 도입 문장 다음 줄
+            // 재생 구간(첫 근거 줄 ~ 마지막 근거 줄)과 받아쓰기 대상 줄을 똑같이: 사이 줄도 포함
+            hl = Array.from({ length: Math.max(...hl) - Math.min(...hl) + 1 }, (_, k) => Math.min(...hl) + k);
             lines = hl.map(i => set.script[i]); path = set.audio; span = lineSpan(set.script, hl);
           }
         } else if (task.ref && env.origAudio) {

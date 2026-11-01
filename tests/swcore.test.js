@@ -151,3 +151,20 @@ test('ideas: tutor-sourced angle lines are not repeats of the classmates', () =>
     }
   }
 });
+
+test('mastered: first-try right is mastered at once; after a miss it takes two rights on different days', () => {
+  let c = K.review(undefined, true, T0);
+  assert.ok(K.mastered(c));
+  c = K.review(undefined, false, T0); assert.ok(!K.mastered(c));
+  c = K.review(c, true, T0 + K.DAY); assert.ok(!K.mastered(c)); assert.strictEqual(c.due, T0 + K.DAY + 3 * K.DAY);
+  c = K.review(c, true, T0 + 4 * K.DAY); assert.ok(K.mastered(c));
+  assert.ok(K.mastered({ box: K.MASTER }));
+});
+
+test('drillQueue skips first-try-right sentences; extraList never returns mastered ones', () => {
+  const items = ['A', 'B', 'C'].map(id => ({ id }));
+  const cards = { A: { box: 1, due: T0 - 1, ok: 1, bad: 0, lastOk: true }, B: { box: 1, due: T0 - 1, ok: 0, bad: 1, lastOk: false } };
+  assert.deepStrictEqual(K.drillQueue(items, cards, T0).map(i => i.id), ['B', 'C']);
+  const extra = K.extraList(items, cards, 10).map(i => i.id);
+  assert.deepStrictEqual(extra.sort(), ['B', 'C']);
+});

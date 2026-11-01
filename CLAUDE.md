@@ -83,7 +83,7 @@ node --test tests/*.test.js
 5. `python3 tools/build.py` → `private/zhan`에서 커밋·푸시. 모의 모듈용 보류 회차는 `tools/zhan_pool.py`의 `HELD` (이유는 `docs/exam-rules.md`).
 
 ## 말하기·쓰기
-- 소站 문제: `app/speak.js`(L&R·Interview 4/3/2·쉐도잉, `tests/speak.test.js`) · `app/write.js`(BS·Email·Discussion·계획 카드·개요 드릴·고쳐 쓰기·모범 답안 비교, `tests/write.test.js`). 기록은 주 기록 `toeflcoach.v1`의 `speak[]`·`writing[]` (+ 원인은 attempts에 `cause` omit/grammar/structure).
+- 소站 문제: `app/speak.js`(L&R·Interview(질문 → 45초 타이머만, 녹음·비교 없음 — 사용자 결정 2026-11-02)·쉐도잉, `tests/speak.test.js`) · `app/write.js`(BS·Email·Discussion·계획 카드·개요 드릴·고쳐 쓰기·모범 답안 비교, `tests/write.test.js`). 기록은 주 기록 `toeflcoach.v1`의 `speak[]`·`writing[]` (+ 원인은 attempts에 `cause` omit/grammar/structure).
 - 받아쓰기(STT): `tools/serve.py`(정적 파일 + `/stt`, faster-whisper `~/.venvs/whisper`)를 `start.command`가 띄운다. 없는 환경에서는 '내 녹음 ↔ 원문 번갈아 듣고 놓친 단어 탭'.
 - 튜터 교정 파트: `app/sw.js`(UI)·`app/swcore.js`(순수 로직, `tests/swcore.test.js`), 콘텐츠 `content/sw.json`, 기록 키 `toefl-sw-v1`.
 - 튜터 피드백을 새로 받으면 `grammar`에 `src: "튜터 M/D"`로 원문 그대로 추가한다. `AI 변형`/`AI 재구성` 문항은 연습 목록에서 빠진다 (기록은 유지). 새로 만들지 않는다.

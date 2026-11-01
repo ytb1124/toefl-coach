@@ -441,11 +441,11 @@
     takeQuota('read', freshOf({ sec: 'R', kinds: ['ctest'] }).sort(byPrio), ['ctest'], 'R C-Test', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
     takeQuota('read', freshOf({ sec: 'R', kinds: ['daily'] }).sort(byPrio), ['daily'], 'R 일상 지문', it => take('read', { type: 'item', item: it.id, tier: 'transfer', skill: it.skill, exam: true }, it.minutes));
 
-    // ④ 말하기: Listen & Repeat 세트 · Interview 문제 4/3/2 (ctx.speak.lrLeft/ivLeft = 안 한 것, 없으면 오늘 것 하나).
+    // ④ 말하기: Listen & Repeat 세트 · Interview 문제 (45초 타이머만) (ctx.speak.lrLeft/ivLeft = 안 한 것, 없으면 오늘 것 하나).
     const sp = ctx.speak || {};
     const lrLeft = sp.lrLeft || (sp.lr ? [sp.lr] : []), ivLeft = sp.ivLeft || (sp.interview ? [sp.interview] : []);
     takeQuota('speak', lrLeft, ['lr'], 'S Listen & Repeat', id => take('speak', { type: 'lr', set: id }, 3));
-    takeQuota('speak', ivLeft, ['interview'], 'S Interview', id => take('speak', { type: 'interview', q: id, rounds: [45, 34, 23] }, 4));
+    takeQuota('speak', ivLeft, ['interview'], 'S Interview', id => take('speak', { type: 'interview', q: id }, 1.5));
 
     // ⑤ 쓰기: 2분 계획 카드 → 이메일·토론 · Build a Sentence · 구조 원인이면 개요 드릴 · 반복 오류 고쳐 쓰기.
     const wr = ctx.write || {};

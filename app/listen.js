@@ -180,8 +180,9 @@
       audio.playbackRate = rate();
       audio.preservesPitch = true;
       if (opts.onEnded) audio.addEventListener('ended', opts.onEnded);
-      if (opts.onTime) audio.addEventListener('timeupdate', () => opts.onTime(audio.currentTime));
-      return audio;
+      const a = audio;   // stop()이 audio를 null로 만든 뒤 늦게 오는 timeupdate에서도 안전하게
+      if (opts.onTime) a.addEventListener('timeupdate', () => opts.onTime(a.currentTime));
+      return a;
     }
     function speedToggle() {
       const box = h('span', { class: 'row tight speed' });
@@ -316,10 +317,10 @@
           q.orig ? origLine(q.orig) : null,
           q.whyKo ? h('p', { class: 'small' }, q.whyKo) : null,
           q.point ? h('p', { class: 'rule small' }, '다음엔: ', q.point) : null,
-          reply && q.audio ? h('button', { class: 'ghost small', onclick: () => player(q.audio).play() }, '▶ 다시 듣기') : null));
+          reply && q.audio ? h('button', { class: 'ghost small', onclick: () => player(q.audio).play().catch(() => {}) }, '▶ 다시 듣기') : null));
       });
       if (!reply) {
-        const lines = set.script.map((l, i) => h('p', { class: 'tline' + (l.at != null ? ' seek' : ''), 'data-i': i, onclick: l.at != null ? () => { if (!audio || audio.__path !== set.audio) start(); audio.currentTime = l.at; audio.play(); } : null },
+        const lines = set.script.map((l, i) => h('p', { class: 'tline' + (l.at != null ? ' seek' : ''), 'data-i': i, onclick: l.at != null ? () => { if (!audio || audio.__path !== set.audio) start(); audio.currentTime = l.at; audio.play().catch(() => {}); } : null },
           l.sp && l.sp !== 'N' ? h('b', { class: 'sp' }, l.sp + ': ') : null, l.t));
         const box = h('div', { class: 'passage tscript' }, lines);
         const start = () => {
@@ -328,7 +329,7 @@
         };
         const hasTime = set.script.some(l => l.at != null);
         card.append(h('h3', null, '스크립트'),
-          h('div', { class: 'row' }, h('button', { class: 'ghost', onclick: () => { start().play(); } }, '▶ 스크립트 보며 다시 듣기'), h('button', { class: 'ghost', onclick: stop }, '■ 멈춤')),
+          h('div', { class: 'row' }, h('button', { class: 'ghost', onclick: () => { start().play().catch(() => {}); } }, '▶ 스크립트 보며 다시 듣기'), h('button', { class: 'ghost', onclick: stop }, '■ 멈춤')),
           h('p', { class: 'small muted' }, hasTime ? '줄을 누르면 그 부분부터 재생됩니다. 지금 나오는 줄이 표시됩니다.' : '이 세트의 스크립트에는 시간 표시가 없어 줄 이동은 안 됩니다.'), box);
       }
       const d = load(), order = root.ZHAN.tests.map(t => t.id);
