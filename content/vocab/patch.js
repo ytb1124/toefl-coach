@@ -168,6 +168,19 @@ function frequentWords() {
     .filter(([w, i, n]) => (n >= FREQUENT_MIN_SET_FAILS || getWordMeta(w.en).keepFlagAt) && !i.exited)
     .sort((x, y) => y[2] - x[2] || y[1].ratio - x[1].ratio).map(([w]) => w);
 }
+// 킵에서 덧붙인 단어(keptOnly)는 기기마다 다르므로 Day 목록에 넣지 않고, 순번으로 압축하는 기록(내보내기·클라우드)에서도 뺀다
+// — 순번이 기기마다 달라 다른 단어 기록으로 들어가는 것을 막는다. 그 단어의 기록은 이 기기에만 남는다.
+const KEPT_DAY = ADDED_DAY + 1;
+function withoutKeptOnly(fn) {
+  return function (...args) {
+    const i = WORDS.findIndex(w => w.keptOnly);
+    if (i < 0) return fn.apply(this, args);
+    const tail = WORDS.splice(i);
+    try { return fn.apply(this, args); } finally { WORDS.push(...tail); }
+  };
+}
+packWordMeta = withoutKeptOnly(packWordMeta);
+packCloudState = withoutKeptOnly(packCloudState);
 const baseBuildSession = buildSession;
 buildSession = function (size, qMode, srcMode) {
   if (srcMode === 'frequent') return frequentWords().slice(0, size);
@@ -207,6 +220,19 @@ const __api = {
       return Object.assign(frequentInfo(w.en), { en: w.en, ko: getCoreMeaning(w), day: w.day, cl: w.cl || null, added: !!w.added, setFails: n, kept,
         label: [n >= FREQUENT_MIN_SET_FAILS ? '세트에서 ' + n + '회 틀림' : '', kept ? '문제 풀다 모름' : ''].filter(Boolean).join(' · ') });
     });
+  },
+  // 킵 목록 중 단어장에 없는 단어를 WORDS 끝에 덧붙인다 (사용자 요청 2026-11-03: 750개에 없어도 자주 틀린 단어로 훈련).
+  // 뜻이 있는 것만 (직접 입력은 뜻을 보고 영어를 쓴다). 뜻을 고치면 따라간다. 돌려주는 값 = 뜻이 없어 빠진 개수.
+  syncKept(list) {
+    let noKo = 0;
+    (list || []).filter(k => !k.done).forEach(k => {
+      const ko = String(k.ko || '').trim(), extra = WORDS.find(w => w.keptOnly && w.en.toLowerCase() === k.w.toLowerCase());
+      if (extra) { if (ko) extra.ko = ko; return; }
+      if (__api.lookup(k.w)) return;
+      if (!ko) { noKo++; return; }
+      WORDS.push({ en: k.w, ko, cl: null, day: KEPT_DAY, added: true, keptOnly: true });
+    });
+    return noKo;
   },
   // 킵 목록 중 단어장에 있는데 아직 표시가 없는 단어를 '문제 풀다 모름'으로 (단어장에 새로 들어온 단어 포함)
   flagKept(list) {

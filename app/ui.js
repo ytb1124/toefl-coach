@@ -336,9 +336,10 @@
       h('strong', null, `킵한 단어 ${kept}개 →`),
       h('p', { class: 'muted small' }, '문제를 풀다가 모르는 단어를 선택해 저장한 목록입니다.')));
     if (!api.hasData()) { main.append(vocabImportCard(api, true)); return; }
-    if (api.flagKept && keepApp().words) api.flagKept(keepApp().words());
+    let keptNoKo = 0;
+    if (keepApp().words) { if (api.syncKept) keptNoKo = api.syncKept(keepApp().words()); if (api.flagKept) api.flagKept(keepApp().words()); }
 
-    main.append(frequentCard(api));
+    main.append(frequentCard(api, keptNoKo));
     const r = api.resumable();
     if (r) {
       main.append(h('section', { class: 'card hero' },
@@ -383,16 +384,17 @@
 
   // 자주 틀린 단어: 평소와 같은 풀이(같은 날 반복)로 범위만 바뀐다. 출처(단어장 Day / 문제 풀다 킵)·주제(단어장 분류) 필터.
   let freqFilter = { src: 'all' };
-  function frequentCard(api) {
+  function frequentCard(api, keptNoKo) {
     if (!api.frequentList) return null;
     const all = api.frequentList();
     const srcOf = w => w.kept ? 'tpo' : 'set';
     const list = all.filter(w => freqFilter.src === 'all' || (freqFilter.src === 'tpo' ? w.kept : w.setFails >= 3));
     const nSet = all.filter(w => w.setFails >= 3).length, nTpo = all.filter(w => w.kept).length;
-    const sel = h('select', { onchange: e => { freqFilter.src = e.target.value; render(); } }, [['all', `전체 ${all.length}`], ['set', `세트에서 3회 이상 틀림 ${nSet}`], ['tpo', `문제 풀다 모름 ${nTpo}`]].map(([v, l]) => h('option', { value: v, selected: freqFilter.src === v }, l)));
+    const sel = h('select', { onchange: e => { freqFilter.src = e.target.value; render(); } }, [['all', `전체 ${all.length}`], ['set', `세트에서 3회 이상 틀림 ${nSet}`], ['tpo', `킵한 단어 ${nTpo}`]].map(([v, l]) => h('option', { value: v, selected: freqFilter.src === v }, l)));
     return h('section', { class: 'card' },
       h('h2', null, `자주 틀린 단어 ${all.length}개`),
-      h('p', { class: 'small muted' }, '세트를 공부하면서 직접 입력으로 3회 이상 틀린 단어와, 문제를 풀다 \'뜻을 몰랐다\'로 킵한 단어입니다. 세트를 나누기 전에 틀린 횟수는 세지 않습니다. 마지막으로 틀린 날 뒤 서로 다른 2일 연속으로 맞히면 빠집니다.'),
+      h('p', { class: 'small muted' }, '세트를 공부하면서 직접 입력으로 3회 이상 틀린 단어와 킵한 단어(단어장에 없는 단어 포함)입니다. 세트를 나누기 전에 틀린 횟수는 세지 않습니다. 마지막으로 틀린 날 뒤 서로 다른 2일 연속으로 맞히면 빠집니다.'),
+      keptNoKo ? h('p', { class: 'small notice' }, `단어장에 없는 킵 단어 ${keptNoKo}개는 뜻이 없어 빠졌습니다. `, h('a', { href: '#/keep' }, '킵한 단어'), '에서 뜻을 적으면 들어옵니다.') : null,
       all.length ? h('div', { class: 'row wrap' }, sel, h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 암기 시작 (최대 30개)'))
         : h('p', { class: 'muted small' }, '아직 없습니다. 세트를 공부하면 여기에 모입니다.'),
       list.length ? h('details', null, h('summary', null, `목록 ${list.length}개`),
