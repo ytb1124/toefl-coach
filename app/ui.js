@@ -395,7 +395,7 @@
       h('h2', null, `자주 틀린 단어 ${all.length}개`),
       h('p', { class: 'small muted' }, '세트를 공부하면서 직접 입력으로 3회 이상 틀린 단어와 킵한 단어(단어장에 없는 단어 포함)입니다. 세트를 나누기 전에 틀린 횟수는 세지 않습니다. 마지막으로 틀린 날 뒤 서로 다른 2일 연속으로 맞히면 빠집니다.'),
       keptNoKo ? h('p', { class: 'small notice' }, `단어장에 없는 킵 단어 ${keptNoKo}개는 뜻이 없어 빠졌습니다. `, h('a', { href: '#/keep' }, '킵한 단어'), '에서 뜻을 적으면 들어옵니다.') : null,
-      all.length ? h('div', { class: 'row wrap' }, sel, h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 암기 시작 (최대 30개)'))
+      all.length ? h('div', { class: 'row wrap' }, sel, h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 전부 암기 시작'))
         : h('p', { class: 'muted small' }, '아직 없습니다. 세트를 공부하면 여기에 모입니다.'),
       list.length ? h('details', null, h('summary', null, `목록 ${list.length}개`),
         h('ul', { class: 'wordlist' }, list.slice(0, 300).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko), ' ',

@@ -157,7 +157,6 @@ function frequentInfo(en) {
 // 범위(사용자 요청 2026-11-01): ① 세트 750에서 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(나누기 전 횟수는 plan.base로 뺌)
 // ② 문제를 풀다 '뜻을 몰랐다'로 킵한 단어. 마지막 틀린 날 뒤 서로 다른 2일 연속 맞히면 빠진다. 많이 틀린 순.
 const FREQUENT_MIN_SET_FAILS = 3;
-const FREQUENT_SESSION_SIZE = 30;
 function setFails(en, plan = loadChunkPlan()) {
   if (!plan || !plan.base || !(en in plan.base)) return 0;
   return Math.max(0, Number(getWordMeta(en).failures.typed || 0) - plan.base[en]);
@@ -188,7 +187,7 @@ buildSession = function (size, qMode, srcMode) {
 };
 // '자주 틀린 단어' 범위로 오늘 암기(같은 날 반복)를 시작한다 — 풀이 방식은 세트와 똑같다.
 function startFrequentSession() {
-  const candidates = frequentWords().filter(w => !getTodayLearningMeta(w.en).todayMastered).slice(0, FREQUENT_SESSION_SIZE);
+  const candidates = frequentWords().filter(w => !getTodayLearningMeta(w.en).todayMastered);  // 개수 제한 없음 (사용자 요청 2026-11-03)
   if (!candidates.length) { alert('오늘 할 자주 틀린 단어가 없습니다.'); return false; }
   learningGoalMode = 'same_day'; quizMode = 'typed'; sessionQueue = candidates; sessionIdx = 0;
   sessionStats = {sure:0, vague:0, guess:0, quickRepairs:0, quickRepairSuccess:0, stopped:[]};
