@@ -100,16 +100,19 @@
       return h('div', null, h('p', { class: 'small' }, h('b', null, side.side)), h('ul', { class: 'hk-outline' }, side.lines.map(o => h('li', null, o.en))));
     }
     const labelRow = it => h('p', { class: 'small' }, '라벨 순서: ', it.parts.map((p, i) => [i ? ' → ' : '', h('span', { class: 'chip hk-label' }, p.label)]));
-    function noData(main, done) {
-      ap(main, h('section', { class: 'card' }, h('p', { class: 'notice' }, '해커스 자료를 불러오지 못했습니다 (비공개 자료). Mac에서 start.command로 열거나 토큰을 넣으세요.'),
-        h('button', { class: 'primary', onclick: () => done({ skipped: true }) }, '넘어가기')));
+    // 자료가 없으면 다른 탭과 같은 토큰 카드 (기기마다 한 번). 자료는 있는데 이 문제만 없으면 넘어가기만.
+    function noData(main, task, done) {
+      const skip = h('button', { class: 'link', onclick: () => done({ skipped: true }) }, '넘어가기');
+      if (root.HACKERS) return ap(main, h('section', { class: 'card' }, h('p', { class: 'notice' }, '이 해커스 문제를 자료에서 찾지 못했습니다.'), skip));
+      ap(main, ...root.ZhanData.tokenCard(h, { title: '해커스 쓰기', lead: '해커스 모범답안은 비공개 자료입니다. 이 기기에 GitHub 토큰을 한 번 넣으면 불러옵니다 (리스닝·리딩 탭과 같은 토큰).',
+        retry: ok => ensure(() => { ok(!!root.HACKERS); if (root.HACKERS) { rc(main); run(main, task, done); } }) }), skip);
     }
 
     // ---- 한 문제 ----
     function run(main, task, done) {
       ensure(() => {
         const it = item(task.task || task.id);
-        if (!it) return noData(main, done);
+        if (!it) return noData(main, task, done);
         const type = typeOf(it.id), T = TIME[type], cold = isCold(it.id);
         const name = type === 'E' ? 'Write an Email' : 'Academic Discussion';
         ap(main, h('p', { class: 'kicker' }, `⑤ 쓰기 · 해커스 ${name} Day ${dayOf(it.id)} · ${it.title} · `, h('span', { class: 'muted' }, cold ? '처음 보는 문제 (실전)' : '라벨 재구성')));
