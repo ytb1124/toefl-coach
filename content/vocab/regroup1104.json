@@ -1,0 +1,3058 @@
+{
+"_help": "2026-11-04 사용자 구성: 세트 1–3(set750)은 그대로, set750 세트 4–15의 600개 + 2026真题_모를단어_01-54.xlsx 단어 시트의 새 단어(E=완전히 모를 것 같음, F=긴가민가)로 12세트를 다시 만든다. 표현 시트의 새 표현(XE/XF)은 별도 표현 세트. added = 단어장·set750에 없던 단어·표현(엑셀 뜻).",
+"carry": 3,
+"added": [
+{
+"en": "dynamics",
+"ko": "역학, 동역학"
+},
+{
+"en": "organism",
+"ko": "유기체, 생물"
+},
+{
+"en": "substance",
+"ko": "물질, 성분"
+},
+{
+"en": "refreshment",
+"ko": "다과, 음료"
+},
+{
+"en": "characterize",
+"ko": "특징짓다"
+},
+{
+"en": "uncover",
+"ko": "밝혀내다, 드러내다"
+},
+{
+"en": "clarity",
+"ko": "명확성, 선명함"
+},
+{
+"en": "nuance",
+"ko": "뉘앙스, 미묘한 차이"
+},
+{
+"en": "trait",
+"ko": "특성, 형질"
+},
+{
+"en": "acoustic",
+"ko": "음향의, 어쿠스틱의"
+},
+{
+"en": "colony",
+"ko": "군집, 집단 서식지"
+},
+{
+"en": "dietary",
+"ko": "식이의, 식단의"
+},
+{
+"en": "discipline",
+"ko": "학문 분야, 규율"
+},
+{
+"en": "particle",
+"ko": "입자, 미립자"
+},
+{
+"en": "sensory",
+"ko": "감각의, 감각 기관의"
+},
+{
+"en": "moisture",
+"ko": "습기, 수분"
+},
+{
+"en": "reef",
+"ko": "암초, 산호초"
+},
+{
+"en": "reflective",
+"ko": "성찰적인, 사색적인"
+},
+{
+"en": "beneath",
+"ko": "~ 아래에, ~ 밑에"
+},
+{
+"en": "communal",
+"ko": "공동의, 공용의"
+},
+{
+"en": "intensive",
+"ko": "집약적인, 집중적인"
+},
+{
+"en": "interfere",
+"ko": "간섭하다, 방해하다"
+},
+{
+"en": "millennia",
+"ko": "수천 년"
+},
+{
+"en": "molecular",
+"ko": "분자의, 분자 수준의"
+},
+{
+"en": "originate",
+"ko": "기원하다, 생겨나다"
+},
+{
+"en": "quad",
+"ko": "(대학) 중앙 안뜰"
+},
+{
+"en": "vendor",
+"ko": "판매자, 노점상"
+},
+{
+"en": "conservationist",
+"ko": "환경 보호 운동가"
+},
+{
+"en": "score",
+"ko": "점수, 악보"
+},
+{
+"en": "adoption",
+"ko": "채택, 도입 / 입양"
+},
+{
+"en": "aesthetic",
+"ko": "미적인, 심미적인 / (명) 미학"
+},
+{
+"en": "anatomy",
+"ko": "해부학, 신체 구조"
+},
+{
+"en": "calculus",
+"ko": "미적분학"
+},
+{
+"en": "disturbance",
+"ko": "교란, 방해"
+},
+{
+"en": "excess",
+"ko": "과잉, 초과 / (형) 과도한"
+},
+{
+"en": "fertilizer",
+"ko": "비료"
+},
+{
+"en": "fungus",
+"ko": "균류, 곰팡이, 버섯"
+},
+{
+"en": "hierarchy",
+"ko": "위계, 계층 구조"
+},
+{
+"en": "landfill",
+"ko": "매립지, 쓰레기 매립장"
+},
+{
+"en": "metabolic",
+"ko": "신진대사의"
+},
+{
+"en": "nonetheless",
+"ko": "그럼에도 불구하고"
+},
+{
+"en": "optical",
+"ko": "광학의, 시각의"
+},
+{
+"en": "textile",
+"ko": "직물, 섬유 / (형) 직물의"
+},
+{
+"en": "microbe",
+"ko": "미생물"
+},
+{
+"en": "quarter",
+"ko": "분기, 학기 / 4분의 1"
+},
+{
+"en": "alumni",
+"ko": "동문, 졸업생들"
+},
+{
+"en": "belonging",
+"ko": "소지품, 소유물"
+},
+{
+"en": "departure",
+"ko": "벗어남, 이탈 / 출발"
+},
+{
+"en": "eligible",
+"ko": "자격이 있는"
+},
+{
+"en": "erosion",
+"ko": "침식, 부식"
+},
+{
+"en": "fluid",
+"ko": "유체의, 유동적인 / (명) 유체"
+},
+{
+"en": "glacier",
+"ko": "빙하"
+},
+{
+"en": "humidity",
+"ko": "습도"
+},
+{
+"en": "inject",
+"ko": "주입하다, 주사하다"
+},
+{
+"en": "lease",
+"ko": "임대차 계약 / (동) 임대하다"
+},
+{
+"en": "pest",
+"ko": "해충, 유해 동물"
+},
+{
+"en": "precipitation",
+"ko": "강수(량), 강우"
+},
+{
+"en": "proceed",
+"ko": "(proceeds) 수익금"
+},
+{
+"en": "rack",
+"ko": "진열대, 선반"
+},
+{
+"en": "sanitation",
+"ko": "위생, 하수 처리"
+},
+{
+"en": "segment",
+"ko": "나누다, 분절하다 / (명) 부분"
+},
+{
+"en": "sophomore",
+"ko": "2학년생"
+},
+{
+"en": "spectacle",
+"ko": "장관, 볼거리"
+},
+{
+"en": "synthetic",
+"ko": "합성의, 인공의"
+},
+{
+"en": "tablet",
+"ko": "석판, 판 / 태블릿"
+},
+{
+"en": "territorial",
+"ko": "영역을 지키는, 텃세를 부리는"
+},
+{
+"en": "elusive",
+"ko": "찾기 힘든, 포착하기 어려운"
+},
+{
+"en": "acquisition",
+"ko": "습득, 획득"
+},
+{
+"en": "amenities",
+"ko": "편의 시설"
+},
+{
+"en": "brass",
+"ko": "금관악기 / 황동"
+},
+{
+"en": "bulb",
+"ko": "전구, 구근"
+},
+{
+"en": "carve",
+"ko": "(시간을) 쪼개어 내다, 조각하다"
+},
+{
+"en": "cascade",
+"ko": "연쇄적으로 퍼지다, 쏟아지다 / (명) 폭포"
+},
+{
+"en": "cater",
+"ko": "음식을 제공하다, 맞추다"
+},
+{
+"en": "cathedral",
+"ko": "대성당"
+},
+{
+"en": "circulation",
+"ko": "순환, 혈액 순환"
+},
+{
+"en": "commentary",
+"ko": "해설, 논평 / 사회 비평"
+},
+{
+"en": "confidential",
+"ko": "기밀의, 비밀인"
+},
+{
+"en": "corridor",
+"ko": "(야생동물) 이동 통로"
+},
+{
+"en": "craftsmanship",
+"ko": "장인 정신, 솜씨"
+},
+{
+"en": "dairy",
+"ko": "유제품 / 낙농의"
+},
+{
+"en": "dissolve",
+"ko": "녹다, 녹이다 / 해산하다"
+},
+{
+"en": "drought",
+"ko": "가뭄"
+},
+{
+"en": "embedded",
+"ko": "내장된, 박혀 있는"
+},
+{
+"en": "enthusiast",
+"ko": "애호가, 열광자"
+},
+{
+"en": "eruption",
+"ko": "분출, 폭발"
+},
+{
+"en": "exaggerate",
+"ko": "과장하다"
+},
+{
+"en": "exemplify",
+"ko": "보여주다, 예증하다"
+},
+{
+"en": "fade",
+"ko": "희미해지다, 바래다"
+},
+{
+"en": "govern",
+"ko": "통치하다, 규율하다"
+},
+{
+"en": "grind",
+"ko": "갈다, 빻다"
+},
+{
+"en": "immersive",
+"ko": "몰입감 있는"
+},
+{
+"en": "inquire",
+"ko": "문의하다, 알아보다"
+},
+{
+"en": "intent",
+"ko": "의도, 의향"
+},
+{
+"en": "interference",
+"ko": "간섭(현상)"
+},
+{
+"en": "literacy",
+"ko": "문해력, 읽고 쓰는 능력"
+},
+{
+"en": "reliance",
+"ko": "의존, 의지"
+},
+{
+"en": "reproduction",
+"ko": "번식, 생식 / 복제"
+},
+{
+"en": "reptile",
+"ko": "파충류"
+},
+{
+"en": "retreat",
+"ko": "수련회, 휴양지 / 후퇴"
+},
+{
+"en": "tale",
+"ko": "이야기, 교훈담"
+},
+{
+"en": "bustle",
+"ko": "북적이다 / 북적임"
+},
+{
+"en": "grapple",
+"ko": "씨름하다, 고심하다"
+},
+{
+"en": "plumb",
+"ko": "(plumbing) 배관"
+},
+{
+"en": "polyp",
+"ko": "폴립(산호충)"
+},
+{
+"en": "precursor",
+"ko": "선구자, 전신(前身)"
+},
+{
+"en": "predecessor",
+"ko": "전신, 선구자"
+},
+{
+"en": "stark",
+"ko": "극명한, 황량한"
+},
+{
+"en": "tinker",
+"ko": "손질하다, 만지작거리다"
+},
+{
+"en": "vocalization",
+"ko": "발성, 울음소리"
+},
+{
+"en": "vulnerability",
+"ko": "취약성, 연약함"
+},
+{
+"en": "accountable",
+"ko": "책임감 있는"
+},
+{
+"en": "algae",
+"ko": "조류, 해조류"
+},
+{
+"en": "aquatic",
+"ko": "수생의, 물에 사는"
+},
+{
+"en": "array",
+"ko": "다양한 집합, 배열"
+},
+{
+"en": "aspiration",
+"ko": "열망, 포부"
+},
+{
+"en": "banquet",
+"ko": "연회, 만찬"
+},
+{
+"en": "bodily",
+"ko": "신체의"
+},
+{
+"en": "captive",
+"ko": "사육된, 포획된"
+},
+{
+"en": "cavity",
+"ko": "충치, 구멍 / 공동"
+},
+{
+"en": "constructive",
+"ko": "건설적인"
+},
+{
+"en": "coordination",
+"ko": "협응, 조정"
+},
+{
+"en": "cylindrical",
+"ko": "원통형의"
+},
+{
+"en": "deforestation",
+"ko": "삼림 벌채"
+},
+{
+"en": "densely",
+"ko": "빽빽하게, 밀집하여"
+},
+{
+"en": "deploy",
+"ko": "배치하다, 투입하다"
+},
+{
+"en": "derived",
+"ko": "유래한, 파생된 / (동) 얻다"
+},
+{
+"en": "dispose",
+"ko": "처리하다, 버리다"
+},
+{
+"en": "dominance",
+"ko": "지배력, 우위"
+},
+{
+"en": "drift",
+"ko": "표류 (연안 모래 이동)"
+},
+{
+"en": "dye",
+"ko": "염료"
+},
+{
+"en": "empathy",
+"ko": "공감, 감정 이입"
+},
+{
+"en": "expressionism",
+"ko": "표현주의"
+},
+{
+"en": "extraction",
+"ko": "채굴, 추출"
+},
+{
+"en": "extraterrestrial",
+"ko": "외계의 / (명) 외계인"
+},
+{
+"en": "favorable",
+"ko": "유리한, 우호적인"
+},
+{
+"en": "fertile",
+"ko": "비옥한"
+},
+{
+"en": "glow",
+"ko": "빛나다, 빛을 내다"
+},
+{
+"en": "inventory",
+"ko": "재고, 물품 목록"
+},
+{
+"en": "neural",
+"ko": "신경의, 신경망의"
+},
+{
+"en": "neutron",
+"ko": "중성자"
+},
+{
+"en": "nurture",
+"ko": "양육 환경, 교육 / 기르다"
+},
+{
+"en": "outage",
+"ko": "(전력 등) 중단, 정전"
+},
+{
+"en": "quest",
+"ko": "탐구, 추구"
+},
+{
+"en": "relocate",
+"ko": "장소를 옮기다, 이전하다"
+},
+{
+"en": "rotation",
+"ko": "윤작, 순환"
+},
+{
+"en": "screw",
+"ko": "나사, 나선 장치"
+},
+{
+"en": "soar",
+"ko": "높이 솟다, 치솟다"
+},
+{
+"en": "subtly",
+"ko": "은근히, 미묘하게"
+},
+{
+"en": "thereby",
+"ko": "그로 인해, 그렇게 함으로써"
+},
+{
+"en": "tide",
+"ko": "조수, 밀물과 썰물"
+},
+{
+"en": "tortoise",
+"ko": "거북이"
+},
+{
+"en": "transcend",
+"ko": "초월하다, 넘어서다"
+},
+{
+"en": "transparency",
+"ko": "투명성"
+},
+{
+"en": "unparalleled",
+"ko": "전례 없는, 비할 데 없는"
+},
+{
+"en": "unveil",
+"ko": "드러내다, 밝혀내다"
+},
+{
+"en": "versatility",
+"ko": "다용도성, 다재다능함"
+},
+{
+"en": "vineyard",
+"ko": "포도밭"
+},
+{
+"en": "weave",
+"ko": "(이야기를) 엮다, 짜다"
+},
+{
+"en": "weed",
+"ko": "잡초"
+},
+{
+"en": "circadian",
+"ko": "일주기의 (생체리듬)"
+},
+{
+"en": "cumulative",
+"ko": "누적되는, 점증적인"
+},
+{
+"en": "dwarf",
+"ko": "작아 보이게 하다, 압도하다 / (명) 왜성·난쟁이"
+},
+{
+"en": "enchant",
+"ko": "매혹하다"
+},
+{
+"en": "feudalism",
+"ko": "봉건제"
+},
+{
+"en": "grandeur",
+"ko": "웅장함, 장엄함"
+},
+{
+"en": "holistic",
+"ko": "전체론적인, 종합적인"
+},
+{
+"en": "impromptu",
+"ko": "즉흥적인"
+},
+{
+"en": "influx",
+"ko": "유입, 대량 유입"
+},
+{
+"en": "instrumental",
+"ko": "중요한, 도움이 되는"
+},
+{
+"en": "mitigation",
+"ko": "완화, 경감"
+},
+{
+"en": "narrate",
+"ko": "(이야기를) 들려주다, 서술하다"
+},
+{
+"en": "permafrost",
+"ko": "영구 동토층"
+},
+{
+"en": "pluralistic",
+"ko": "다원적인, 다수의"
+},
+{
+"en": "prone",
+"ko": "~하기 쉬운, 경향이 있는"
+},
+{
+"en": "render",
+"ko": "~로 만들다, 되게 하다"
+},
+{
+"en": "sabbatical",
+"ko": "안식년"
+},
+{
+"en": "sedimentary",
+"ko": "퇴적의"
+},
+{
+"en": "speculative",
+"ko": "사변적인, 추측에 근거한"
+},
+{
+"en": "tranquil",
+"ko": "고요한, 평온한"
+},
+{
+"en": "unearth",
+"ko": "발굴하다, 드러내다"
+},
+{
+"en": "upkeep",
+"ko": "유지 관리, 보수"
+},
+{
+"en": "virtuous",
+"ko": "덕이 있는 / 선순환의"
+},
+{
+"en": "accustomed",
+"ko": "익숙한"
+},
+{
+"en": "aloud",
+"ko": "소리 내어"
+},
+{
+"en": "amphibian",
+"ko": "양서류"
+},
+{
+"en": "aptitude",
+"ko": "적성"
+},
+{
+"en": "arguably",
+"ko": "아마도, 거의 확실히"
+},
+{
+"en": "armor",
+"ko": "갑옷"
+},
+{
+"en": "bloodstream",
+"ko": "혈류"
+},
+{
+"en": "boil",
+"ko": "결국 ~로 귀결되다"
+},
+{
+"en": "bolt",
+"ko": "번개 / (동) 달아나다"
+},
+{
+"en": "botany",
+"ko": "식물학"
+},
+{
+"en": "burrow",
+"ko": "굴 (땅속 보금자리)"
+},
+{
+"en": "canopy",
+"ko": "수관(나무 덮개), 차양"
+},
+{
+"en": "ceremonial",
+"ko": "의식의, 제례의"
+},
+{
+"en": "cinematography",
+"ko": "촬영(술), 영상미"
+},
+{
+"en": "civic",
+"ko": "시민의, 공공의"
+},
+{
+"en": "clearance",
+"ko": "재고 정리 할인 / 간격"
+},
+{
+"en": "cloak",
+"ko": "뒤덮다, 감싸다 / (명) 망토"
+},
+{
+"en": "confined",
+"ko": "제한된, 국한된"
+},
+{
+"en": "conformity",
+"ko": "순응, 획일성"
+},
+{
+"en": "courtyard",
+"ko": "안뜰, 마당"
+},
+{
+"en": "cultivate",
+"ko": "재배하다 / (관계·능력을) 기르다"
+},
+{
+"en": "curate",
+"ko": "(콘텐츠를) 선별하다, 큐레이션하다"
+},
+{
+"en": "decomposition",
+"ko": "분해, 부패"
+},
+{
+"en": "democratize",
+"ko": "대중화하다, 누구나 쓰게 하다"
+},
+{
+"en": "demographic",
+"ko": "인구통계학적인 / (명) 인구 집단"
+},
+{
+"en": "depiction",
+"ko": "묘사, 표현"
+},
+{
+"en": "descendant",
+"ko": "후손, 자손"
+},
+{
+"en": "digestion",
+"ko": "소화"
+},
+{
+"en": "disproportionately",
+"ko": "불균형하게, 지나치게"
+},
+{
+"en": "divergence",
+"ko": "차이, 분기"
+},
+{
+"en": "dull",
+"ko": "칙칙한, 지루한"
+},
+{
+"en": "eatery",
+"ko": "식당"
+},
+{
+"en": "empathetic",
+"ko": "공감하는, 공감 능력이 있는"
+},
+{
+"en": "encode",
+"ko": "암호화하다, 부호화하다"
+},
+{
+"en": "enlighten",
+"ko": "깨우치다, 알려 주다"
+},
+{
+"en": "existential",
+"ko": "실존적인"
+},
+{
+"en": "explicitly",
+"ko": "명시적으로"
+},
+{
+"en": "fairness",
+"ko": "공정함, 공평"
+},
+{
+"en": "fatigue",
+"ko": "피로"
+},
+{
+"en": "firsthand",
+"ko": "직접, 몸소"
+},
+{
+"en": "foil",
+"ko": "박(箔), 얇은 금속판"
+},
+{
+"en": "forager",
+"ko": "먹이 채집자 (일벌 등)"
+},
+{
+"en": "formative",
+"ko": "형성에 영향을 주는, 형성기의"
+},
+{
+"en": "frontier",
+"ko": "미개척 분야, 최전선 / 국경 지대"
+},
+{
+"en": "gala",
+"ko": "축제, 기념 행사 / 연회"
+},
+{
+"en": "gatherer",
+"ko": "채집자 / (hunter-gatherer) 수렵채집인"
+},
+{
+"en": "gauge",
+"ko": "측정하다, 가늠하다 / (명) 계기"
+},
+{
+"en": "geothermal",
+"ko": "지열의"
+},
+{
+"en": "goodwill",
+"ko": "선의, 호의"
+},
+{
+"en": "hectic",
+"ko": "정신없이 바쁜"
+},
+{
+"en": "hygiene",
+"ko": "위생"
+},
+{
+"en": "hygienic",
+"ko": "위생적인"
+},
+{
+"en": "insulate",
+"ko": "단열하다, 보온하다"
+},
+{
+"en": "intake",
+"ko": "섭취(량)"
+},
+{
+"en": "intonation",
+"ko": "음정, 억양"
+},
+{
+"en": "juggle",
+"ko": "(일·학업을) 병행하다, 저글링하다"
+},
+{
+"en": "keystone",
+"ko": "핵심 요소 / 핵심종"
+},
+{
+"en": "lesser",
+"ko": "덜 알려진, 덜한"
+},
+{
+"en": "leverage",
+"ko": "활용하다, 이용하다"
+},
+{
+"en": "limb",
+"ko": "팔다리"
+},
+{
+"en": "lime",
+"ko": "석회질의 / (명) 석회"
+},
+{
+"en": "maize",
+"ko": "옥수수"
+},
+{
+"en": "mangrove",
+"ko": "맹그로브"
+},
+{
+"en": "marginalized",
+"ko": "소외된, 주변화된"
+},
+{
+"en": "marvel",
+"ko": "놀라워하다 / (명) 경이"
+},
+{
+"en": "meteorologist",
+"ko": "기상학자"
+},
+{
+"en": "metric",
+"ko": "지표, 측정 기준"
+},
+{
+"en": "midway",
+"ko": "중간쯤, 중간에"
+},
+{
+"en": "millennium",
+"ko": "천년"
+},
+{
+"en": "moist",
+"ko": "축축한"
+},
+{
+"en": "momentum",
+"ko": "추진력, 탄력"
+},
+{
+"en": "monetary",
+"ko": "금전적인"
+},
+{
+"en": "mural",
+"ko": "벽화"
+},
+{
+"en": "nectar",
+"ko": "꽃꿀, 과즙"
+},
+{
+"en": "negotiate",
+"ko": "협상하다 / (문제를) 조율·타개하다"
+},
+{
+"en": "nocturnal",
+"ko": "야행성의"
+},
+{
+"en": "nomadic",
+"ko": "유목의, 유랑하는"
+},
+{
+"en": "notch",
+"ko": "등급, 수준 / (top-notch) 최고급의"
+},
+{
+"en": "observatory",
+"ko": "천문대, 관측소"
+},
+{
+"en": "onboard",
+"ko": "(신입을) 적응시키다, 온보딩하다"
+},
+{
+"en": "outlet",
+"ko": "콘센트 / 판로, 배출구"
+},
+{
+"en": "oyster",
+"ko": "굴 (조개)"
+},
+{
+"en": "pavement",
+"ko": "포장도로 / (미) 보도"
+},
+{
+"en": "pavilion",
+"ko": "전시관, 파빌리온"
+},
+{
+"en": "pedestrian",
+"ko": "보행자"
+},
+{
+"en": "peek",
+"ko": "엿보기, 잠깐 봄 / (동) 엿보다"
+},
+{
+"en": "pesticide",
+"ko": "농약"
+},
+{
+"en": "physiological",
+"ko": "생리적인, 생리학의"
+},
+{
+"en": "polarization",
+"ko": "양극화"
+},
+{
+"en": "pollen",
+"ko": "꽃가루"
+},
+{
+"en": "potter",
+"ko": "도공, 도예가"
+},
+{
+"en": "practicality",
+"ko": "실용성"
+},
+{
+"en": "practitioner",
+"ko": "실천가, 전문가"
+},
+{
+"en": "raffle",
+"ko": "추첨, 경품 추첨"
+},
+{
+"en": "replica",
+"ko": "복제품"
+},
+{
+"en": "retention",
+"ko": "기억(력), 보유율"
+},
+{
+"en": "seafarer",
+"ko": "항해자, 선원"
+},
+{
+"en": "seamlessly",
+"ko": "매끄럽게, 원활하게"
+},
+{
+"en": "serpent",
+"ko": "뱀 / (악기) 세르펜트"
+},
+{
+"en": "shallow",
+"ko": "얕은"
+},
+{
+"en": "skepticism",
+"ko": "회의론, 회의적 태도"
+},
+{
+"en": "spatial",
+"ko": "공간의"
+},
+{
+"en": "sphere",
+"ko": "구(球), 구체"
+},
+{
+"en": "stake",
+"ko": "이해관계, 위험 부담 / (명) 말뚝"
+},
+{
+"en": "stall",
+"ko": "노점, 가판대"
+},
+{
+"en": "stir",
+"ko": "젓다, 섞다 / (감정을) 불러일으키다"
+},
+{
+"en": "strand",
+"ko": "가닥, 줄 / (동) 좌초시키다"
+},
+{
+"en": "stumble",
+"ko": "우연히 발견하다 / 비틀거리다"
+},
+{
+"en": "sulfuric",
+"ko": "황산의"
+},
+{
+"en": "sweep",
+"ko": "(sweeping) 탁 트인, 전경이 넓은"
+},
+{
+"en": "symmetry",
+"ko": "대칭, 균형"
+},
+{
+"en": "tidal",
+"ko": "조수의 (밀물·썰물)"
+},
+{
+"en": "tow",
+"ko": "견인하다"
+},
+{
+"en": "transit",
+"ko": "운송, 이동 / 대중교통"
+},
+{
+"en": "unforeseen",
+"ko": "예상치 못한"
+},
+{
+"en": "urge",
+"ko": "촉구하다"
+},
+{
+"en": "vibrate",
+"ko": "진동하다"
+},
+{
+"en": "wipe",
+"ko": "쓸어버리다, 전멸시키다"
+},
+{
+"en": "allow for",
+"ko": "~을 가능하게 하다"
+},
+{
+"en": "Will do",
+"ko": "그럴게요, 알겠어요 (응답 표현)"
+},
+{
+"en": "break down",
+"ko": "(자세히) 분석·설명하다 / 분해되다"
+},
+{
+"en": "follow up",
+"ko": "후속 연락을 하다"
+},
+{
+"en": "not without",
+"ko": "~이 따르는, ~이 없지 않은"
+},
+{
+"en": "work for",
+"ko": "~에게 괜찮다, 편하다"
+},
+{
+"en": "get in",
+"ko": "(기차 등이) 도착하다 / 들어가다"
+},
+{
+"en": "point to",
+"ko": "~을 가리키다, ~을 시사하다"
+},
+{
+"en": "reach out",
+"ko": "연락하다, 문의하다"
+},
+{
+"en": "align with",
+"ko": "~와 일치하다, 맞추다"
+},
+{
+"en": "advocate for",
+"ko": "~을 옹호하다, 지지하다"
+},
+{
+"en": "come with",
+"ko": "~에 따르다, 수반되다"
+},
+{
+"en": "interfere with",
+"ko": "~을 방해하다"
+},
+{
+"en": "look to",
+"ko": "look to + 동사: ~하려고 하다 / ~에 기대다"
+},
+{
+"en": "could use",
+"ko": "~이 필요하다"
+},
+{
+"en": "in turn",
+"ko": "결과적으로, 차례로"
+},
+{
+"en": "look into",
+"ko": "알아보다, 조사하다"
+},
+{
+"en": "stop by",
+"ko": "들르다"
+},
+{
+"en": "derive from",
+"ko": "~에서 유래하다, 얻어지다"
+},
+{
+"en": "pave the way for",
+"ko": "~의 길을 열다, ~의 토대를 마련하다"
+},
+{
+"en": "aid in",
+"ko": "~을 돕다"
+},
+{
+"en": "make it to",
+"ko": "(제시간에) 도착하다"
+},
+{
+"en": "take up",
+"ko": "(취미 등을) 시작하다 / (시간·공간을) 차지하다"
+},
+{
+"en": "turn in",
+"ko": "제출하다"
+},
+{
+"en": "work out",
+"ko": "(일이) 잘 풀리다 / 운동하다"
+},
+{
+"en": "get around",
+"ko": "get around to ~: (미루던 일을) 할 짬을 내다 / 돌아다니다"
+},
+{
+"en": "reach out to",
+"ko": "연락하다"
+},
+{
+"en": "run into",
+"ko": "~와 우연히 마주치다 / (문제에) 부딪히다"
+},
+{
+"en": "scheduling conflict",
+"ko": "일정 충돌"
+},
+{
+"en": "take someone off (a list)",
+"ko": "take (time) off: (휴가로) 쉬다 / 명단에서 빼다"
+},
+{
+"en": "that said",
+"ko": "그래도, 그렇긴 해도"
+},
+{
+"en": "emerge as",
+"ko": "~로 부상하다"
+},
+{
+"en": "all about",
+"ko": "know all about ~: ~에 대해 훤히 알다 / ~가 전부다"
+},
+{
+"en": "build on",
+"ko": "~을 발전시키다, 바탕으로 쌓아가다"
+},
+{
+"en": "in the meantime",
+"ko": "그동안"
+},
+{
+"en": "inquire about",
+"ko": "~에 대해 문의하다"
+},
+{
+"en": "make up",
+"ko": "make up for ~: ~을 만회·보상하다 / 구성하다"
+},
+{
+"en": "take over",
+"ko": "(시간이) ~ 넘게 걸리다(takes over an hour) / 인계받다"
+},
+{
+"en": "unintended consequences",
+"ko": "의도하지 않은 결과"
+},
+{
+"en": "posit that",
+"ko": "~라고 주장(가정)하다"
+},
+{
+"en": "resonate with",
+"ko": "~의 공감을 얻다"
+},
+{
+"en": "date back",
+"ko": "(연대가) ~까지 거슬러 올라가다"
+},
+{
+"en": "fill up",
+"ko": "(자리가) 꽉 차다, 매진되다"
+},
+{
+"en": "fly out",
+"ko": "(비행기로) 떠나다"
+},
+{
+"en": "get off",
+"ko": "일을 끝내다, 퇴근하다"
+},
+{
+"en": "head out",
+"ko": "출발하다, 나가다"
+},
+{
+"en": "kick off",
+"ko": "(행사가) 시작되다"
+},
+{
+"en": "miss out",
+"ko": "(기회를) 놓치다"
+},
+{
+"en": "reflect on",
+"ko": "~을 돌아보며 생각하다"
+},
+{
+"en": "take on",
+"ko": "(일·역할을) 맡다 / 맞서다"
+},
+{
+"en": "turns out",
+"ko": "알고 보니, 결국 ~로 밝혀지다"
+},
+{
+"en": "wrap up",
+"ko": "마무리하다, 끝내다"
+},
+{
+"en": "a glimpse into",
+"ko": "~을 엿볼 수 있는 기회"
+},
+{
+"en": "buzz with",
+"ko": "~로 북적이다"
+},
+{
+"en": "cornerstone of",
+"ko": "~의 초석, 근간"
+},
+{
+"en": "delve into",
+"ko": "~을 깊이 파고들다"
+},
+{
+"en": "gain traction",
+"ko": "탄력을 받다, 인기를 얻다"
+},
+{
+"en": "grapple with",
+"ko": "~와 씨름하다, 고심하다"
+},
+{
+"en": "tailor ... to",
+"ko": "~에 맞춰 설계하다, 맞춤화하다"
+},
+{
+"en": "tap into",
+"ko": "(무의식 등을) 끌어내다, 활용하다"
+},
+{
+"en": "tinker with",
+"ko": "~을 손보다, 개량하다"
+},
+{
+"en": "arrange for",
+"ko": "~을 마련하다, 준비하다"
+},
+{
+"en": "be rooted in",
+"ko": "~에 뿌리를 두다, ~에 근거하다"
+},
+{
+"en": "clean up after",
+"ko": "~의 뒤처리를 하다"
+},
+{
+"en": "commit to",
+"ko": "~에 약정하다, 전념하다"
+},
+{
+"en": "conform to",
+"ko": "~에 순응하다, 따르다"
+},
+{
+"en": "drop off",
+"ko": "(물건을) 맡기다"
+},
+{
+"en": "even as",
+"ko": "~하는 와중에도, ~하면서도"
+},
+{
+"en": "fall apart",
+"ko": "무너지다, 부서지다"
+},
+{
+"en": "give back",
+"ko": "환원하다, 보답하다"
+},
+{
+"en": "go over",
+"ko": "검토하다, 짚고 넘어가다"
+},
+{
+"en": "it turns out",
+"ko": "알고 보니 ~이다"
+},
+{
+"en": "keep track of",
+"ko": "~을 추적하다, 기록하다"
+},
+{
+"en": "lean in",
+"ko": "몸을 기울이다"
+},
+{
+"en": "miss out on",
+"ko": "~을 놓치다"
+},
+{
+"en": "no later than",
+"ko": "늦어도 ~까지"
+},
+{
+"en": "over the course of",
+"ko": "~에 걸쳐서"
+},
+{
+"en": "pace yourself",
+"ko": "페이스를 조절하다"
+},
+{
+"en": "pass out",
+"ko": "나눠주다"
+},
+{
+"en": "run late",
+"ko": "(일정이) 늦게 끝나다, 늦어지다"
+},
+{
+"en": "so long",
+"ko": "안녕, 잘 가 (농담조 작별)"
+},
+{
+"en": "spread out",
+"ko": "넓게 퍼져 있다"
+},
+{
+"en": "stick with",
+"ko": "~을 계속 하다, 꾸준히 하다"
+},
+{
+"en": "turn to",
+"ko": "~을 택하다, ~을 쓰기 시작하다"
+},
+{
+"en": "adhere to",
+"ko": "~을 지키다, 따르다"
+},
+{
+"en": "all walks of life",
+"ko": "모든 계층의 사람들, 각계각층"
+},
+{
+"en": "tailored to",
+"ko": "~에 맞춰진, 맞춤형의"
+},
+{
+"en": "venture into",
+"ko": "~에 들어가다, 나서다"
+},
+{
+"en": "at the end of the day",
+"ko": "결국에는, 궁극적으로는"
+},
+{
+"en": "blur the line between",
+"ko": "~ 사이의 경계를 흐리다"
+},
+{
+"en": "echo chamber",
+"ko": "같은 의견만 되풀이되는 환경(에코 체임버)"
+},
+{
+"en": "Fair enough",
+"ko": "그럴 만하다, 알겠다 (면접 맞장구)"
+},
+{
+"en": "fast forward to",
+"ko": "(시간을 건너뛰어) ~로 넘어가다"
+},
+{
+"en": "go about",
+"ko": "(일을) 진행하다, 처리하다"
+},
+{
+"en": "hint at",
+"ko": "~을 넌지시 암시하다"
+},
+{
+"en": "I bet",
+"ko": "분명 ~일 거야"
+},
+{
+"en": "keystone species",
+"ko": "핵심종 (생태계를 떠받치는 핵심 생물)"
+},
+{
+"en": "push boundaries",
+"ko": "한계를 넓히다"
+},
+{
+"en": "work against",
+"ko": "~에 맞서 작용하다"
+}
+],
+"sets": [
+[
+"dynamics",
+"refreshments",
+"strenuous",
+"terrain",
+"millennia",
+"attire",
+"bombard",
+"lavish",
+"molecular",
+"conservationist",
+"steer",
+"tentativeness",
+"regime",
+"erosion",
+"flaw",
+"critique",
+"unconsolidated",
+"decompose",
+"cascade",
+"itinerary",
+"deteriorate",
+"encroach",
+"cater",
+"restock",
+"literacy",
+"eclectic",
+"swell",
+"impromptu",
+"amphitheater",
+"reliance",
+"comprise",
+"affluent",
+"drift",
+"capitalize",
+"bustling",
+"mundane",
+"dye",
+"curator",
+"comprehensive",
+"transparency",
+"repel",
+"mutilate",
+"faint",
+"unparalleled",
+"intimate",
+"staggering",
+"confined",
+"intramural",
+"influx",
+"sparse",
+"pledge",
+"conformity",
+"modernism",
+"forager",
+"discrete",
+"illusory",
+"patronage",
+"formative",
+"scorn",
+"aberrant",
+"revival",
+"meteorologist",
+"metric",
+"congeal",
+"obliterate",
+"sprawl",
+"virtuous",
+"pollen",
+"transitory",
+"indispensable",
+"symbolize",
+"potter",
+"archetypal",
+"ominous",
+"usher",
+"tidal"
+],
+[
+"organism",
+"vegetation",
+"invoke",
+"in earnest",
+"interfere",
+"buzz",
+"sturdy",
+"exempt",
+"originate",
+"score",
+"susceptible",
+"setback",
+"acclaim",
+"eligible",
+"fluid",
+"degrade",
+"intrinsically",
+"lateral",
+"carve",
+"kelp",
+"incite",
+"bizarre",
+"cathedral",
+"stifle",
+"interference",
+"intricate",
+"deficient",
+"holistic",
+"anthropologist",
+"reproduction",
+"culmination",
+"stationary",
+"dominance",
+"captivate",
+"distinct",
+"intrusive",
+"empathy",
+"cybernetic",
+"consumption",
+"transcend",
+"pornounced",
+"rigidly",
+"farmland",
+"unveil",
+"meticulously",
+"disclose",
+"cloak",
+"invertebrates",
+"instrumental",
+"inconceivable",
+"contend",
+"courtyard",
+"modernist",
+"foil",
+"improbable",
+"heyday",
+"pave",
+"frontier",
+"throughout",
+"invariably",
+"safeguard",
+"marvel",
+"midway",
+"realm",
+"voracious predator",
+"standout",
+"upkeep",
+"polarization",
+"invioable",
+"halt",
+"symposium",
+"practicality",
+"purposely",
+"resurgence",
+"vapor",
+"thoroughly"
+],
+[
+"substance",
+"breed",
+"neglect",
+"agile",
+"intensive",
+"disruption",
+"spontaneous",
+"chaotic",
+"quad",
+"microbe",
+"syllabus",
+"terminology",
+"comprehensible",
+"departure",
+"glacier",
+"delve",
+"eerie",
+"forage",
+"bulb",
+"mandatory",
+"inflict",
+"accommodate",
+"circulation",
+"streamline",
+"intent",
+"course through",
+"indiscriminately",
+"grandeur",
+"antimicrobial",
+"reptile",
+"idiosyncrasy",
+"cling to",
+"dispose",
+"catalyst",
+"cumbersome",
+"culminate in",
+"expressionism",
+"decay",
+"bias",
+"tortoise",
+"eccentric",
+"contradicting",
+"feasibility",
+"versatility",
+"reciprocal",
+"scores",
+"clearance",
+"kiln",
+"mitigation",
+"predominate",
+"furnish",
+"cultivate",
+"mound",
+"firsthand",
+"pragmatic",
+"proficient",
+"photovoltaic",
+"gala",
+"pitfall",
+"sacred",
+"salinity",
+"marginalized",
+"millennium",
+"flattery",
+"vulnerable",
+"stealth",
+"unprecedented",
+"physiological",
+"supersede",
+"controversial",
+"tackle",
+"practitioner",
+"collision",
+"repercussion",
+"voyage",
+"symmetry"
+],
+[
+"intrigue",
+"durability",
+"irrevocably",
+"standstill",
+"communal",
+"hub",
+"manifestation",
+"commence",
+"vendor",
+"quarter",
+"underlying",
+"formidable",
+"disparity",
+"belonging",
+"humidity",
+"deposition",
+"tenuous",
+"erect",
+"brass",
+"methodology",
+"propel",
+"glimpse into",
+"commentary",
+"tap",
+"inquire",
+"arduous",
+"to some extent",
+"feudalism",
+"aqueduct",
+"retreat",
+"disseminate",
+"endow",
+"derived",
+"chirping",
+"boon",
+"distinction",
+"extraction",
+"decipher",
+"breakthrough",
+"tide",
+"conducive to",
+"unwilling",
+"filtration",
+"vineyard",
+"propulsion",
+"entitled to",
+"civic",
+"larval",
+"narrate",
+"circuitous",
+"haul",
+"curate",
+"mythology",
+"fatigue",
+"undisputed",
+"desolate",
+"picky",
+"gatherer",
+"spearhead",
+"cramped",
+"savanna",
+"mangrove",
+"moist",
+"dimension",
+"coincide with",
+"stellar",
+"unearth",
+"pesticide",
+"pristine",
+"encompass",
+"taxation",
+"prolong",
+"standpoint",
+"perishable",
+"weaver",
+"sweep"
+],
+[
+"refreshment",
+"intervention",
+"stunted",
+"persuasively",
+"beneath",
+"inquiry",
+"cast about",
+"improvised",
+"adoption",
+"vent",
+"alumni",
+"disband",
+"noteworthy",
+"elusive",
+"inject",
+"displacement",
+"prone to",
+"integral",
+"amenities",
+"oceanography",
+"contemplate",
+"wary",
+"confidential",
+"thump",
+"immersive",
+"materialize",
+"hierarchical",
+"tale",
+"arthropods",
+"derive",
+"verging on",
+"deploy",
+"cobblestone",
+"extraterrestrial",
+"unleash",
+"ambivalent",
+"degradation",
+"deliberate",
+"enchant",
+"thereby",
+"preoccupied with",
+"skeptical",
+"weave",
+"flicker",
+"cinematography",
+"decimate",
+"turbulence",
+"likelihood",
+"decomposition",
+"with respect to",
+"found wanting",
+"fairness",
+"narrated",
+"gauge",
+"cornerstone",
+"more subtle",
+"pitcher",
+"maize",
+"methodically",
+"outdated",
+"scarlet",
+"momentum",
+"permafrost",
+"deplete",
+"wrought",
+"peek",
+"stimuli",
+"raffle",
+"hence",
+"startling",
+"termite",
+"sulfuric",
+"trappings",
+"vicinity",
+"whining",
+"tow"
+],
+[
+"characterize",
+"perceive",
+"mature",
+"intangible",
+"reflective",
+"insulation",
+"rigorous",
+"stem from",
+"aesthetic",
+"accountability",
+"textile",
+"alleged",
+"spectacular",
+"bustle",
+"lease",
+"engrossed",
+"lodge",
+"precisely",
+"acquisition",
+"overfishing",
+"legitimately",
+"subordinate",
+"corridor",
+"traction",
+"grind",
+"demise",
+"give rise to",
+"accountable",
+"artistry",
+"antagonize",
+"contemptuous",
+"densely",
+"coherent",
+"favorable",
+"dainty",
+"flawed",
+"dichotomy",
+"evaluate",
+"dwarf",
+"subtly",
+"swift",
+"compel",
+"weed",
+"fragility",
+"ceremonial",
+"designate",
+"endeavor",
+"logistics",
+"democratize",
+"somewhat",
+"grossly",
+"explicitly",
+"nominate",
+"geothermal",
+"unintentionally",
+"forerunner",
+"plumbing",
+"lime",
+"intact",
+"allay",
+"scent",
+"monetary",
+"pluralistic",
+"spectator",
+"lucrative",
+"pedestrian",
+"stormwater",
+"replica",
+"fabricate",
+"haphazard",
+"tern",
+"stumble",
+"outbreak",
+"intercourse",
+"whiz",
+"transit"
+],
+[
+"uncover",
+"perception",
+"grow accustomed to",
+"secure",
+"reef",
+"lean",
+"compulsory",
+"judiciously",
+"anatomy",
+"acidification",
+"optical",
+"prohibitive",
+"tantalize",
+"detrimental",
+"pest",
+"fertilization",
+"gather momentum",
+"deviate",
+"acknowledge",
+"paleontologist",
+"encapsulate",
+"by and large",
+"craftsmanship",
+"utility",
+"govern",
+"profuse",
+"size up",
+"algae",
+"aversion",
+"scarcity",
+"mere subsistence",
+"deforestation",
+"cohesion",
+"fertile",
+"anomaly",
+"reminisce",
+"drainage",
+"fluctuation",
+"cumulative",
+"soar",
+"penetrate",
+"epitomize",
+"accustomed",
+"fraught",
+"canopy",
+"dissemination",
+"circumvent",
+"louvers",
+"demographic",
+"heighten",
+"camouflage",
+"existential",
+"nostalgia",
+"goodwill",
+"thorough",
+"wield",
+"portrayal",
+"limb",
+"albeit",
+"authenticity",
+"scrap",
+"mural",
+"prone",
+"suffer paralysis",
+"opaque",
+"pavilion",
+"strain",
+"retention",
+"devour",
+"scutinize",
+"therapeutic",
+"strand",
+"prolonged",
+"bound for",
+"willow",
+"unforeseen"
+],
+[
+"clarity",
+"resilience",
+"implausible",
+"subsist",
+"moisture",
+"patron",
+"subsidiary",
+"tolerate",
+"calculus",
+"anticipate",
+"nonetheless",
+"impermeable",
+"peculiarity",
+"grapple",
+"precipitation",
+"glimpse",
+"peculiar",
+"vigor",
+"territorial",
+"paved",
+"unwieldy",
+"frigid",
+"criterion",
+"venture",
+"fade",
+"demolish",
+"mimic",
+"aquatic",
+"bioacoustics",
+"keep in check",
+"allure",
+"cylindrical",
+"cohesive",
+"glow",
+"splendid",
+"destitute of",
+"dreamlike",
+"resilient",
+"circadian",
+"screw",
+"refute",
+"aggregate",
+"aloud",
+"geoengineering",
+"burrow",
+"stipulate",
+"counterproductive",
+"mantle",
+"depiction",
+"seep",
+"excavate",
+"enlighten",
+"objection",
+"hectic",
+"given that",
+"cursh",
+"posit",
+"leverage",
+"attainment",
+"infrequent",
+"seabed",
+"nectar",
+"render",
+"periphery",
+"immutable",
+"pavement",
+"stratosphere",
+"seafarer",
+"amiss",
+"retrospect",
+"transient",
+"stir",
+"brittle",
+"distort",
+"woodwork",
+"urge"
+],
+[
+"nuance",
+"unintended",
+"supplant",
+"undoubtedly",
+"sensory",
+"carbonate",
+"denote",
+"initiative",
+"disturbance",
+"arise",
+"metabolic",
+"tacit",
+"constitution",
+"plumb",
+"proceed",
+"governance",
+"attributable to",
+"decisive",
+"tablet",
+"pigment",
+"ephemeral",
+"apparatus",
+"dairy",
+"vocalizations",
+"exemplify",
+"voracious",
+"contiguous",
+"array",
+"biochemical",
+"subsistence",
+"rekindle",
+"coordination",
+"complimentary",
+"inventory",
+"rapport",
+"regrettably",
+"duct",
+"slight",
+"vulnerability",
+"rotation",
+"cosistent with",
+"surveillance",
+"amphibian",
+"glide",
+"botany",
+"unique among",
+"lucid",
+"manuscript",
+"descendant",
+"lethal",
+"secluded",
+"encode",
+"orchestral",
+"hygiene",
+"slightly",
+"strikingly",
+"prefabricated",
+"lesser",
+"incidentally",
+"conceive",
+"seaweed",
+"negotiate",
+"sabbatical",
+"far-reaching",
+"cease",
+"oyster",
+"strive",
+"seamlessly",
+"augment",
+"respectively",
+"trilobite",
+"stall",
+"pioneer",
+"perceptibly",
+"workability",
+"vibrate"
+],
+[
+"trait",
+"susceptible to",
+"dispose of",
+"align",
+"particle",
+"repudiate",
+"absurd",
+"constraint",
+"dominate",
+"landfill",
+"fastidious",
+"efface",
+"bog",
+"polyp",
+"rack",
+"enact",
+"primordial",
+"herd",
+"synthetic",
+"commend",
+"empirical",
+"engender",
+"pivotal",
+"dissolve",
+"exaggerate",
+"constituent",
+"pertinent",
+"abstraction",
+"aspiration",
+"equivocal",
+"primitive",
+"bleach",
+"constructive",
+"neural",
+"attest",
+"juncture",
+"comply",
+"vocalization",
+"relocate",
+"sovereign",
+"hazardous",
+"enchanting",
+"aptitude",
+"bolt",
+"full-fledged",
+"delineate",
+"high-stake",
+"digestion",
+"relic",
+"engulf",
+"maritime",
+"empathetic",
+"hygienic",
+"deliberately",
+"hinder",
+"ornithologist",
+"innate",
+"keystone",
+"tactic",
+"immobile",
+"preliminary",
+"nocturnal",
+"sedimentary",
+"embody",
+"uninterrupted",
+"seismic",
+"outlet",
+"serpent",
+"trespass",
+"ostentatious",
+"stroll",
+"stake",
+"impetus",
+"embrace",
+"undertake",
+"wipe"
+],
+[
+"acoustic",
+"emanate",
+"commemorate",
+"assumption",
+"discipline",
+"contradictory",
+"inclement",
+"enrich",
+"excess",
+"compelling",
+"implication",
+"celestial",
+"hierarchy",
+"precursor",
+"sanitation",
+"turbulent",
+"revise",
+"horseshoe",
+"equilibrium",
+"spectacle",
+"accomplish",
+"adverse",
+"polyps",
+"drought",
+"eruption",
+"insolent",
+"traumatic",
+"acidity",
+"banquet",
+"deviation",
+"dissipate",
+"borderline",
+"cavity",
+"devastate",
+"or so",
+"compost",
+"neutron",
+"tinker",
+"quest",
+"corroborate",
+"thwart",
+"enforce",
+"arguably",
+"tantalizing",
+"revere",
+"hymn",
+"boil",
+"profoundly",
+"chronic",
+"maximization",
+"disproportionately",
+"eatery",
+"coinage",
+"devise",
+"overdue",
+"quantify",
+"insulate",
+"substantial",
+"milestone",
+"procure",
+"juggle",
+"speculative",
+"nomadic",
+"intimately",
+"impose",
+"seminary",
+"onboard",
+"deduce",
+"secrete",
+"subjective",
+"shallow",
+"hamper",
+"etch",
+"underwent",
+"sphere"
+],
+[
+"colony",
+"sporadically",
+"imprecise",
+"groundbreaking",
+"dietary",
+"propagate",
+"porliferation",
+"invasive",
+"fertilizer",
+"incompatible",
+"unambiguous",
+"cognition",
+"fungus",
+"predecessor",
+"segment",
+"appraisal",
+"obscure",
+"impressionism",
+"hazard",
+"sophomore",
+"constrain",
+"accomplished",
+"recipient",
+"embedded",
+"enthusiast",
+"shoddy",
+"on the whole",
+"admiration",
+"bodily",
+"astute",
+"intriguing",
+"botanical",
+"captive",
+"eminently",
+"dejected",
+"confrontation",
+"nurture",
+"stark",
+"outage",
+"inaugurate",
+"vanish",
+"ensemble",
+"armor",
+"candidly",
+"unpromising",
+"hypothesize",
+"bloodstream",
+"deflect",
+"truism",
+"median",
+"divergence",
+"dull",
+"reconcile",
+"astonish",
+"overhunting",
+"unsuitable",
+"intake",
+"grasp",
+"antagonistic",
+"purification",
+"intonation",
+"tranquil",
+"notch",
+"not in consensus with",
+"impede",
+"shoreline",
+"observatory",
+"keen",
+"toil",
+"surrealism",
+"skepticism",
+"inhospitable",
+"precision",
+"unearthed",
+"spatial"
+]
+],
+"expr": [
+[
+"allow for",
+"follow up",
+"align with",
+"not without",
+"point to",
+"reach out",
+"interfere with",
+"emerge as",
+"look to",
+"look into",
+"stop by",
+"take up",
+"posit that",
+"turn in",
+"reach out to",
+"run into",
+"that said",
+"buzz with",
+"all about",
+"inquire about",
+"make up",
+"date back",
+"cornerstone of",
+"fill up",
+"head out",
+"kick off",
+"take on",
+"grapple with",
+"turns out",
+"be rooted in",
+"clean up after",
+"drop off",
+"tailor ... to",
+"even as",
+"go over",
+"it turns out",
+"miss out on",
+"adhere to",
+"no later than",
+"pass out",
+"run late",
+"stick with",
+"all walks of life",
+"turn to",
+"echo chamber",
+"Fair enough",
+"hint at",
+"venture into",
+"I bet",
+"work against"
+],
+[
+"Will do",
+"break down",
+"derive from",
+"work for",
+"get in",
+"advocate for",
+"come with",
+"could use",
+"pave the way for",
+"in turn",
+"aid in",
+"make it to",
+"work out",
+"resonate with",
+"get around",
+"scheduling conflict",
+"take someone off (a list)",
+"build on",
+"in the meantime",
+"a glimpse into",
+"take over",
+"unintended consequences",
+"fly out",
+"get off",
+"delve into",
+"miss out",
+"reflect on",
+"wrap up",
+"arrange for",
+"gain traction",
+"commit to",
+"conform to",
+"fall apart",
+"give back",
+"keep track of",
+"tap into",
+"lean in",
+"over the course of",
+"pace yourself",
+"so long",
+"tinker with",
+"spread out",
+"at the end of the day",
+"blur the line between",
+"fast forward to",
+"go about",
+"tailored to",
+"keystone species",
+"push boundaries"
+]
+],
+"group": {
+"conservationist": "E",
+"score": "E",
+"microbe": "E",
+"quarter": "E",
+"elusive": "E",
+"bustle": "E",
+"detrimental": "E",
+"grapple": "E",
+"plumb": "E",
+"polyp": "E",
+"precursor": "E",
+"predecessor": "E",
+"stark": "E",
+"tinker": "E",
+"vocalization": "E",
+"vulnerability": "E",
+"circadian": "E",
+"cumulative": "E",
+"dwarf": "E",
+"enchant": "E",
+"feudalism": "E",
+"grandeur": "E",
+"holistic": "E",
+"impromptu": "E",
+"influx": "E",
+"instrumental": "E",
+"mitigation": "E",
+"narrate": "E",
+"permafrost": "E",
+"pluralistic": "E",
+"prone": "E",
+"render": "E",
+"sabbatical": "E",
+"sedimentary": "E",
+"speculative": "E",
+"tranquil": "E",
+"unearth": "E",
+"unprecedented": "E",
+"upkeep": "E",
+"virtuous": "E",
+"dynamics": "F",
+"organism": "F",
+"substance": "F",
+"intrigue": "F",
+"refreshment": "F",
+"characterize": "F",
+"uncover": "F",
+"clarity": "F",
+"nuance": "F",
+"trait": "F",
+"acoustic": "F",
+"colony": "F",
+"dietary": "F",
+"discipline": "F",
+"particle": "F",
+"sensory": "F",
+"moisture": "F",
+"reef": "F",
+"reflective": "F",
+"beneath": "F",
+"communal": "F",
+"intensive": "F",
+"interfere": "F",
+"millennia": "F",
+"molecular": "F",
+"originate": "F",
+"quad": "F",
+"vendor": "F",
+"adoption": "F",
+"aesthetic": "F",
+"anatomy": "F",
+"calculus": "F",
+"disturbance": "F",
+"dominate": "F",
+"excess": "F",
+"fertilizer": "F",
+"fungus": "F",
+"hierarchy": "F",
+"landfill": "F",
+"metabolic": "F",
+"nonetheless": "F",
+"optical": "F",
+"textile": "F",
+"alumni": "F",
+"belonging": "F",
+"departure": "F",
+"eligible": "F",
+"erosion": "F",
+"flaw": "F",
+"fluid": "F",
+"glacier": "F",
+"humidity": "F",
+"inject": "F",
+"lease": "F",
+"pest": "F",
+"precipitation": "F",
+"proceed": "F",
+"rack": "F",
+"sanitation": "F",
+"segment": "F",
+"sophomore": "F",
+"spectacle": "F",
+"synthetic": "F",
+"tablet": "F",
+"territorial": "F",
+"acknowledge": "F",
+"acquisition": "F",
+"amenities": "F",
+"brass": "F",
+"bulb": "F",
+"carve": "F",
+"cascade": "F",
+"cater": "F",
+"cathedral": "F",
+"circulation": "F",
+"commentary": "F",
+"confidential": "F",
+"corridor": "F",
+"craftsmanship": "F",
+"criterion": "F",
+"dairy": "F",
+"dissolve": "F",
+"drought": "F",
+"embedded": "F",
+"enthusiast": "F",
+"eruption": "F",
+"exaggerate": "F",
+"exemplify": "F",
+"fade": "F",
+"govern": "F",
+"grind": "F",
+"immersive": "F",
+"inquire": "F",
+"intent": "F",
+"interference": "F",
+"literacy": "F",
+"reliance": "F",
+"reproduction": "F",
+"reptile": "F",
+"retreat": "F",
+"tale": "F",
+"accountable": "F",
+"algae": "F",
+"aquatic": "F",
+"array": "F",
+"aspiration": "F",
+"banquet": "F",
+"bodily": "F",
+"captive": "F",
+"cavity": "F",
+"constructive": "F",
+"coordination": "F",
+"cylindrical": "F",
+"deforestation": "F",
+"densely": "F",
+"deploy": "F",
+"derived": "F",
+"dispose": "F",
+"dominance": "F",
+"drift": "F",
+"dye": "F",
+"empathy": "F",
+"expressionism": "F",
+"extraction": "F",
+"extraterrestrial": "F",
+"favorable": "F",
+"fertile": "F",
+"glow": "F",
+"inventory": "F",
+"neural": "F",
+"neutron": "F",
+"nurture": "F",
+"outage": "F",
+"quest": "F",
+"relocate": "F",
+"rotation": "F",
+"screw": "F",
+"soar": "F",
+"subtly": "F",
+"thereby": "F",
+"tide": "F",
+"tortoise": "F",
+"transcend": "F",
+"transparency": "F",
+"unparalleled": "F",
+"unveil": "F",
+"versatility": "F",
+"vineyard": "F",
+"weave": "F",
+"weed": "F",
+"accustomed": "F",
+"aloud": "F",
+"amphibian": "F",
+"aptitude": "F",
+"arguably": "F",
+"armor": "F",
+"bloodstream": "F",
+"boil": "F",
+"bolt": "F",
+"botany": "F",
+"burrow": "F",
+"canopy": "F",
+"ceremonial": "F",
+"cinematography": "F",
+"civic": "F",
+"clearance": "F",
+"cloak": "F",
+"confined": "F",
+"conformity": "F",
+"courtyard": "F",
+"cultivate": "F",
+"curate": "F",
+"decomposition": "F",
+"democratize": "F",
+"demographic": "F",
+"depiction": "F",
+"descendant": "F",
+"digestion": "F",
+"disproportionately": "F",
+"divergence": "F",
+"dull": "F",
+"eatery": "F",
+"empathetic": "F",
+"encode": "F",
+"enlighten": "F",
+"existential": "F",
+"explicitly": "F",
+"fairness": "F",
+"fatigue": "F",
+"firsthand": "F",
+"foil": "F",
+"forager": "F",
+"formative": "F",
+"frontier": "F",
+"gala": "F",
+"gatherer": "F",
+"gauge": "F",
+"geothermal": "F",
+"goodwill": "F",
+"hectic": "F",
+"hygiene": "F",
+"hygienic": "F",
+"insulate": "F",
+"intake": "F",
+"intonation": "F",
+"juggle": "F",
+"keystone": "F",
+"lesser": "F",
+"leverage": "F",
+"limb": "F",
+"lime": "F",
+"maize": "F",
+"mangrove": "F",
+"marginalized": "F",
+"marvel": "F",
+"meteorologist": "F",
+"metric": "F",
+"midway": "F",
+"millennium": "F",
+"moist": "F",
+"momentum": "F",
+"monetary": "F",
+"mural": "F",
+"nectar": "F",
+"negotiate": "F",
+"nocturnal": "F",
+"nomadic": "F",
+"notch": "F",
+"observatory": "F",
+"onboard": "F",
+"outlet": "F",
+"oyster": "F",
+"pavement": "F",
+"pavilion": "F",
+"pedestrian": "F",
+"peek": "F",
+"pesticide": "F",
+"physiological": "F",
+"polarization": "F",
+"pollen": "F",
+"potter": "F",
+"practicality": "F",
+"practitioner": "F",
+"prolong": "F",
+"raffle": "F",
+"replica": "F",
+"retention": "F",
+"seafarer": "F",
+"seamlessly": "F",
+"serpent": "F",
+"shallow": "F",
+"skepticism": "F",
+"spatial": "F",
+"sphere": "F",
+"stake": "F",
+"stall": "F",
+"stir": "F",
+"strand": "F",
+"stumble": "F",
+"sulfuric": "F",
+"sweep": "F",
+"symmetry": "F",
+"thoroughly": "F",
+"tidal": "F",
+"tow": "F",
+"transit": "F",
+"unforeseen": "F",
+"urge": "F",
+"vibrate": "F",
+"wipe": "F",
+"align with": "XE",
+"derive from": "XE",
+"pave the way for": "XE",
+"emerge as": "XE",
+"posit that": "XE",
+"resonate with": "XE",
+"a glimpse into": "XE",
+"buzz with": "XE",
+"cornerstone of": "XE",
+"delve into": "XE",
+"gain traction": "XE",
+"grapple with": "XE",
+"tailor ... to": "XE",
+"tap into": "XE",
+"tinker with": "XE",
+"adhere to": "XE",
+"all walks of life": "XE",
+"tailored to": "XE",
+"venture into": "XE",
+"allow for": "XF",
+"Will do": "XF",
+"break down": "XF",
+"follow up": "XF",
+"not without": "XF",
+"work for": "XF",
+"get in": "XF",
+"point to": "XF",
+"reach out": "XF",
+"advocate for": "XF",
+"come with": "XF",
+"interfere with": "XF",
+"look to": "XF",
+"could use": "XF",
+"in turn": "XF",
+"look into": "XF",
+"stop by": "XF",
+"aid in": "XF",
+"make it to": "XF",
+"take up": "XF",
+"turn in": "XF",
+"work out": "XF",
+"get around": "XF",
+"reach out to": "XF",
+"run into": "XF",
+"scheduling conflict": "XF",
+"take someone off (a list)": "XF",
+"that said": "XF",
+"all about": "XF",
+"build on": "XF",
+"in the meantime": "XF",
+"inquire about": "XF",
+"make up": "XF",
+"take over": "XF",
+"unintended consequences": "XF",
+"date back": "XF",
+"fill up": "XF",
+"fly out": "XF",
+"get off": "XF",
+"head out": "XF",
+"kick off": "XF",
+"miss out": "XF",
+"reflect on": "XF",
+"take on": "XF",
+"turns out": "XF",
+"wrap up": "XF",
+"arrange for": "XF",
+"be rooted in": "XF",
+"clean up after": "XF",
+"commit to": "XF",
+"conform to": "XF",
+"drop off": "XF",
+"even as": "XF",
+"fall apart": "XF",
+"give back": "XF",
+"go over": "XF",
+"it turns out": "XF",
+"keep track of": "XF",
+"lean in": "XF",
+"miss out on": "XF",
+"no later than": "XF",
+"over the course of": "XF",
+"pace yourself": "XF",
+"pass out": "XF",
+"run late": "XF",
+"so long": "XF",
+"spread out": "XF",
+"stick with": "XF",
+"turn to": "XF",
+"at the end of the day": "XF",
+"blur the line between": "XF",
+"echo chamber": "XF",
+"Fair enough": "XF",
+"fast forward to": "XF",
+"go about": "XF",
+"hint at": "XF",
+"I bet": "XF",
+"keystone species": "XF",
+"push boundaries": "XF",
+"work against": "XF"
+}
+}

@@ -330,7 +330,7 @@
       return;
     }
     main.append(h('h1', null, '단어 암기'),
-      h('p', { class: 'muted small' }, '고른 750개 단어를 50개씩 15세트로 외웁니다. 원본 단어장의 \'오늘 암기 시작\'과 같은 방식(뜻 연결하기 → 6개씩 묶어 익히기 → 시간을 두고 철자 떠올리기 → 마지막 재시험)입니다.'));
+      h('p', { class: 'muted small' }, '단어 세트 15개와 표현 세트 2개로 외웁니다. 원본 단어장의 \'오늘 암기 시작\'과 같은 방식(뜻 연결하기 → 6개씩 묶어 익히기 → 시간을 두고 철자 떠올리기 → 마지막 재시험)입니다.'));
     const kept = keepApp().count();
     main.append(h('section', { class: 'card keep-card', onclick: () => go('#/keep') },
       h('strong', null, `킵한 단어 ${kept}개 →`),
@@ -343,7 +343,7 @@
     const r = api.resumable();
     if (r) {
       main.append(h('section', { class: 'card hero' },
-        h('h2', null, r.chunk ? `세트 ${r.chunk.index + 1} 진행 중` : '진행 중인 암기'),
+        h('h2', null, r.chunk ? `${api.chunkLabel ? api.chunkLabel(r.chunk.index) : '세트 ' + (r.chunk.index + 1)} 진행 중` : '진행 중인 암기'),
         h('p', { class: 'muted small' }, `오늘 완료 ${r.done} / ${r.total}개 · 저장된 곳부터 이어집니다.`),
         h('button', { class: 'primary', onclick: () => vocabFlow(() => api.resume()) }, '이어서 하기'),
         confirmButton('진행 중인 세트 그만두기', '한 번 더 누르면 진행 상태를 버립니다 (단어별 기록은 남음)', 'link small', () => { api.discardSession(); render(); })));
@@ -359,24 +359,36 @@
         n ? confirmButton(`이 ${n.toLocaleString()}개로 고정하고 30개씩 ${Math.ceil(n / 30)}세트로 나누기`, '한 번 더 누르면 고정합니다 (되돌릴 수 없음)', 'primary', () => { api.createPlan(mode); render(); })
           : h('p', { class: 'notice' }, '복습 단어가 없습니다. 가져온 기록에 찍음으로 분류된 단어가 있는지 확인하세요.')));
     } else {
-      const total = api.chunkCount(plan), done = Object.keys(plan.done).length, next = api.nextChunkIndex(plan);
-      const sec = h('section', { class: 'card' + (r ? '' : ' hero') },
-        h('h2', null, `단어 ${plan.words.length.toLocaleString()}개 · ${plan.size}개씩 ${total}세트`, h('span', { class: 'muted small' }, ` ${done} / ${total}세트 완료`)),
-        h('div', { class: 'meter' }, h('div', { style: `width:${total ? 100 * done / total : 0}%` })),
-        h('p', { class: 'muted small' }, `세트마다 예전 세트에서 2회 이상 틀린 단어 16 · 예전에 안 한 세트 단어 16 · 새로 넣은 단어 16~17 · 다시 넣은 아는 단어 1~2개가 고르게 섞여 있습니다 (${E.dayStr(plan.createdAt).replace(/-/g, '.')} 시작). 세트를 끝내면 날짜가 기록되고, 아무 세트나 눌러 다시 할 수 있어요.`));
-      if (!r && next != null) sec.append(h('button', { class: 'primary', onclick: () => vocabFlow(() => api.start(next)) }, `세트 ${next + 1} 암기 시작 (${api.chunkWords(next).length}개)`));
-      if (next == null) sec.append(h('p', { class: 'rule' }, '모든 세트를 한 번씩 끝냈습니다. 세트를 눌러 다시 복습할 수 있습니다.'));
-      const grid = h('div', { class: 'setgrid' });
-      for (let i = 0; i < total; i++) {
-        const d = plan.done[i];
-        grid.append(h('button', { class: 'setb' + (d ? ' done' : '') + (i === next ? ' next' : ''), title: api.chunkWords(i).map(w => w.en).join(', '),
-          onclick: () => vocabFlow(() => api.start(i)) }, h('b', null, `세트 ${i + 1}`), h('span', null, d ? d.slice(5).replace('-', '/') + ' 완료' : `${api.chunkWords(i).length}개`),
-          VSW.times()['set' + i] ? h('span', { class: 'muted small' }, '⏱ ' + VSW.fmt(VSW.times()['set' + i])) : null));
-      }
-      sec.append(grid);
-      if (next != null) sec.append(h('details', null, h('summary', null, `세트 ${next + 1} 단어 미리 보기`),
-        h('ul', { class: 'wordlist' }, api.chunkWords(next).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko))))));
-      main.append(sec);
+      const total = api.chunkCount(plan), idx = [...Array(total).keys()];
+      const kindOf = i => api.chunkKind ? api.chunkKind(i) : 'word', label = i => api.chunkLabel ? api.chunkLabel(i) : `세트 ${i + 1}`;
+      const timeOf = i => VSW.times()[api.timerKey ? api.timerKey(i) : 'set' + i];
+      const nWords = k => idx.filter(i => kindOf(i) === k).reduce((n, i) => n + api.chunkWords(i).length, 0);
+      const setCard = (kind, first) => {
+        const mine = idx.filter(i => kindOf(i) === kind); if (!mine.length) return null;
+        const done = mine.filter(i => plan.done[i]).length, next = api.nextChunkIndex(plan, kind);
+        const sec = h('section', { class: 'card' + (first && !r ? ' hero' : '') },
+          h('h2', null, kind === 'expr' ? `표현 ${nWords('expr')}개 · ${mine.length}세트` : `단어 ${nWords('word').toLocaleString()}개 · ${mine.length}세트`, h('span', { class: 'muted small' }, ` ${done} / ${mine.length}세트 완료`)),
+          h('div', { class: 'meter' }, h('div', { style: `width:${100 * done / mine.length}%` })),
+          h('p', { class: 'muted small' }, kind === 'expr'
+            ? '2026真题 01–54회에서 고른 모를 만한 표현입니다. 세트마다 \'완전히 모를 것 같음\'과 \'긴가민가\'가 고르게 섞여 있고, 단어와 같은 방식으로 외웁니다.'
+            : plan.carry != null
+              ? `세트 1–${plan.carry}은 그대로(50개씩)이고, 세트 ${plan.carry + 1}–${mine.length}는 기존 단어 50개에 2026真题 새 단어(완전히 모를 것 같음 3~4 · 긴가민가 22~23)를 고르게 섞어 75~76개씩 다시 짰습니다 (${E.dayStr(plan.createdAt).replace(/-/g, '.')}). 자주 틀린 단어 기록은 이어집니다.`
+              : `${plan.size}개씩 나눈 세트입니다.`));
+        if (!r && next != null) sec.append(h('button', { class: 'primary', onclick: () => vocabFlow(() => api.start(next)) }, `${label(next)} 암기 시작 (${api.chunkWords(next).length}개)`));
+        if (next == null) sec.append(h('p', { class: 'rule' }, '모든 세트를 한 번씩 끝냈습니다. 세트를 눌러 다시 복습할 수 있습니다.'));
+        const grid = h('div', { class: 'setgrid' });
+        for (const i of mine) {
+          const d = plan.done[i], t = timeOf(i);
+          grid.append(h('button', { class: 'setb' + (d ? ' done' : '') + (i === next ? ' next' : ''), title: api.chunkWords(i).map(w => w.en).join(', '),
+            onclick: () => vocabFlow(() => api.start(i)) }, h('b', null, label(i).replace('표현 ', '')), h('span', null, d ? d.slice(5).replace('-', '/') + ' 완료' : `${api.chunkWords(i).length}개`),
+            t ? h('span', { class: 'muted small' }, '⏱ ' + VSW.fmt(t)) : null));
+        }
+        sec.append(grid);
+        if (next != null) sec.append(h('details', null, h('summary', null, `${label(next)} 미리 보기`),
+          h('ul', { class: 'wordlist' }, api.chunkWords(next).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko))))));
+        return sec;
+      };
+      main.append(...[setCard('word', true), setCard('expr', false)].filter(Boolean));
     }
     main.append(h('details', { class: 'card' }, h('summary', null, '단어 기록 내보내기 (파일 저장)'), vocabExportCard(api)));
     main.append(h('details', { class: 'card' }, h('summary', null, '단어장 기록 다시 가져오기'), vocabImportCard(api, false)));
@@ -568,7 +580,7 @@
       h('button', { class: 'link', onclick: () => { save(); go('#/'); } }, '← 나가기 (자동 저장)'),
       h('span', { class: 'muted small' }, `${BLOCK[b.key][0]} ${BLOCK[b.key][1]} · ${b.minutes}분 · ${Math.min(b.cursor + 1, b.tasks.length)}/${b.tasks.length}`)), main);
     const advance = () => { b.cursor++; if (b.cursor >= b.tasks.length) b.done = true; save(); render(); };
-    const skipBlock = h('button', { class: 'link small', onclick: () => { b.done = true; b.skipped = true; save(); render(); } }, '이 블록은 내일로 넘기기');
+    const skipBlock = h('button', { class: 'link small', onclick: () => { if (!confirm('이 블록 전체를 내일로 넘길까요?')) return; practice().stopAll(); b.done = true; b.skipped = true; save(); render(); } }, '이 블록은 내일로 넘기기');
     if (b.cursor >= b.tasks.length) {
       main.append(h('section', { class: 'card hero' }, h('h1', null, `${BLOCK[b.key][1]} 블록`), h('p', { class: 'muted' }, b.tasks.length ? '이 블록의 할 일을 마쳤습니다.' : '오늘 이 블록에는 할 일이 없습니다.'),
         h('button', { class: 'primary', onclick: () => { b.done = true; save(); render(); } }, '다음 블록')));
@@ -580,7 +592,8 @@
       if ((t.because === 'judge' || t.because === 'timed') && t.key) { D.followups = D.followups || {}; D.followups[t.key] = now(); }
       advance();
     });
-    main.append(h('div', { class: 'row' }, h('button', { class: 'link small', onclick: () => { practice().stopAll(); advance(); } }, '이 할 일 건너뛰기'), skipBlock));
+    main.append(h('div', { class: 'row' }, h('button', { class: 'link small', onclick: () => { practice().stopAll(); advance(); } }, '이 할 일 건너뛰기')),
+      h('div', { class: 'row', style: 'margin-top:64px' }, skipBlock));
   }
 
   function runTask(main, t, done) {
