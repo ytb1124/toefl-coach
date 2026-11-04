@@ -127,6 +127,7 @@ node --test tests/*.test.js
   계획 키 `toefl-vocab-chunk-plan-v3`(`plan.sets` 배열, 세트 크기 제각각). v2의 `base`·세트 1–3 완료 날짜를 이어받는다 (v2가 나중에 동기화돼 들어와도 `adoptV2`가 한 번 이어받음). v2는 지우지 않는다. 다시 짠 세트의 스톱워치 키는 `v3set<i>`(예전 `set<i>` 시간이 새 세트에 붙지 않게).
 - '자주 틀린 단어'(patch.js `frequentWords`): 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(`base` 차감) + 킵한 단어 전부(`keepFlagAt`, 킵 목록과 `flagKept`로 맞춤).
   단어장에 없는 킵 단어도 뜻을 적었으면 `syncKept`가 WORDS 끝에 `keptOnly`로 덧붙여 훈련한다 (2026-11-03 사용자 요청). 기기마다 다르므로 Day 목록에 넣지 않고, 순번 압축 기록(`packWordMeta`·`packCloudState`)에서 빼서 그 기록은 그 기기에만 남는다. 마지막 틀린 날 뒤 서로 다른 2일 연속 맞히면 빠짐. 새 필드만 쓰고 기존 필드는 바꾸지 않는다.
+- '이미 알아요'(2026-11-04 사용자 요청): 원본 첫 카드(뜻 익히기)는 그대로 두고, 그 카드에서 0(또는 버튼)을 누르면 그 단어를 오늘 완료로 넘긴다 (`markKnownToday`). 시험을 본 게 아니므로 srs·틀린 횟수는 남기지 않고 오늘 기록에 `knownSkip`만. 뜻을 가리거나 확인 문제를 넣지 않는다 (사용자 결정).
 - 세트 스톱워치(`app/ui.js` `VSW`, 키 `toefl-vocab-timer-v1`): 세트·자주 틀린 단어를 시작하면 우측 상단에 뜨고 일시정지 가능, 끝나면 세트 버튼에 걸린 시간 표시. patch.js가 `__hooks.started/finished`를 부른다.
 - 단어는 오늘 계획(`buildPlan`)에 들어가지 않는다 (2026-11-01부터, 단어 탭에서만).
 - Safari 기록 비교: `python3 tools/vocab_compare.py` (`~/Downloads/vocab-export-*.txt` 요약, 읽기만). 가져오기는 사용자가 단어 탭에서 직접.

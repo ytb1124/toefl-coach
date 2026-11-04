@@ -126,6 +126,34 @@ renderSameDaySummary = function () {
   __hooks.changed();
 };
 
+// '이미 알아요' (사용자 요청 2026-11-04): 원본 첫 카드(뜻 익히기)는 그대로, 0을 누르면(또는 버튼) 그 단어를 오늘 완료로 넘긴다.
+// 시험을 본 것이 아니므로 직접 입력 기록(srs·틀린 횟수)은 남기지 않고, 오늘 기록에 knownSkip만 표시한다.
+function markKnownToday(en) {
+  const m = getTodayLearningMeta(en);
+  m.exposureDone = true; if (!m.firstExposureAt) m.firstExposureAt = Date.now();
+  m.todayMastered = true; m.finalPassed = true; m.knownSkip = true;
+  sameDayState.nextNewIndex++; keyMap = {};
+  completeSameDayActivity(en);
+}
+function onEncodingCard() {
+  const c = learningScreenActive && sameDayState && sameDayState.current;
+  return c && c.type === 'encoding' && c.stage !== 'recognition' ? c : null;
+}
+const baseRenderEncoding = renderEncoding;
+renderEncoding = function (word) {
+  baseRenderEncoding(word);
+  const wrap = app.firstElementChild; if (!wrap) return;
+  const b = el('button', 'width:100%;padding:9px;margin-top:8px;border:1px solid #0F6E56;border-radius:8px;background:#e8f5ee;color:#0F6E56;font-size:13px', '<span class="kbd">0</span>이미 알아요 (오늘 완료로 넘기기)');
+  b.onclick = () => { if (onEncodingCard()) markKnownToday(word.en); };
+  wrap.appendChild(b);
+};
+document.addEventListener('keydown', e => {
+  if (e.key !== '0' || e.repeat) return;
+  const a = document.activeElement; if (a && a.tagName === 'INPUT' && !a.disabled) return;
+  const c = onEncodingCard(); if (!c) return;
+  e.preventDefault(); markKnownToday(c.en);
+});
+
 // 원본 홈의 '이어서 학습하기' 버튼과 같은 복원.
 function resumeSession() {
   const resumable = loadSession(); if (!resumable) return false;
