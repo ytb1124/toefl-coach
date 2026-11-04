@@ -132,6 +132,7 @@ function markKnownToday(en) {
   const m = getTodayLearningMeta(en);
   m.exposureDone = true; if (!m.firstExposureAt) m.firstExposureAt = Date.now();
   m.todayMastered = true; m.finalPassed = true; m.knownSkip = true;
+  encodingTimers.forEach(id => clearTimeout(id)); encodingTimers = [];
   sameDayState.nextNewIndex++; keyMap = {};
   completeSameDayActivity(en);
 }
@@ -139,9 +140,14 @@ function onEncodingCard() {
   const c = learningScreenActive && sameDayState && sameDayState.current;
   return c && c.type === 'encoding' && c.stage !== 'recognition' ? c : null;
 }
+// 원본 첫 카드는 3초 뒤 keyMap을 {'Enter': 계속}으로 덮어쓰는 타이머를 건다. 3초 전에 0으로 넘기면 그 타이머가 다음 화면의 keyMap
+// (Esc = 모르겠어요 등)을 지워 Esc가 브라우저로 가 전체화면이 풀렸다 (2026-11-04). 그래서 첫 카드가 거는 타이머를 모아 두었다가 0을 누르면 지운다.
+let encodingTimers = [];
 const baseRenderEncoding = renderEncoding;
 renderEncoding = function (word) {
-  baseRenderEncoding(word);
+  const realSetTimeout = setTimeout;
+  setTimeout = (fn, ms) => { const id = realSetTimeout(fn, ms); encodingTimers.push(id); return id; };
+  try { baseRenderEncoding(word); } finally { setTimeout = realSetTimeout; }
   const wrap = app.firstElementChild; if (!wrap) return;
   const b = el('button', 'width:100%;padding:9px;margin-top:8px;border:1px solid #0F6E56;border-radius:8px;background:#e8f5ee;color:#0F6E56;font-size:13px', '<span class="kbd">0</span>이미 알아요 (오늘 완료로 넘기기)');
   b.onclick = () => { if (onEncodingCard()) markKnownToday(word.en); };
