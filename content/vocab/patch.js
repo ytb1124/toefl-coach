@@ -33,11 +33,12 @@ function typedFails(en) { const m = wordMeta[en]; return m && m.failures ? Numbe
 function adoptV2(plan, v2) {
   plan.words.forEach(en => { if (v2.base && en in v2.base) plan.base[en] = v2.base[en]; });
   for (let i = 0; i < plan.carry; i++) if (v2.done[i] && !plan.done[i]) plan.done[i] = v2.done[i];
-  plan.fromV2 = true; saveChunkPlan(plan); return plan;
+  plan.fromV2 = true; plan.baseSince = v2.createdAt; saveChunkPlan(plan); return plan;
 }
 function loadChunkPlan() {
   const p = readChunkPlan();
   if (p && p.version === 3 && !p.fromV2) { const v2 = readPlanKey(CHUNK_PLAN_V2_KEY); if (v2) return adoptV2(p, v2); }
+  if (p && p.version === 3 && p.baseSince == null) { const v2 = readPlanKey(CHUNK_PLAN_V2_KEY); p.baseSince = v2 ? v2.createdAt : p.createdAt; saveChunkPlan(p); }
   if (p || !SET750 || !REGROUP) return p;
   const v2 = readPlanKey(CHUNK_PLAN_V2_KEY), carry = REGROUP.carry;
   const sets = SET750.sets.slice(0, carry).concat(REGROUP.sets, REGROUP.expr);
@@ -45,7 +46,7 @@ function loadChunkPlan() {
   const words = sets.flat(), base = {}, done = {};
   words.forEach(en => { base[en] = v2 && v2.base && en in v2.base ? v2.base[en] : typedFails(en); });
   if (v2) for (let i = 0; i < carry; i++) if (v2.done[i]) done[i] = v2.done[i];
-  const plan = { createdAt: Date.now(), locked: true, version: 3, sourceQuizMode: 'flash', carry, sets, kinds, words, base, done, last: null, fromV2: !!v2 };
+  const plan = { createdAt: Date.now(), baseSince: v2 ? v2.createdAt : Date.now(), locked: true, version: 3, sourceQuizMode: 'flash', carry, sets, kinds, words, base, done, last: null, fromV2: !!v2 };
   saveChunkPlan(plan);
   // 다시 짠 세트(4번째부터)의 진행 중 세션만 정리 (세트 1–3은 단어가 같아 이어서 할 수 있음, 단어 기록은 남음)
   const s = loadSession(); if (s && s.sameDayState && s.sameDayState.chunk && s.sameDayState.chunk.index >= carry) clearSession();
@@ -221,8 +222,24 @@ function frequentInfo(en) {
   return { candidate, weighted, ratio: tries ? weighted / tries : (m.keepFlagAt ? 1 : 0), days: wrongDays.length, vague, hard: !!m.hard, exited, label: parts.join(' · ') };
 }
 // 범위(사용자 요청 2026-11-01): ① 세트 750에서 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(나누기 전 횟수는 plan.base로 뺌)
-// ② 문제를 풀다 '뜻을 몰랐다'로 킵한 단어. 마지막 틀린 날 뒤 서로 다른 2일 연속 맞히면 빠진다. 많이 틀린 순.
+// ② 문제를 풀다 '뜻을 몰랐다'로 킵한 단어. 빠지는 규칙은 freqState. 많이 틀린 순.
 const FREQUENT_MIN_SET_FAILS = 3;
+// 빠지는 규칙 (사용자 요청 2026-11-05): 들어온 날(세트 계획 시작 뒤 처음 직접 입력으로 틀린 날, 킵한 단어는 킵한 날) 뒤에
+// 직접 입력에서 틀리지 않고 '확실'로 맞힌 날이 서로 다른 2일이면 다음 암기부터 뺀다. 연속일 필요는 없다. 빠진 뒤 다시 틀리면 그날 다시 들어온다.
+const FREQUENT_EXIT_OK_DAYS = 2;
+function freqState(en, plan) {
+  const m = getWordMeta(en), since = plan && plan.baseSince ? dayKey(plan.baseSince) : '';
+  const wrong = new Set((m.spacedRecall.failureDates || []).filter(d => d >= since));
+  if (m.keepFlagAt) wrong.add(m.keepFlagAt);
+  const ok = new Set((m.spacedRecall.successfulDates || []).filter(d => !wrong.has(d)));
+  let entry = null, okDays = 0, outDay = null;
+  for (const d of [...new Set([...wrong, ...ok])].sort()) {
+    if (entry == null) { if (wrong.has(d)) entry = d; continue; }
+    if (outDay == null) { if (ok.has(d) && d > entry && ++okDays >= FREQUENT_EXIT_OK_DAYS) outDay = d; }
+    else if (wrong.has(d)) { entry = d; okDays = 0; outDay = null; }
+  }
+  return { entry, okDays, exited: outDay != null };
+}
 function setFails(en, plan = loadChunkPlan()) {
   if (!plan || !plan.base || !(en in plan.base)) return 0;
   return Math.max(0, Number(getWordMeta(en).failures.typed || 0) - plan.base[en]);
@@ -230,7 +247,7 @@ function setFails(en, plan = loadChunkPlan()) {
 function frequentWords() {
   const plan = loadChunkPlan();
   return WORDS.map(w => [w, frequentInfo(w.en), setFails(w.en, plan)])
-    .filter(([w, i, n]) => (n >= FREQUENT_MIN_SET_FAILS || getWordMeta(w.en).keepFlagAt) && !i.exited)
+    .filter(([w, i, n]) => (n >= FREQUENT_MIN_SET_FAILS || getWordMeta(w.en).keepFlagAt) && !freqState(w.en, plan).exited)
     .sort((x, y) => y[2] - x[2] || y[1].ratio - x[1].ratio).map(([w]) => w);
 }
 // 킵에서 덧붙인 단어(keptOnly)는 기기마다 다르므로 Day 목록에 넣지 않고, 순번으로 압축하는 기록(내보내기·클라우드)에서도 뺀다
@@ -281,9 +298,10 @@ const __api = {
   frequentList() {
     const plan = loadChunkPlan();
     return frequentWords().map(w => {
-      const n = setFails(w.en, plan), kept = !!getWordMeta(w.en).keepFlagAt;
+      const n = setFails(w.en, plan), kept = !!getWordMeta(w.en).keepFlagAt, st = freqState(w.en, plan);
       return Object.assign(frequentInfo(w.en), { en: w.en, ko: getCoreMeaning(w), day: w.day, cl: w.cl || null, added: !!w.added, setFails: n, kept,
-        label: [n >= FREQUENT_MIN_SET_FAILS ? '세트에서 ' + n + '회 틀림' : '', kept ? '문제 풀다 모름' : ''].filter(Boolean).join(' · ') });
+        okDays: st.okDays,
+        label: [n >= FREQUENT_MIN_SET_FAILS ? '세트에서 ' + n + '회 틀림' : '', kept ? '문제 풀다 모름' : '', st.okDays ? '맞힌 날 ' + st.okDays + '/' + FREQUENT_EXIT_OK_DAYS : ''].filter(Boolean).join(' · ') });
     });
   },
   // 킵 목록 중 단어장에 없는 단어를 WORDS 끝에 덧붙인다 (사용자 요청 2026-11-03: 750개에 없어도 자주 틀린 단어로 훈련).

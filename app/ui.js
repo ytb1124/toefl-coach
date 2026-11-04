@@ -405,7 +405,7 @@
     const sel = h('select', { onchange: e => { freqFilter.src = e.target.value; render(); } }, [['all', `전체 ${all.length}`], ['set', `세트에서 3회 이상 틀림 ${nSet}`], ['tpo', `킵한 단어 ${nTpo}`]].map(([v, l]) => h('option', { value: v, selected: freqFilter.src === v }, l)));
     return h('section', { class: 'card' },
       h('h2', null, `자주 틀린 단어 ${all.length}개`),
-      h('p', { class: 'small muted' }, '세트를 공부하면서 직접 입력으로 3회 이상 틀린 단어와 킵한 단어(단어장에 없는 단어 포함)입니다. 세트를 나누기 전에 틀린 횟수는 세지 않습니다. 마지막으로 틀린 날 뒤 서로 다른 2일 연속으로 맞히면 빠집니다.'),
+      h('p', { class: 'small muted' }, '세트를 공부하면서 직접 입력으로 3회 이상 틀린 단어와 킵한 단어(단어장에 없는 단어 포함)입니다. 세트를 나누기 전에 틀린 횟수는 세지 않습니다. 들어온 뒤 직접 입력에서 틀리지 않고 맞힌 날이 2일(연속 아니어도 됨)이 되면 다음 암기부터 빠지고, 다시 틀리면 돌아옵니다.'),
       keptNoKo ? h('p', { class: 'small notice' }, `단어장에 없는 킵 단어 ${keptNoKo}개는 뜻이 없어 빠졌습니다. `, h('a', { href: '#/keep' }, '킵한 단어'), '에서 뜻을 적으면 들어옵니다.') : null,
       all.length ? h('div', { class: 'row wrap' }, sel, h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 전부 암기 시작'))
         : h('p', { class: 'muted small' }, '아직 없습니다. 세트를 공부하면 여기에 모입니다.'),
