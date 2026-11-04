@@ -198,6 +198,11 @@ recordAttempt = function (qMode, en, tier, responseMs = null) {
   if (tier === 'vague') m.vagueCount[qMode]++;
   if (tier === 'guess') addDate(m.wrongDates || (m.wrongDates = []), today);
   if (tier === 'sure') addDate(m.okDates || (m.okDates = []), today);
+  // 자주 틀린 단어 통과 (2026-11-05): 자주 틀린 단어 암기 중 직접 입력 '확실' 시각, 직접 입력에서 마지막으로 틀린 시각
+  if (qMode === 'typed' && tier === 'guess') m.typedFailAt = Date.now();
+  if (qMode === 'typed' && tier === 'sure' && sameDayState && sameDayState.sourceMode === 'frequent') {
+    (m.freqPassAt || (m.freqPassAt = [])).push(Date.now()); if (m.freqPassAt.length > 20) m.freqPassAt.splice(0, m.freqPassAt.length - 20);
+  }
   saveMeta();
 };
 function addDate(list, d) { if (!list.includes(d)) list.push(d); list.sort(); if (list.length > 40) list.splice(0, list.length - 40); }
@@ -224,7 +229,11 @@ function frequentInfo(en) {
 // 범위(사용자 요청 2026-11-01): ① 세트 750에서 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(나누기 전 횟수는 plan.base로 뺌)
 // ② 문제를 풀다 '뜻을 몰랐다'로 킵한 단어. 빠지는 규칙은 freqState. 많이 틀린 순.
 const FREQUENT_MIN_SET_FAILS = 3;
-// 빠지는 규칙 (사용자 요청 2026-11-05): 들어온 날(세트 계획 시작 뒤 처음 직접 입력으로 틀린 날, 킵한 단어는 킵한 날) 뒤에
+// 빠지는 규칙 ②(사용자 요청 2026-11-05): 자주 틀린 단어 암기에서 직접 입력 '확실' 2번(같은 날도 됨, 마지막으로 틀린 뒤만 셈).
+// 세트 공부 중 맞힌 것은 세지 않는다. 그 뒤 직접 입력에서 다시 틀리면 다시 들어온다.
+const FREQUENT_EXIT_PASSES = 2;
+function freqPasses(en) { const m = getWordMeta(en), after = m.typedFailAt || 0; return (m.freqPassAt || []).filter(t => t > after).length; }
+// 빠지는 규칙 ①(사용자 요청 2026-11-05): 들어온 날(세트 계획 시작 뒤 처음 직접 입력으로 틀린 날, 킵한 단어는 킵한 날) 뒤에
 // 직접 입력에서 틀리지 않고 '확실'로 맞힌 날이 서로 다른 2일이면 다음 암기부터 뺀다. 연속일 필요는 없다. 빠진 뒤 다시 틀리면 그날 다시 들어온다.
 const FREQUENT_EXIT_OK_DAYS = 2;
 function freqState(en, plan) {
@@ -238,7 +247,8 @@ function freqState(en, plan) {
     if (outDay == null) { if (ok.has(d) && d > entry && ++okDays >= FREQUENT_EXIT_OK_DAYS) outDay = d; }
     else if (wrong.has(d)) { entry = d; okDays = 0; outDay = null; }
   }
-  return { entry, okDays, exited: outDay != null };
+  const passes = freqPasses(en);
+  return { entry, okDays, passes, exited: outDay != null || passes >= FREQUENT_EXIT_PASSES };
 }
 function setFails(en, plan = loadChunkPlan()) {
   if (!plan || !plan.base || !(en in plan.base)) return 0;
@@ -301,7 +311,7 @@ const __api = {
       const n = setFails(w.en, plan), kept = !!getWordMeta(w.en).keepFlagAt, st = freqState(w.en, plan);
       return Object.assign(frequentInfo(w.en), { en: w.en, ko: getCoreMeaning(w), day: w.day, cl: w.cl || null, added: !!w.added, setFails: n, kept,
         okDays: st.okDays,
-        label: [n >= FREQUENT_MIN_SET_FAILS ? '세트에서 ' + n + '회 틀림' : '', kept ? '문제 풀다 모름' : '', st.okDays ? '맞힌 날 ' + st.okDays + '/' + FREQUENT_EXIT_OK_DAYS : ''].filter(Boolean).join(' · ') });
+        label: [n >= FREQUENT_MIN_SET_FAILS ? '세트에서 ' + n + '회 틀림' : '', kept ? '문제 풀다 모름' : '', st.okDays ? '맞힌 날 ' + st.okDays + '/' + FREQUENT_EXIT_OK_DAYS : '', st.passes ? '통과 ' + st.passes + '/' + FREQUENT_EXIT_PASSES : ''].filter(Boolean).join(' · ') });
     });
   },
   // 킵 목록 중 단어장에 없는 단어를 WORDS 끝에 덧붙인다 (사용자 요청 2026-11-03: 750개에 없어도 자주 틀린 단어로 훈련).
