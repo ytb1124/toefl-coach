@@ -11,7 +11,7 @@
  */
 (function () {
   'use strict';
-  const SYNCED = k => k === 'toeflcoach.v1' || k.startsWith('toefl-vocab') || k.startsWith('toefl-sw') || k.startsWith('toefl-listen') || k.startsWith('toefl-read') || k.startsWith('toefl-ko') || k.startsWith('toefl-keep') || k.startsWith('toefl-spell');
+  const SYNCED = k => k === 'toeflcoach.v1' || k.startsWith('toefl-vocab') || k.startsWith('toefl-sw') || k.startsWith('toefl-listen') || k.startsWith('toefl-read') || k.startsWith('toefl-dups') || k.startsWith('toefl-ko') || k.startsWith('toefl-keep') || k.startsWith('toefl-spell');
   const META = 'sync:meta';            // this device: { key: {t, dirty} }
   const BIN_CFG = 'sync:jsonbin';      // this device: { k: key, b: {main, srs, meta, misc} }
   const mem = new Map();

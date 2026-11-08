@@ -134,13 +134,14 @@
     else if (view === 'sw') swApp().view(main, (location.hash || '').split('/').slice(2), render);
     else if (view === 'listen') listenApp().view(main, (location.hash || '').split('/').slice(2), render);
     else if (view === 'read') readApp().view(main, (location.hash || '').split('/').slice(2));
+    else if (view === 'dups') dupApp().view(main, (location.hash || '').split('/').slice(2));
     else if (view === 'ko') koApp().view(main, (location.hash || '').split('/').slice(2));
     else if (view === 'keep') keepApp().view(main, render);
     else if (view === 'spell') spellApp().view(main, render);
     else viewToday(main);
   }
   // 탭 5개: 오늘 · 연습실 · 오답 · 변화 · 설정 (단어·리딩·리스닝·말하기·쓰기 화면은 연습실/오답에서 들어감)
-  const TAB_OF = { '': '', do: '', room: 'room', speak: 'room', write: 'room', vocab: 'room', sw: 'room', keep: 'room', spell: 'room', mock: 'room', wrong: 'wrong', tests: 'wrong', read: 'wrong', listen: 'wrong', ko: 'wrong', skill: 'wrong', orig: 'wrong', progress: 'progress', settings: 'settings' };
+  const TAB_OF = { '': '', do: '', room: 'room', speak: 'room', write: 'room', vocab: 'room', sw: 'room', keep: 'room', spell: 'room', mock: 'room', wrong: 'wrong', tests: 'wrong', read: 'wrong', listen: 'wrong', dups: 'wrong', ko: 'wrong', skill: 'wrong', orig: 'wrong', progress: 'progress', settings: 'settings' };
   function nav(cur) {
     const tab = TAB_OF[cur] != null ? TAB_OF[cur] : cur;
     const link = (hash, label, key) => h('a', { href: hash, class: tab === key ? 'on' : '' }, label);
@@ -238,6 +239,8 @@
     },
   };
   const listenApp = () => LS || (LS = ListenApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink }));
+  let DU = null;
+  const dupApp = () => DU || (DU = DupApp.create({ h, toast, go, storage: window.Sync || localStorage }));
   let RD = null;
   const readApp = () => RD || (RD = ReadApp.create({ h, toast, go, storage: window.Sync || localStorage, link: origLink, letterBlank }));
   // 단어 킵: 어느 화면에서든 영어 단어를 선택해 저장 (app/keep.js). 단어장에 있으면 뜻을 채운다.
@@ -751,6 +754,7 @@
         h('button', { class: 'ghost', onclick: () => go('#/read') }, '리딩 오답 다시 풀기'),
         h('button', { class: 'ghost', onclick: () => go('#/listen') }, '리스닝 오답 다시 풀기'),
         h('button', { class: 'ghost', onclick: () => go('#/sw/bsz') }, 'Build a Sentence 오답'),
+        h('button', { class: 'ghost', onclick: () => go('#/dups') }, 'FM-TOEFL 중복 문제'),
         h('button', { class: 'ghost', onclick: () => go('#/ko') }, '한국어로 풀어 보기'))),
       h('section', { class: 'card' }, h('h2', null, '능력별 원본 오답'), h('ul', { class: 'skills' }, E.skillTable(D, C, now()).map(r => h('li', { onclick: () => go('#/skill/' + r.skill.id) },
         h('span', { class: 'sname' }, r.skill.name), chip(r.st.state), h('span', { class: 'muted small' }, `${r.ev.primary}개`))))));

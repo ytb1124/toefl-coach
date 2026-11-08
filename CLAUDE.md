@@ -116,6 +116,12 @@ node --test tests/*.test.js
 - 자료: 라이팅 리포트(`subject=write`, 목록은 practiceType 4)의 WritingTab props `tasks[0].questions` → `private/zhan/writing/Mock_Test_<N>_<wf>.json` (+ `writing/ko.json`) → `python3 tools/zhan_write.py` → `private/zhan/writing.js`·`writing.json`.
 - 말풍선 A가 데이터에 없으면 해설 첫 줄/题干에서 영어 문장을 찾고, 정답 문장 자체면 버린다 (없으면 '기록 없음' 표시).
 
+## FM-TOEFL 중복 문제 (`#/dups`, 2026-11-08 사용자 요청)
+- 2026 真题 54회 전사본(`../voca/2026真题_전사본/`, 작업 사본 `../voca/2026真题_작업도구/w/raw/`)에서 **2회 이상 반복 출제된 문제 228그룹**(L1 68·L2 38·L3 67·R1 2·R2 9·R3 2·W1 18·S2 16·S3 8)만 푼다. 중복 판정은 `../voca/2026真题_작업도구/tools2/dups.py`와 같은 규칙.
+- 코드 `app/dups.js` (순수 로직 `DupCore`, `tests/dups.test.js`), 기록 키 `toefl-dups-v1` (Sync). 오답 탭 '모의고사 오답' 카드에서 진입. 대기열: 또 틀림 → 많이 반복된 새 문제 → 다시 푼 것.
+- 자료는 원본 저작물이라 비공개: `python3 tools/fm_dups.py` → `private/zhan/dups.json`·`dups.js` (그룹 id = 구분+가장 이른 출현, 예 `L1-T06Q10`). 음성 `~/.venvs/kokoro/bin/python tools/fm_dups_kokoro.py` → `private/zhan/dups_audio/<id>.mp3` (Kokoro 1.25배, 전사 스크립트 재구성 — 원본 음원 아님, 대화 화자 구분 없음; S3는 `<id>_q<k>.mp3`). 새 회차 전사를 `w/raw`에 넣은 뒤 두 스크립트를 다시 돌리면 된다. 비공개 저장소에 커밋·푸시해야 휴대폰·공개 사이트에서 열린다.
+- 풀이 방식: L1·L2·L3·R2·R3 객관식(문항·정답은 전사본), W1은 문장 직접 쓰기(대소문자·문장부호 무시 비교), S2·S3는 45초 타이머 + '답했어요' 자가 체크(녹음·채점 없음), R1 C-Test는 빈칸 위치가 전사에 없어 지문·빠진 글자 보기만.
+
 ## 한국어로 풀어 보기 (`#/ko`, 오답 원인 가르기)
 - 시험에서 틀린 독점 TPO 리딩·리스닝 세트를 한국어 번역으로 푼다. 한국어로 맞히면 '영어 이해 문제', 또 틀리면 '판단 문제' (어휘 문제는 진단 제외). 코드 `app/kotrial.js` (`tests/kotrial.test.js`), 기록 키 `toefl-ko-v1` (오늘 훈련 원본 기록과 섞지 않음).
 - 자료: `private/zhan/kotrial/ko.json` (세트 id → 번역; 스크립트 줄·문항·보기 순서는 영어와 같게) → `python3 tools/zhan_ko.py` → `private/zhan/kotrial.js`·`kotrial.json`. 번역도 비공개 저장소에만.

@@ -456,6 +456,7 @@ ARTIFACT_PAGE = """<title>TOEFL 교정 코치</title>
 <script src="app/speak.js"></script>
 <script src="app/practice.js"></script>
 <script src="app/read.js"></script>
+<script src="app/dups.js"></script>
 <script src="app/kotrial.js"></script>
 <script src="app/keep.js"></script>
 <script src="app/spell.js"></script>
