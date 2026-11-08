@@ -83,8 +83,9 @@ node --test tests/*.test.js
 5. `python3 tools/build.py` → `private/zhan`에서 커밋·푸시. 모의 모듈용 보류 회차는 `tools/zhan_pool.py`의 `HELD` (이유는 `docs/exam-rules.md`).
 
 ## 말하기·쓰기
-- 소站 문제: `app/speak.js`(L&R·Interview(질문 → 45초 타이머만, 녹음·비교 없음 — 사용자 결정 2026-11-02)·쉐도잉, `tests/speak.test.js`) · `app/write.js`(BS·반복 오류 고쳐 쓰기, `tests/write.test.js`). 기록은 주 기록 `toeflcoach.v1`의 `speak[]`·`writing[]` (+ 원인은 attempts에 `cause` omit/grammar/structure).
+- 소站 문제: `app/speak.js`(L&R·Interview(질문 → 45초. 2026-11-02엔 타이머만이었으나 **2026-11-07 사용자 요청으로 녹음 + Whisper 분석을 되돌림**: 단어 수·분당 단어·멈춤·이유/예시/결과 문장·군말 체크 `SpeakCore.interviewFeedback`, 마이크·Whisper가 없으면 예전처럼 타이머만)·쉐도잉, `tests/speak.test.js`) · `app/write.js`(BS·반복 오류 고쳐 쓰기, `tests/write.test.js`). 기록은 주 기록 `toeflcoach.v1`의 `speak[]`·`writing[]` (+ 원인은 attempts에 `cause` omit/grammar/structure).
 - 받아쓰기(STT): `tools/serve.py`(정적 파일 + `/stt`, faster-whisper `~/.venvs/whisper`)를 `start.command`가 띄운다. 없는 환경에서는 '내 녹음 ↔ 원문 번갈아 듣고 놓친 단어 탭'.
+- **2026-11-07 추가: 연습실 쓰기의 '실전 쓰기 점검'(`#/write/live/email|discussion`, `WriteCore.liveCheck`)** — 문제를 붙여 넣고 7/10분 타이머로 쓴 뒤 요구사항 누락·단어 수·예시·결론의 새 주장·단어 반복·문법 의심을 체크하고 'Claude에게 보낼 글 복사'. 기록 kind `live`. 점수를 매기지 않는다 (FM-TOEFL 54 Email 요구사항 누락·Discussion 구체성 부족에서 출발).
 - **Email·Academic Discussion은 2026-11-02에 소站·튜터 버전을 화면·오늘 계획에서 뺐다** (소站 풀·`sw.json`의 email/discussion/ideas 데이터와 예전 기록은 남아 있지만 보이지 않음). 다시 넣지 않는다.
 - **쓰기 Task 2·3 = 해커스 모범답안 라벨 재구성** (`#/hk`, `app/hackers.js`, `tests/hackers.test.js`): 해커스 Updated TOEFL Writing '20일 완성 모범 답안' Email Day 1–20 (p.322–341, `HE01`–`HE20`) · Discussion Day 1–20 (p.344–383, `HD01`–`HD20`).
   한 문제 = ① 읽기(라벨·굵은 표현) → ② 가리고 쓰기(라벨+아웃라인만, 굵은 표현 그대로, 나머지는 짧은 문장; Discussion 8분 · Email 5분) → ③ 비교(굵은 표현 적중 자동, 라벨 자가 체크, 문법 오류 수 입력) → ④ 실전 다시 쓰기(문제만 보고 실전 10/7분, 처음부터 다시 → 같은 비교; 사용자 요청 2026-11-02). Day가 3의 배수면 '처음 보는 문제'(① 없이 실전 10/7분으로 시작, 그다음 ④). 기록 mode: recon·cold·final.
@@ -125,6 +126,8 @@ node --test tests/*.test.js
 - 세트 750 (2026-11-01, `content/vocab/set750.json`, 빌드가 patch.js에 넣음): 50개씩 15세트. 단어장에 없던 252개는 `added`(통합 문서1의 뜻)로 WORDS 끝에 'Day 31'로 붙는다 (기존 순번 유지). 계획 키 `toefl-vocab-chunk-plan-v2`는 처음 열 때 만들어지고 `base`(그때의 직접 입력 틀린 횟수)를 남긴다. 예전 30개 계획 `-v1`은 지우지 않는다.
 - 재구성 2026-11-04 (`content/vocab/regroup1104.json`, 빌드가 patch.js에 `REGROUP`으로 넣음): 세트 1–3은 set750 그대로, 세트 4–15 = set750 세트 4–15의 600개 + `../voca/2026真题_모를단어_01-54.xlsx` 단어 시트의 새 단어 310개(E 완전히 모를 것 같음 · F 긴가민가)를 고르게 섞은 75~76개씩. 새 표현 99개(XE/XF)는 '표현 세트' 2개로 따로 (`plan.kinds`). 단어장에 없던 400개는 252개 뒤에 'Day 31'로 붙는다.
   계획 키 `toefl-vocab-chunk-plan-v3`(`plan.sets` 배열, 세트 크기 제각각). v2의 `base`·세트 1–3 완료 날짜를 이어받는다 (v2가 나중에 동기화돼 들어와도 `adoptV2`가 한 번 이어받음). v2는 지우지 않는다. 다시 짠 세트의 스톱워치 키는 `v3set<i>`(예전 `set<i>` 시간이 새 세트에 붙지 않게).
+- 재배치 2026-11-08 (사용자 요청, patch.js `relayoutPlan`): v3 계획을 한 번만 `layout: 4`로 고쳐 쓴다. 세트 1–6(`plan.keep`, 앞쪽에 끝낸 세트가 더 있으면 그 뒤까지)은 그대로, 나머지 단어 세트(7–15)의 단어는 40개씩 다시 나눠 세트 7–23(마지막은 42개), 표현 99개는 번갈아 섞어 25개씩 4세트. 스톱워치 키는 다시 짠 세트가 `v4set<i>`. 단어 목록·`base`·완료 날짜는 이어지고 다시 짠 세트의 진행 중 세션만 정리한다.
+- 자주 틀린 단어도 40개씩 묶음(`frequentChunks`, 많이 틀린 순 목록을 40개씩; 남는 게 20 미만이면 앞 묶음에 합침). '다음 40개 암기 시작' = 오늘 아직 안 한 첫 묶음, 묶음 버튼으로 골라 시작, 끝나면 '다음 자주 틀린 단어 N 시작'. 스톱워치 키 `freq<k>`. 빠지는 규칙은 그대로라 단어가 빠지면 묶음이 앞으로 당겨진다.
 - '자주 틀린 단어'(patch.js `frequentWords`): 세트를 나눈 뒤 직접 입력으로 3회 이상 틀린 단어(`base` 차감) + 킵한 단어 전부(`keepFlagAt`, 킵 목록과 `flagKept`로 맞춤).
   단어장에 없는 킵 단어도 뜻을 적었으면 `syncKept`가 WORDS 끝에 `keptOnly`로 덧붙여 훈련한다 (2026-11-03 사용자 요청). 기기마다 다르므로 Day 목록에 넣지 않고, 순번 압축 기록(`packWordMeta`·`packCloudState`)에서 빼서 그 기록은 그 기기에만 남는다. 빠지는 규칙(`freqState`, 2026-11-05 사용자 요청): 들어온 날(`plan.baseSince` 뒤 첫 직접 입력 틀린 날, 킵은 킵한 날) 뒤 직접 입력에서 틀리지 않고 '확실'로 맞힌 날 2일(연속 아니어도 됨)이면 빠지고, 또는 자주 틀린 단어 암기 중 직접 입력 '확실' 2번(같은 날도 됨, `m.freqPassAt` 중 마지막 직접 입력 틀림 `m.typedFailAt` 뒤만 셈; 세트 공부 중 통과는 안 셈)이면 빠짐. 그 뒤 다시 틀리면 돌아옴. 새 필드만 쓰고 기존 필드는 바꾸지 않는다.
 - '이미 알아요'(2026-11-04 사용자 요청): 원본 첫 카드(뜻 익히기)는 그대로 두고, 그 카드에서 0(또는 버튼)을 누르면 그 단어를 오늘 완료로 넘긴다 (`markKnownToday`). 시험을 본 게 아니므로 srs·틀린 횟수는 남기지 않고 오늘 기록에 `knownSkip`만. 뜻을 가리거나 확인 문제를 넣지 않는다 (사용자 결정).
@@ -135,6 +138,7 @@ node --test tests/*.test.js
 ## 단어 킵 (`#/keep`)
 - 어느 화면에서든 영어 단어(1~4단어)를 선택하면 "+ 단어 킵" 버튼이 뜨고, 그 문장과 함께 저장한다. 단어장(`content/vocab`)에 있으면 뜻을 자동으로 채운다 (`VocabApp.lookup`, `content/vocab/patch.js`).
 - 코드 `app/keep.js` (`tests/keep.test.js`), 기록 키 `toefl-keep-v1` (Sync로 동기화). '단어' 탭 위 카드에서 목록으로 간다.
+- 스펠링·교정 드릴 (2026-11-07 추가, `#/spell`): 코드 `app/spell.js` (`tests/spell.test.js`), 기록 키 `toefl-spell-v1` (Sync 동기화). 항목은 `SpellDrill.ITEMS`에 직접 적는다 — src `mine`(내 글에서 실제 틀린 단어)·`tutor`(튜터 교정)·`common`(일반 빈출, 내 오류 아님). 새 오류를 발견하면 여기에 추가. 틀리면 정답을 한 번 더 쳐야 넘어가고 상자 0으로 돌아가 내일 다시 나온다. 말하기·쓰기 방 카드에서 진입.
 - `app/vocab.js`는 빌드 생성 파일이다: 단어 화면 문구는 `content/vocab/source.html`·`patch.js`에서 고친다.
 
 ## 배포

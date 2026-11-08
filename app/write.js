@@ -38,7 +38,40 @@
     return Object.keys(c).sort((a, b) => c[b] - c[a]).slice(0, n || 3);
   }
   const BS_SEC = 410, EMAIL_SEC = 420, AD_SEC = 600, PLAN_SEC = 120, OUTLINE_SEC = 600;
-  const Core = { roles, sentences, wordCount, structure, requirements, topCats, BS_SEC, EMAIL_SEC, AD_SEC, PLAN_SEC };
+
+  // ---- 실전 쓰기 점검 (2026-11-07): FM-TOEFL 54에서 점수를 잃은 것(요구사항 누락·짧은 글·구체성 없음·결론의 새 주장)을 규칙으로 잡는다. 점수를 매기지 않는다. ----
+  const STOP = new Set('the a an and or but to of in on at for with from by is are was were be been it this that these those i you he she we they my your his her our their me him them as so if then than not no do does did can could would should will have has had about into over after before when what which who how why there here also very more most some any each every'.split(' '));
+  const stem = w => w.toLowerCase().replace(/(ing|ed|es|s)$/, '');
+  const contentWords = t => [...new Set((String(t || '').match(/[A-Za-z]{4,}/g) || []).map(stem).filter(w => w.length >= 3 && !STOP.has(w)))];
+  function liveCheck(text, kind, reqs) {
+    const sents = sentences(text);
+    const n = wordCount(text);
+    const min = kind === 'email' ? 100 : 120;
+    const checks = [{ id: 'len', ok: n >= min, label: `단어 ${n}개 (목표 ${min}개 이상)`, tip: '짧으면 요구사항마다 한 문장을 더하세요.' }];
+    const textStems = new Set(contentWords(text));
+    for (const r of (reqs || []).filter(Boolean)) {
+      const kw = contentWords(r);
+      const hit = kw.filter(w => textStems.has(w));
+      const ok = kw.length ? hit.length >= Math.max(1, Math.ceil(kw.length * 0.4)) : null;
+      checks.push({ id: 'req', ok, label: `요구사항: ${r.length > 60 ? r.slice(0, 57) + '…' : r}`, tip: `이 요구를 답하는 문장이 보이지 않습니다. 핵심어 예: ${kw.slice(0, 4).join(', ')}` });
+    }
+    const st = structure(text, kind);
+    for (const [name, ok] of st.checks) if (!/단어 이상/.test(name)) checks.push({ id: 'struct', ok, label: name, tip: '이 요소가 글에서 보이지 않습니다.' });
+    // 결론에 새 주장: 마지막 문장의 내용어(5자 이상)가 앞 글에 거의 없으면 경고
+    if (sents.length >= 4) {
+      const last = sents[sents.length - 1];
+      const before = new Set(contentWords(sents.slice(0, -1).join(' ')));
+      const fresh = contentWords(last).filter(w => w.length >= 5 && !before.has(w));
+      checks.push({ id: 'newclaim', ok: fresh.length < 3, label: '결론에 새 주장 없음', tip: `마지막 문장에 새 단어가 많습니다 (${fresh.slice(0, 4).join(', ')}). 앞에서 한 말을 정리만 하세요.` });
+    }
+    // 같은 단어 3번 이상 반복 (어휘 다양성)
+    const cnt = {};
+    for (const w of (String(text).toLowerCase().match(/[a-z]{5,}/g) || [])) if (!STOP.has(w)) cnt[w] = (cnt[w] || 0) + 1;
+    const rep = Object.keys(cnt).filter(w => cnt[w] >= 4);
+    checks.push({ id: 'repeat', ok: rep.length === 0, label: rep.length ? `같은 단어 반복: ${rep.slice(0, 3).join(', ')}` : '단어 반복 없음', tip: '동의어나 대명사로 바꾸세요.' });
+    return { words: n, checks, passed: checks.filter(c => c.ok === true).length, total: checks.filter(c => c.ok != null).length };
+  }
+  const Core = { roles, sentences, wordCount, structure, requirements, topCats, liveCheck, BS_SEC, EMAIL_SEC, AD_SEC, PLAN_SEC };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
   root.WriteCore = Core;
 
@@ -136,6 +169,41 @@
       });
     }
 
+    // ---- 실전 쓰기 점검: 문제를 붙여 넣고(또는 그냥 쓰고) 타이머로 쓴 뒤 체크리스트 + Claude용 복사 ----
+    function live(main, kind) {
+      kind = kind === 'discussion' ? 'discussion' : 'email';
+      const sec = kind === 'email' ? EMAIL_SEC : AD_SEC;
+      ap(main, h('p', { class: 'kicker' }, '쓰기 · 실전 쓰기 점검'));
+      const box = h('section', { class: 'card' }); ap(main, box);
+      const prompt = h('textarea', { rows: 5, placeholder: '문제(지시문·교수/학생 글)를 붙여 넣으세요. 비워 두어도 됩니다.' });
+      const reqs = h('textarea', { rows: 3, placeholder: kind === 'email' ? '요구사항 한 줄에 하나 (예: Explain the problem with the direct deposit)' : '(Discussion은 비워 두세요)' });
+      const kindRow = h('div', { class: 'row' }, ['email', 'discussion'].map(k => h('button', { class: k === kind ? 'primary' : 'ghost', onclick: () => { stopAll(); rc(main); live(main, k); } }, k === 'email' ? 'Email (7분)' : 'Academic Discussion (10분)')));
+      const area = h('textarea', { rows: 14, spellcheck: 'true', placeholder: '시작을 누르면 타이머가 돕니다. 철자 틀린 단어는 빨간 밑줄로 보입니다.' });
+      area.disabled = true;
+      const out = h('div');
+      let cd = null, started = null;
+      const startBtn = h('button', { class: 'primary', onclick: () => {
+        started = Date.now(); area.disabled = false; area.focus(); startBtn.remove();
+        cd = countdown(sec, () => toast('시간 종료 — 마무리하고 제출하세요')); head.append(cd);
+      } }, '▶ 시작');
+      const head = h('div', { class: 'qhead' }, h('span', { class: 'small muted' }, `${kind === 'email' ? 'Email 7분' : 'Discussion 10분'} · 다 쓰면 제출하세요. 마지막 60초는 철자·시제 검토.`));
+      const submit = h('button', { class: 'primary', onclick: () => {
+        const text = area.value.trim();
+        if (!text) { toast('먼저 글을 쓰세요'); return; }
+        if (cd) cd.stop();
+        const rq = reqs.value.split('\n').map(s => s.trim()).filter(Boolean);
+        const r = liveCheck(text, kind, rq);
+        const flags = scan(text, kind).filter(f => f.level !== 'info');
+        const md = `# ${kind === 'email' ? 'Email' : 'Academic Discussion'} 실전 (${new Date().toLocaleString()})\n\n## 문제\n${prompt.value.trim() || '(없음)'}\n\n## 요구사항\n${rq.join('\n') || '(없음)'}\n\n## 내 글 (${r.words}단어, ${started ? Math.round((Date.now() - started) / 1000) + '초' : '시간 미측정'})\n${text}\n`;
+        env.logWriting({ kind: 'live', mode: kind, task: 'live-' + Date.now().toString(36), text, words: r.words, passed: r.passed, total: r.total, structure: structure(text, kind).checks, cats: [...new Set(flags.map(f => f.cat))], plan: [], ms: started ? Date.now() - started : null });
+        rc(out, h('h3', null, `체크 ${r.passed} / ${r.total}`),
+          h('ul', { class: 'small' }, r.checks.map(c => h('li', { class: c.ok === false ? 'miss' : 'ok' }, (c.ok === false ? '✗ ' : c.ok ? '✓ ' : '· ') + c.label + (c.ok === false ? ' — ' + c.tip : '')))),
+          flags.length ? h('div', null, h('h4', null, '문법·표현 의심'), h('ul', { class: 'small' }, flags.slice(0, 12).map(f => h('li', null, (f.match ? '“' + f.match + '” ' : '') + (f.msg || f.cat))))) : h('p', { class: 'small muted' }, '규칙으로 잡히는 문법 오류는 없습니다.'),
+          h('div', { class: 'row' }, h('button', { class: 'ghost', onclick: () => { try { navigator.clipboard.writeText(md).then(() => toast('복사했습니다 — Claude에게 붙여 넣으세요')); } catch (e) { toast('복사 실패'); } } }, 'Claude에게 보낼 글 복사')));
+      } }, '제출·점검');
+      ap(box, kindRow, h('label', { class: 'small muted' }, '문제'), prompt, kind === 'email' ? h('label', { class: 'small muted' }, '요구사항 (요구 누락 점검용)') : null, kind === 'email' ? reqs : null, head, startBtn, area, h('div', { class: 'row' }, submit), out);
+    }
+
     function noData(main, done) {
       ap(main, h('section', { class: 'card' }, h('p', { class: 'notice' }, '소站 쓰기 자료를 불러오지 못했습니다 (비공개 자료). Mac에서 start.command로 열거나 토큰을 넣으세요.'),
         h('button', { class: 'primary', onclick: () => done({ skipped: true }) }, '넘어가기')));
@@ -156,6 +224,8 @@
       const btns = (kind, label) => h('section', { class: 'card' }, h('h2', null, label), h('div', { class: 'row wrap' }, meta.filter(s => s.kind === kind).map(s => h('button', { class: 'ghost', onclick: () => go(`#/write/${kind}/${s.id}`) }, `독점 TPO ${s.paper}`))));
       ap(main, h('h1', null, '쓰기 (소站 독점 TPO)'),
         btns('bs', 'Build a Sentence (10문항 · 6분 50초)'),
+        h('section', { class: 'card' }, h('h2', null, '실전 쓰기 점검 (Email · Discussion)'), h('p', { class: 'small muted' }, '타이머로 쓰고 → 요구사항·단어 수·예시·결론·철자를 점검 → Claude에게 보낼 글 복사.'),
+          h('div', { class: 'row wrap' }, h('button', { class: 'primary', onclick: () => go('#/write/live/email') }, 'Email 7분'), h('button', { class: 'primary', onclick: () => go('#/write/live/discussion') }, 'Discussion 10분'))),
         h('section', { class: 'card' }, h('h2', null, '드릴'), h('div', { class: 'row wrap' },
           h('button', { class: 'ghost', onclick: () => go('#/write/fix') }, '반복 오류 고쳐 쓰기'))),
         h('section', { class: 'card' }, h('h2', null, '쓴 글 내보내기'), h('p', { class: 'small muted' }, `기록된 글 ${env.writingLog().filter(w => w.text).length}편 — Claude에게 첨삭을 맡길 때 이 파일을 주세요.`),
@@ -173,6 +243,6 @@
     function run(main, task, done) {
       if (task.type === 'fix') fix(main, task, done);
     }
-    return { run, fix, bs, today, room, stopAll };
+    return { run, fix, bs, live, today, room, stopAll };
   } };
 })(typeof window !== 'undefined' ? window : globalThis);

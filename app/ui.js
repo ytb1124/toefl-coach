@@ -117,6 +117,7 @@
       const back = () => go('#/write');
       if (arg === 'bs' && arg2) write().bs(main, decodeURIComponent(arg2), back);
       else if (arg === 'fix') write().fix(main, {}, back);
+      else if (arg === 'live') write().live(main, arg2);
       else write().room(main, C, go);
     }
     else if (view === 'hk') {
@@ -135,10 +136,11 @@
     else if (view === 'read') readApp().view(main, (location.hash || '').split('/').slice(2));
     else if (view === 'ko') koApp().view(main, (location.hash || '').split('/').slice(2));
     else if (view === 'keep') keepApp().view(main, render);
+    else if (view === 'spell') spellApp().view(main, render);
     else viewToday(main);
   }
   // 탭 5개: 오늘 · 연습실 · 오답 · 변화 · 설정 (단어·리딩·리스닝·말하기·쓰기 화면은 연습실/오답에서 들어감)
-  const TAB_OF = { '': '', do: '', room: 'room', speak: 'room', write: 'room', vocab: 'room', sw: 'room', keep: 'room', mock: 'room', wrong: 'wrong', tests: 'wrong', read: 'wrong', listen: 'wrong', ko: 'wrong', skill: 'wrong', orig: 'wrong', progress: 'progress', settings: 'settings' };
+  const TAB_OF = { '': '', do: '', room: 'room', speak: 'room', write: 'room', vocab: 'room', sw: 'room', keep: 'room', spell: 'room', mock: 'room', wrong: 'wrong', tests: 'wrong', read: 'wrong', listen: 'wrong', ko: 'wrong', skill: 'wrong', orig: 'wrong', progress: 'progress', settings: 'settings' };
   function nav(cur) {
     const tab = TAB_OF[cur] != null ? TAB_OF[cur] : cur;
     const link = (hash, label, key) => h('a', { href: hash, class: tab === key ? 'on' : '' }, label);
@@ -242,6 +244,8 @@
   let KP = null;
   const keepApp = () => KP || (KP = KeepWords.create({ h, toast, storage: window.Sync || localStorage,
     lookup: w => { const api = vocabApp(); return api && api.lookup ? api.lookup(w) : null; } }));
+  let SPELLD = null;
+  const spellApp = () => SPELLD || (SPELLD = SpellDrill.create({ h, toast, storage: window.Sync || localStorage }));
   let KO = null;
   const koApp = () => KO || (KO = KoTrialApp.create({ h, toast, go, storage: window.Sync || localStorage }));
 
@@ -330,7 +334,7 @@
       return;
     }
     main.append(h('h1', null, '단어 암기'),
-      h('p', { class: 'muted small' }, '단어 세트 15개와 표현 세트 2개로 외웁니다. 원본 단어장의 \'오늘 암기 시작\'과 같은 방식(뜻 연결하기 → 6개씩 묶어 익히기 → 시간을 두고 철자 떠올리기 → 마지막 재시험)입니다.'));
+      h('p', { class: 'muted small' }, (() => { const pl = api.plan && api.plan(); const n = k => pl ? pl.kinds.filter(x => x === k).length : null; return pl && pl.layout === 4 ? `단어 세트 ${n('word')}개와 표현 세트 ${n('expr')}개로 외웁니다.` : '단어 세트 15개와 표현 세트 2개로 외웁니다.'; })() + ' 원본 단어장의 \'오늘 암기 시작\'과 같은 방식(뜻 연결하기 → 6개씩 묶어 익히기 → 시간을 두고 철자 떠올리기 → 마지막 재시험)입니다.'));
     const kept = keepApp().count();
     main.append(h('section', { class: 'card keep-card', onclick: () => go('#/keep') },
       h('strong', null, `킵한 단어 ${kept}개 →`),
@@ -370,7 +374,9 @@
           h('h2', null, kind === 'expr' ? `표현 ${nWords('expr')}개 · ${mine.length}세트` : `단어 ${nWords('word').toLocaleString()}개 · ${mine.length}세트`, h('span', { class: 'muted small' }, ` ${done} / ${mine.length}세트 완료`)),
           h('div', { class: 'meter' }, h('div', { style: `width:${100 * done / mine.length}%` })),
           h('p', { class: 'muted small' }, kind === 'expr'
-            ? '2026真题 01–54회에서 고른 모를 만한 표현입니다. 세트마다 \'완전히 모를 것 같음\'과 \'긴가민가\'가 고르게 섞여 있고, 단어와 같은 방식으로 외웁니다.'
+            ? '2026真题 01–54회에서 고른 모를 만한 표현입니다. 25개씩 나눴고, 세트마다 \'완전히 모를 것 같음\'과 \'긴가민가\'가 고르게 섞여 있고, 단어와 같은 방식으로 외웁니다.'
+            : plan.layout === 4
+              ? `세트 1–${plan.keep}은 그대로이고, 세트 ${plan.keep + 1}–${mine.length}는 남은 단어를 40개씩 다시 나눴습니다 (${E.dayStr(plan.relayoutAt).replace(/-/g, '.')}). 자주 틀린 단어 기록은 이어집니다.`
             : plan.carry != null
               ? `세트 1–${plan.carry}은 그대로(50개씩)이고, 세트 ${plan.carry + 1}–${mine.length}는 기존 단어 50개에 2026真题 새 단어(완전히 모를 것 같음 3~4 · 긴가민가 22~23)를 고르게 섞어 75~76개씩 다시 짰습니다 (${E.dayStr(plan.createdAt).replace(/-/g, '.')}). 자주 틀린 단어 기록은 이어집니다.`
               : `${plan.size}개씩 나눈 세트입니다.`));
@@ -407,8 +413,13 @@
       h('h2', null, `자주 틀린 단어 ${all.length}개`),
       h('p', { class: 'small muted' }, '세트를 공부하면서 직접 입력으로 3회 이상 틀린 단어와 킵한 단어(단어장에 없는 단어 포함)입니다. 세트를 나누기 전에 틀린 횟수는 세지 않습니다. 자주 틀린 단어 암기에서 직접 입력을 2번 통과하거나(같은 날도 됨), 들어온 뒤 틀리지 않고 맞힌 날이 2일이 되면 다음 암기부터 빠지고, 다시 틀리면 돌아옵니다.'),
       keptNoKo ? h('p', { class: 'small notice' }, `단어장에 없는 킵 단어 ${keptNoKo}개는 뜻이 없어 빠졌습니다. `, h('a', { href: '#/keep' }, '킵한 단어'), '에서 뜻을 적으면 들어옵니다.') : null,
-      all.length ? h('div', { class: 'row wrap' }, sel, h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) }, '자주 틀린 단어 전부 암기 시작'))
+      all.length ? h('div', { class: 'row wrap' }, sel, h('button', { class: 'primary', onclick: () => vocabFlow(() => api.startHard()) },
+        api.frequentSetCount ? `다음 ${Math.min(api.frequentSetSize, all.length)}개 암기 시작` : '자주 틀린 단어 전부 암기 시작'))
         : h('p', { class: 'muted small' }, '아직 없습니다. 세트를 공부하면 여기에 모입니다.'),
+      all.length && api.frequentSetCount && api.frequentSetCount() > 1 ? h('div', { class: 'setgrid' }, [...Array(api.frequentSetCount()).keys()].map(k => {
+        const open = api.frequentSetOpen(k);
+        return h('button', { class: 'setb' + (open ? '' : ' done'), onclick: () => vocabFlow(() => api.startHard(k)) }, h('b', null, `묶음 ${k + 1}`), h('span', null, open ? `${open}개` : '오늘 완료'));
+      })) : null,
       list.length ? h('details', null, h('summary', null, `목록 ${list.length}개`),
         h('ul', { class: 'wordlist' }, list.slice(0, 300).map(w => h('li', null, h('b', null, w.en), ' ', h('span', { class: 'muted' }, w.ko), ' ',
           h('span', { class: 'small' }, w.label || ''), w.kept ? h('span', { class: 'chip' }, '문제에서') : null)))) : null);
@@ -684,6 +695,7 @@
       h('button', { class: 'ghost', onclick: () => go('#/speak') }, '말하기: Listen & Repeat · Interview'),
       h('button', { class: 'ghost', onclick: () => go('#/hk') }, '쓰기: 해커스 모범답안 재구성 (Email · Discussion)'),
       h('button', { class: 'ghost', onclick: () => go('#/write') }, '쓰기: Build a Sentence · 반복 오류 고쳐 쓰기'),
+      h('button', { class: 'ghost', onclick: () => go('#/spell') }, `스펠링·교정 드릴 (복습 ${spellApp().dueCount()}개)`),
       h('button', { class: 'ghost', onclick: () => go('#/sw') }, '튜터 교정 문장·반복 오류 (말하기·쓰기 탭)'))),
     h('section', { class: 'card' }, h('h2', null, '단어'), h('div', { class: 'row wrap' }, h('button', { class: 'ghost', onclick: () => go('#/vocab') }, '단어 암기'), h('button', { class: 'ghost', onclick: () => go('#/keep') }, `킵한 단어 ${keepApp().count()}개`))),
     h('section', { class: 'card' }, h('h2', null, '모의 모듈'), h('p', { class: 'small muted' }, '보류 회차(독점 TPO 2·3)로 실전처럼 리딩·리스닝 모듈을 풉니다.'), h('button', { class: 'ghost', onclick: () => go('#/mock') }, '모의 모듈')));

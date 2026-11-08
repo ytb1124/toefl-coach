@@ -2216,7 +2216,7 @@ function adoptV2(plan, v2) {
   for (let i = 0; i < plan.carry; i++) if (v2.done[i] && !plan.done[i]) plan.done[i] = v2.done[i];
   plan.fromV2 = true; plan.baseSince = v2.createdAt; saveChunkPlan(plan); return plan;
 }
-function loadChunkPlan() {
+function loadChunkPlanBase() {
   const p = readChunkPlan();
   if (p && p.version === 3 && !p.fromV2) { const v2 = readPlanKey(CHUNK_PLAN_V2_KEY); if (v2) return adoptV2(p, v2); }
   if (p && p.version === 3 && p.baseSince == null) { const v2 = readPlanKey(CHUNK_PLAN_V2_KEY); p.baseSince = v2 ? v2.createdAt : p.createdAt; saveChunkPlan(p); }
@@ -2233,6 +2233,35 @@ function loadChunkPlan() {
   const s = loadSession(); if (s && s.sameDayState && s.sameDayState.chunk && s.sameDayState.chunk.index >= carry) clearSession();
   return plan;
 }
+// 재배치 2026-11-08 (사용자 요청): 세트 1–6은 그대로, 나머지 단어 세트(7–15)의 단어는 40개씩 다시 나누고, 표현은 25개씩 4세트로.
+// 저장된 계획(v3)을 한 번만 고쳐 쓴다(layout 4). 단어 목록·base(틀린 횟수 기준점)·완료 날짜는 그대로 이어지고, 앞쪽 세트가 이미 끝난 것이 있으면 그 뒤까지 그대로 둔다.
+const WORD_SET_SIZE = 40, EXPR_SET_SIZE = 25, KEEP_MIN = 6;
+function splitEven(list, size) {   // size개씩, 마지막이 size의 절반 미만이면 앞 세트에 합친다
+  const out = []; for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+  if (out.length > 1 && out[out.length - 1].length < size / 2) out[out.length - 2] = out[out.length - 2].concat(out.pop());
+  return out;
+}
+function relayoutPlan(p) {
+  if (!p || p.layout === 4 || !Array.isArray(p.sets) || !Array.isArray(p.kinds)) return p;
+  const wordIdx = [], exprIdx = [];
+  p.kinds.forEach((k, i) => (k === 'expr' ? exprIdx : wordIdx).push(i));
+  if (wordIdx.some((w, n) => w !== n)) return p;   // 예상한 배치(단어 세트가 앞)가 아니면 건드리지 않는다
+  const keep = Math.min(wordIdx.length, Math.max(KEEP_MIN, ...wordIdx.filter(i => p.done[i]).map(i => i + 1)));
+  const head = p.sets.slice(0, keep);
+  const rest = wordIdx.slice(keep).flatMap(i => p.sets[i]);
+  const exprSets = exprIdx.map(i => p.sets[i]), mixed = [];
+  for (let n = 0, m = Math.max(0, ...exprSets.map(a => a.length)); n < m; n++) exprSets.forEach(a => { if (n < a.length) mixed.push(a[n]); });
+  const wordSets = splitEven(rest, WORD_SET_SIZE), newExpr = splitEven(mixed, EXPR_SET_SIZE);
+  const oldSessionIdx = (() => { const s = loadSession(); return s && s.sameDayState && s.sameDayState.chunk ? s.sameDayState.chunk.index : null; })();
+  const done = {}; for (let i = 0; i < keep; i++) if (p.done[i]) done[i] = p.done[i];
+  p.sets = head.concat(wordSets, newExpr);
+  p.kinds = p.sets.map((_, i) => i < head.length + wordSets.length ? 'word' : 'expr');
+  p.done = done; p.words = p.sets.flat(); p.keep = keep; p.layout = 4; p.last = null; p.relayoutAt = Date.now();
+  saveChunkPlan(p);
+  if (oldSessionIdx != null && oldSessionIdx >= keep) clearSession();   // 다시 짠 세트의 진행 중 세션만 정리
+  return p;
+}
+function loadChunkPlan() { return relayoutPlan(loadChunkPlanBase()); }
 function saveChunkPlan(plan) { localStorage.setItem(CHUNK_PLAN_KEY, JSON.stringify(plan)); }
 function chunkToday() { const d = new Date(Date.now() - 4 * 3600000);   // 하루는 새벽 4시에 바뀐다 (dayKey와 같게)
  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -2257,7 +2286,7 @@ function chunkKind(plan, i) { return plan.kinds ? plan.kinds[i] : 'word'; }
 // 세트 번호는 단어·표현 따로 1부터 (표현 세트 1, 2)
 function chunkLabel(plan, i) { const k = chunkKind(plan, i); let n = 0; for (let j = 0; j <= i; j++) if (chunkKind(plan, j) === k) n++; return (k === 'expr' ? '표현 세트 ' : '세트 ') + n; }
 // 스톱워치 기록 키: 그대로 둔 세트는 예전 키, 다시 짠 세트는 새 키 (예전 세트 4–15의 시간이 새 세트에 붙지 않게)
-function chunkTimerKey(plan, i) { return plan.carry != null && i >= plan.carry ? 'v3set' + i : 'set' + i; }
+function chunkTimerKey(plan, i) { return plan.layout === 4 && i >= plan.keep ? 'v4set' + i : plan.carry != null && i >= plan.carry ? 'v3set' + i : 'set' + i; }
 function nextChunkIndex(plan, kind) { for (let i = 0; i < chunkCount(plan); i++) if (!plan.done[i] && (!kind || chunkKind(plan, i) === kind)) return i; return null; }
 
 // '오늘 암기 시작'(startSameDaySession)과 같은 초기화를, 대상만 세트의 30개로 바꿔 실행한다.
@@ -2295,7 +2324,17 @@ renderSameDaySummary = function () {
   const chunk = sameDayState && sameDayState.chunk;
   const plan = markChunkDone();
   if (__hooks.finished) __hooks.finished();  // 스톱워치: 이 세트(또는 자주 틀린 단어) 시간 기록
+  const fset = sameDayState && sameDayState.sourceMode === 'frequent' ? sameDayState.freqSet : null;
   renderBaseSameDaySummary();
+  if (fset != null) {   // 자주 틀린 단어 40개 묶음: 다음 묶음 버튼
+    const wrap = app.firstElementChild, cs = frequentChunks(), nk = cs.findIndex(c => c.some(w => !getTodayLearningMeta(w.en).todayMastered));
+    if (wrap && nk >= 0) {
+      const b = el('button', 'padding:12px 24px;border:1px solid #0F6E56;border-radius:8px;background:#e8f5ee;color:#0F6E56;margin-left:8px;cursor:pointer', '다음 자주 틀린 단어 ' + (nk + 1) + ' 시작');
+      b.onclick = () => { learningGoalMode = 'standard'; sameDayState = null; clearSession(); startFrequentSession(nk); };
+      wrap.appendChild(b);
+    }
+    __hooks.changed(); return;
+  }
   if (!chunk || !plan) return;
   const wrap = app.firstElementChild; if (!wrap) return;
   wrap.insertBefore(el('div', 'font-size:14px;font-weight:600;color:#0F6E56;margin-bottom:12px', chunkLabel(plan, chunk.index) + ' 완료 · 지금까지 ' + Object.keys(plan.done).length + ' / ' + chunkCount(plan) + '세트'), wrap.children[1] || null);
@@ -2362,7 +2401,7 @@ function resumeSession() {
   learningGoalMode = resumable.learningGoalMode || 'standard';
   sameDayState = resumable.sameDayState || null;
   renderCard();
-  if (__hooks.started) { const c = sameDayState && sameDayState.chunk; __hooks.started(c ? 'set' + c.index : 'freq', c ? '세트 ' + (c.index + 1) : '자주 틀린 단어'); }
+  if (__hooks.started) { const c = sameDayState && sameDayState.chunk, pl = c && loadChunkPlan(), fs = sameDayState && sameDayState.freqSet; __hooks.started(c && pl ? chunkTimerKey(pl, c.index) : fs != null ? 'freq' + fs : 'freq', c && pl ? chunkLabel(pl, c.index) : fs != null ? '자주 틀린 단어 ' + (fs + 1) : '자주 틀린 단어'); }
   return true;
 }
 
@@ -2460,15 +2499,22 @@ buildSession = function (size, qMode, srcMode) {
   return baseBuildSession(size, qMode, srcMode);
 };
 // '자주 틀린 단어' 범위로 오늘 암기(같은 날 반복)를 시작한다 — 풀이 방식은 세트와 똑같다.
-function startFrequentSession() {
-  const candidates = frequentWords().filter(w => !getTodayLearningMeta(w.en).todayMastered);  // 개수 제한 없음 (사용자 요청 2026-11-03)
+// 40개씩 나눠 학습 (사용자 요청 2026-11-08): 현재 자주 틀린 단어 목록(많이 틀린 순)을 40개씩 자른 k번째 묶음. k를 안 주면 오늘 아직 안 한 첫 40개.
+// 단어가 빠지면 목록이 앞으로 당겨지므로 '묶음 번호'는 그때그때 목록 기준이다.
+const FREQ_SET_SIZE = 40;
+function frequentChunks() { return splitEven(frequentWords(), FREQ_SET_SIZE); }
+function startFrequentSession(k) {
+  const open = w => !getTodayLearningMeta(w.en).todayMastered;
+  const chunks = frequentChunks();
+  if (k == null) { k = chunks.findIndex(c => c.some(open)); if (k < 0) k = 0; }
+  const candidates = (chunks[k] || []).filter(open);
   if (!candidates.length) { alert('오늘 할 자주 틀린 단어가 없습니다.'); return false; }
   learningGoalMode = 'same_day'; quizMode = 'typed'; sessionQueue = candidates; sessionIdx = 0;
   sessionStats = {sure:0, vague:0, guess:0, quickRepairs:0, quickRepairSuccess:0, stopped:[]};
   learningState = null; delayedRetries = []; finalReviewQueue = []; finalReviewActive = false;
-  sameDayState = {targets: candidates.map(w => w.en), sourceMode: 'frequent', sourceQuizMode: 'flash', chunk: null, nextNewIndex: 0, activityIndex: 0, pending: [], finalQueue: [], current: null, lastEns: [], phase: 'encoding', stats: {firstRecallSuccess:0, quick:0, deep:0, memory:0}};
+  sameDayState = {targets: candidates.map(w => w.en), sourceMode: 'frequent', sourceQuizMode: 'flash', chunk: null, freqSet: k, nextNewIndex: 0, activityIndex: 0, pending: [], finalQueue: [], current: null, lastEns: [], phase: 'encoding', stats: {firstRecallSuccess:0, quick:0, deep:0, memory:0}};
   candidates.forEach(w => resetTodayLearningIfNeeded(w.en)); saveMeta(); saveSession(); renderCard();
-  if (__hooks.started) __hooks.started('freq', '자주 틀린 단어');
+  if (__hooks.started) __hooks.started('freq' + k, '자주 틀린 단어 ' + (k + 1));
   return true;
 }
 
@@ -2486,6 +2532,9 @@ const __api = {
   // 자주 틀린 단어
   hardCount() { return frequentWords().length; },
   startHard: startFrequentSession,
+  frequentSetCount() { return frequentChunks().length; },
+  frequentSetSize: FREQ_SET_SIZE,
+  frequentSetOpen(k) { const c = frequentChunks()[k]; return c ? c.filter(w => !getTodayLearningMeta(w.en).todayMastered).length : 0; },
   frequentList() {
     const plan = loadChunkPlan();
     return frequentWords().map(w => {

@@ -24,3 +24,13 @@ test('email requirements come from the prompt bullets; top error categories', ()
 test('소站 writing times', () => {
   assert.deepStrictEqual([W.BS_SEC, W.EMAIL_SEC, W.AD_SEC, W.PLAN_SEC], [410, 420, 600, 120]);
 });
+
+test('liveCheck: short email missing a requirement and with a new-claim ending is flagged', () => {
+  const W = require('../app/write.js');
+  const email = 'Dear Ms. Davis,\nI hope this email finds you well. I am excited to join your team. Recently, I need to complete several onboarding tasks. Therefore, could you inform me of the timing of my first paycheck? I also think the company should build a new gym for every employee in the city.';
+  const r = W.liveCheck(email, 'email', ['Express your excitement for joining the team', 'Explain the problem you are having with setting up direct deposit', 'Ask about the timing of your first paycheck']);
+  assert.strictEqual(r.checks.find(c => c.id === 'len').ok, false);
+  const reqs = r.checks.filter(c => c.id === 'req').map(c => c.ok);
+  assert.deepStrictEqual(reqs, [true, false, true]);
+  assert.strictEqual(r.checks.find(c => c.id === 'newclaim').ok, false);
+});

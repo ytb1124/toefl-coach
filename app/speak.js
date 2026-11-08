@@ -17,7 +17,29 @@
     const span = ws[ws.length - 1].end - ws[0].start;
     return { words: ws.length, wpm: span > 0 ? Math.round(ws.length / (span / 60)) : null, pauses, longest: Math.round(longest * 10) / 10 };
   }
-  const Core = { speechStats };
+  // ---- Interview feedback (2026-11-07): checks a transcript for the things that cost points in FM-TOEFL 54 —
+  // too few words, slow pace, no example, no result/closing sentence. Rules only; no scoring claim.
+  const FILLER = /\b(um+|uh+|er+|hmm+|mm+|you know)\b/gi;
+  const has = (t, re) => re.test(t);
+  function interviewFeedback(text, words, limit) {
+    limit = limit || 45;
+    const t = String(text || '');
+    const st = speechStats(words);
+    const n = st.words || (t.match(/[A-Za-z']+/g) || []).length;
+    const target = Math.round(limit * 2);   // ≈ 120 wpm × limit/60
+    const fillers = (t.match(FILLER) || []).length;
+    const checks = [
+      { id: 'len', ok: n >= target, label: `단어 ${n}개 (목표 ${target}개 이상)`, tip: '이유 한 문장 + 구체적 예시 두 문장 + 결과 한 문장은 되어야 합니다.' },
+      { id: 'pace', ok: st.wpm == null ? null : st.wpm >= 110, label: st.wpm == null ? '속도 알 수 없음' : `속도 분당 ${st.wpm}단어 (목표 110 이상)`, tip: '문장을 짧게 끊되 멈추지 말고 이어 가세요.' },
+      { id: 'pause', ok: st.pauses <= 3, label: `0.8초 이상 멈춤 ${st.pauses}번 (가장 긴 ${st.longest}초)`, tip: '막히면 쉬운 말로 바꿔서 끝까지 이어 가세요.' },
+      { id: 'reason', ok: has(t, /\b(because|since|so that|reason|helps? me|allows?|that's why)\b/i), label: '이유 표현(because·since…)', tip: '첫 문장 뒤에 because로 이유를 붙이세요.' },
+      { id: 'example', ok: has(t, /\b(for example|for instance|such as|when i|once|last (year|month|week)|in (high|middle|elementary) school)\b/i), label: '구체적 예시(for example·When I…)', tip: '누가·언제·어디서를 한 문장으로.' },
+      { id: 'result', ok: has(t, /\b(so|as a result|therefore|that's why|which is why|overall|in conclusion|in the end|improved|helped)\b[^.?!]*[.?!]?\s*$/i), label: '결과·마무리 문장으로 끝남', tip: '마지막은 "그래서 …했다 / that\'s why I think …"로 닫으세요.' },
+      { id: 'filler', ok: fillers <= 3, label: `군말(um·uh) ${fillers}번`, tip: '생각할 땐 "Well," 한 단어로 대신하세요.' },
+    ];
+    return { stats: st, words: n, target, fillers, checks, passed: checks.filter(c => c.ok === true).length, total: checks.filter(c => c.ok != null).length };
+  }
+  const Core = { speechStats, interviewFeedback };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Core; return; }
   root.SpeakCore = Core;
 
@@ -191,19 +213,50 @@
           play(qAudio).catch(() => { status.textContent = '질문 음성을 재생하지 못했습니다 — 글로 읽고 답하세요.'; ap(box, h('p', { class: 'stem' }, q.text)); })
             .then(() => { if (g === gen) answer(); });
         }
+        // 2026-11-07 (사용자 요청, 11/02 결정을 되돌림): 말하는 동안 녹음한다. 녹음이 안 되면(마이크 없음) 예전처럼 타이머만.
         function answer() {
           beep();
           let left = limit;
           const tick = () => { clock.textContent = `${left}초`; status.textContent = '말하는 중 — 다 말했으면 스페이스바'; };
           tick();
-          const end = () => { if (!ivTimer || g !== gen) return; clearInterval(ivTimer); ivTimer = null; spaceHandler = null; finish(); };
-          ivTimer = setInterval(() => { left--; if (left <= 0) { clock.textContent = '0초'; end(); } else tick(); }, 1000);
-          spaceHandler = end;
+          const timerOnly = () => {
+            const end = () => { if (!ivTimer || g !== gen) return; clearInterval(ivTimer); ivTimer = null; spaceHandler = null; finish(null); };
+            ivTimer = setInterval(() => { left--; if (left <= 0) { clock.textContent = '0초'; end(); } else tick(); }, 1000);
+            spaceHandler = end;
+          };
+          mic().then(() => {
+            if (g !== gen) return;
+            spaceHandler = () => record.stop && record.stop();
+            return record(limit, l => { left = l; if (g === gen) tick(); }).then(blob => { if (g !== gen) return; spaceHandler = null; finish(blob); });
+          }).catch(() => { if (g !== gen) return; status.textContent = '마이크를 쓸 수 없어 타이머만 돕니다.'; timerOnly(); });
         }
-        function finish() {
+        function finish(blob) {
           status.textContent = '끝';
-          env.logSpeak({ kind: 'interview', q: q.id, timerOnly: true });   // 오늘 계획에서 '한 문제'로 세기 위한 기록만
-          ap(box, h('p', { class: 'stem' }, q.text), h('button', { class: 'primary', onclick: () => done({}) }, '다음'));
+          clock.textContent = '';
+          if (!blob) {
+            env.logSpeak({ kind: 'interview', q: q.id, timerOnly: true });   // 오늘 계획에서 '한 문제'로 세기 위한 기록만
+            ap(box, h('p', { class: 'stem' }, q.text), h('button', { class: 'primary', onclick: () => done({}) }, '다음'));
+            return;
+          }
+          const nextBtn = h('button', { class: 'primary', onclick: () => done({}) }, '다음');
+          const own = h('button', { class: 'ghost', onclick: () => playBlob(blob) }, '▶ 내 녹음');
+          ap(box, h('p', { class: 'stem' }, q.text));
+          sttReady().then(ok => {
+            if (!ok) {
+              env.logSpeak({ kind: 'interview', q: q.id, timerOnly: true, recorded: true });
+              ap(box, h('p', { class: 'small muted' }, '이 기기에서는 Whisper 받아쓰기를 쓸 수 없습니다 (Mac의 start.command로 열면 자동 분석). 내 녹음을 다시 들어 보세요.'), own, nextBtn);
+              return;
+            }
+            status.textContent = '분석 중…';
+            transcribe(blob).then(r => {
+              const fb = Core.interviewFeedback(r.text, r.words, limit);
+              env.logSpeak({ kind: 'interview', q: q.id, stt: true, rounds: [{ words: fb.words, wpm: fb.stats.wpm, pauses: fb.stats.pauses, longest: fb.stats.longest, fillers: fb.fillers, passed: fb.passed, total: fb.total }] });
+              status.textContent = `체크 ${fb.passed}/${fb.total}`;
+              ap(box, h('p', { class: 'small muted' }, '들린 대로: ', r.text || '(소리 없음)'),
+                h('ul', { class: 'small' }, fb.checks.map(c => h('li', { class: c.ok === false ? 'miss' : 'ok' }, (c.ok === false ? '✗ ' : c.ok ? '✓ ' : '· ') + c.label + (c.ok === false ? ' — ' + c.tip : '')))),
+                own, nextBtn);
+            }).catch(e => { stt = false; ap(box, h('p', { class: 'small' }, e.message), own, nextBtn); });
+          });
         }
       });
     }

@@ -404,3 +404,5 @@ span.good { color: var(--good); } span.bad { color: var(--bad); }
 .hk-outline { margin: 4px 0 10px; padding-left: 1.2em; font-size: .92rem; }
 .hk-hits li.ok { color: var(--good); } .hk-hits li.miss { color: var(--warn); }
 input.hk-num { width: 5em; margin-left: 8px; }
+.spell-q { font-size: 1.15rem; margin: 10px 0 4px; }
+.spell-in { width: 100%; font-size: 1.1rem; padding: 10px; margin-top: 8px; box-sizing: border-box; }
