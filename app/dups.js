@@ -23,17 +23,11 @@
     if (m === 'speak' || m === 'view') return 'fixed';
     return last.ok === last.n ? 'fixed' : 'again';
   }
-  // 대기열: 또 틀림(오래된 순) → 아직 안 풂(많이 반복된 순) → 다시 푼 것(오래된 순)
+  // 자동으로 나오는 순서: 아직 안 푼 문제만, 많이 반복된 것부터. 한 번 푼 문제는 (틀렸어도) 다시 나오지 않는다.
+  // 틀린 문제는 목록의 '틀린 것'에서 사용자가 골라 다시 푼다.
   function queue(groups, recs, filter) {
-    const list = groups.filter(g => !filter || !filter.cat || filter.cat === 'all' || g.cat === filter.cat);
-    const rank = { again: 0, new: 1, fixed: 2 };
-    const at = g => { const t = tries(recs[g.id]); return t.length ? t[t.length - 1].at : 0; };
-    return list.slice().sort((a, b) => {
-      const sa = status(a, recs[a.id]), sb = status(b, recs[b.id]);
-      if (sa !== sb) return rank[sa] - rank[sb];
-      if (sa === 'new') return b.nt - a.nt || b.n - a.n || (a.id < b.id ? -1 : 1);
-      return at(a) - at(b);
-    });
+    return groups.filter(g => (!filter || !filter.cat || filter.cat === 'all' || g.cat === filter.cat) && status(g, recs[g.id]) === 'new')
+      .sort((a, b) => b.nt - a.nt || b.n - a.n || (a.id < b.id ? -1 : 1));
   }
   const checkBuild = (typed, answer) => norm(typed) === norm(answer);
   const counts = (groups, recs) => {
@@ -58,6 +52,7 @@
     const ensureData = then => root.ZhanData.load('dups', 'ZHAN_DUPS', then);
     let cur = null;           // 풀이 중인 그룹의 진행 상태
     let filterCat = 'all';
+    let filterSt = 'new';   // 목록: new 안 푼 것 · again 틀린 것 · fixed 맞힌 것
 
     function load() { try { const d = JSON.parse(storage.getItem(KEY) || 'null'); if (d && d.v) return Object.assign({ v: 1, g: {} }, d); } catch (e) { /* fresh */ } return { v: 1, g: {} }; }
     function save(mut) { const d = load(); mut(d); try { storage.setItem(KEY, JSON.stringify(d)); } catch (e) { toast('저장 실패: ' + e.message); } return d; }
@@ -92,20 +87,22 @@
       const d = load(), all = Z().groups;
       const groups = filterCat === 'all' ? all : all.filter(g => g.cat === filterCat);
       const c = counts(groups, d.g);
-      const q = queue(all, d.g, { cat: filterCat });
-      const first = q.find(g => status(g, d.g[g.id]) !== 'fixed') || q[0];
+      const first = queue(all, d.g, { cat: filterCat })[0];
       main.append(root.ZhanData.sourceLine(h, 'dups'), h('section', { class: 'card hero' },
         h('h1', null, 'FM-TOEFL 중복 문제'),
-        h('p', { class: 'muted' }, `2026 真题 54회 전사본에서 2회 이상 나온 문제 ${all.length}개 (많이 반복된 것부터). 풀고 나면 정답·해설 대신 전사된 스크립트와 몇 회차에 나왔는지를 보여 줍니다.`),
-        h('p', { class: 'small' }, `또 틀림 ${c.again} · 아직 안 풂 ${c.new} · 끝냄 ${c.fixed}`),
-        first ? h('button', { class: 'primary', onclick: () => go('#/dups/' + first.id) }, `다음 문제: ${catName(first.cat)} · ${first.nt}회차에 출제`) : ''));
+        h('p', { class: 'muted' }, `2026 真题 54회 전사본에서 2회 이상 나온 문제 ${all.length}개 (많이 반복된 것부터). 한 번 푼 문제는 자동으로 다시 나오지 않고, 틀린 문제는 '틀린 것'에서 골라 다시 풉니다.`),
+        h('p', { class: 'small' }, `아직 안 풂 ${c.new} · 틀림 ${c.again} · 맞힘 ${c.fixed}`),
+        first ? h('button', { class: 'primary', onclick: () => go('#/dups/' + first.id) }, `다음 문제: ${catName(first.cat)} · ${first.nt}회차에 출제`) : h('p', { class: 'small good-text' }, '안 푼 문제를 모두 풀었습니다.')));
       main.append(h('section', { class: 'card' },
         h('div', { class: 'row wrap' }, [['all', '전체']].concat(CATS.map(x => [x[0], x[1]])).map(([id, name]) => {
           const n = id === 'all' ? all.length : all.filter(g => g.cat === id).length;
           return h('button', { class: id === filterCat ? 'primary' : 'ghost', onclick: () => { filterCat = id; main.innerHTML = ''; viewList(main); } }, `${name} ${n}`);
         }))));
-      const sorted = groups.slice().sort((a, b) => b.nt - a.nt || b.n - a.n || (a.id < b.id ? -1 : 1));
-      main.append(h('section', { class: 'card' }, h('ul', { class: 'olist' }, sorted.map(g => h('li', { onclick: () => go('#/dups/' + g.id) },
+      const stTabs = [['new', '안 푼 것', c.new], ['again', '틀린 것', c.again], ['fixed', '맞힌 것', c.fixed]];
+      main.append(h('section', { class: 'card' }, h('div', { class: 'row wrap' }, stTabs.map(([id, name, n]) =>
+        h('button', { class: id === filterSt ? 'primary' : 'ghost', onclick: () => { filterSt = id; main.innerHTML = ''; viewList(main); } }, `${name} ${n}`)))));
+      const sorted = groups.filter(g => status(g, d.g[g.id]) === filterSt).sort((a, b) => b.nt - a.nt || b.n - a.n || (a.id < b.id ? -1 : 1));
+      main.append(h('section', { class: 'card' }, sorted.length ? '' : h('p', { class: 'small muted' }, '해당하는 문제가 없습니다.'), h('ul', { class: 'olist' }, sorted.map(g => h('li', { onclick: () => go('#/dups/' + g.id) },
         h('div', null, h('b', null, `${g.nt}회차`), ' ', h('span', { class: 'muted small' }, catName(g.cat)), ' ', chipFor(status(g, d.g[g.id]))),
         h('div', { class: 'small muted' }, preview(g)))))));
     }
@@ -118,7 +115,7 @@
     // ---------- one group ----------
     function viewGroup(main, g) {
       const redraw = () => { main.innerHTML = ''; viewGroup(main, g); window.scrollTo(0, 0); };
-      const nextGroup = () => { const d = load(); return queue(Z().groups, d.g, { cat: filterCat }).find(x => x.id !== g.id && status(x, d.g[x.id]) !== 'fixed'); };
+      const nextGroup = () => { const d = load(); return queue(Z().groups, d.g, { cat: filterCat }).find(x => x.id !== g.id); };
       main.append(h('div', { class: 'swbar' }, back('#/dups', '목록'), h('span', { class: 'small muted' }, `${catName(g.cat)} · ${g.nt}회차 출제`)));
       const card = h('section', { class: 'card' });
       main.append(card);
@@ -126,8 +123,8 @@
       const footer = () => {
         const nx = nextGroup();
         return h('div', { class: 'row' },
-          h('button', { class: 'ghost', onclick: () => { cur = null; redraw(); } }, '같은 문제 다시 풀기'),
-          nx ? h('button', { class: 'primary', onclick: () => { cur = null; go('#/dups/' + nx.id); } }, '다음 문제 →') : '');
+          h('button', { class: 'ghost', onclick: () => { cur = null; go('#/dups'); } }, '목록으로'),
+          nx ? h('button', { class: 'primary', onclick: () => { cur = null; go('#/dups/' + nx.id); } }, '다음 안 푼 문제 →') : '');
       };
       const appears = () => h('p', { class: 'small muted' }, `나온 곳: ${wheres(g)}${g.partial ? ' (일부 출현은 전사가 잘려 있음)' : ''}`);
 

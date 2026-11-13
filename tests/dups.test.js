@@ -23,10 +23,10 @@ test('status: 안 풂 / 또 틀림 / 맞힘, 말하기는 한 번이면 끝냄',
   assert.strictEqual(D.status(g, { tries: [{ at: 1, ok: 0, n: 1 }, { at: 2, ok: 1, n: 1 }] }), 'fixed');
   assert.strictEqual(D.status({ cat: 'S2' }, { tries: [{ at: 1, done: true }] }), 'fixed');
 });
-test('queue: 또 틀림 → 많이 반복된 새 문제 → 다시 푼 것', () => {
+test('queue: 안 푼 문제만, 많이 반복된 것부터 (푼 문제는 틀려도 다시 나오지 않음)', () => {
   const a = mc('a', 2, 2), b = mc('b', 4, 4), c = mc('c', 3, 3), d = mc('d', 2, 3);
   const recs = { a: { tries: [{ at: 5, ok: 1, n: 1 }] }, d: { tries: [{ at: 9, ok: 0, n: 1 }] } };
-  assert.deepStrictEqual(D.queue([a, b, c, d], recs).map(x => x.id), ['d', 'b', 'c', 'a']);
+  assert.deepStrictEqual(D.queue([a, b, c, d], recs).map(x => x.id), ['b', 'c']);
 });
 test('queue: 섹션 필터', () => {
   const l = mc('l', 2, 2), w = Object.assign({}, build);
