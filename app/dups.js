@@ -171,7 +171,7 @@
           setTimeout(() => { next.disabled = false; }, 15000);   // 끝까지 못 들었을 때 넘어갈 수 있게
         };
         btn.onclick = start;
-        setTimeout(start, 300);   // 문제를 열면 자동 재생 (브라우저가 막으면 실패 토스트 후 버튼으로)
+        setTimeout(() => { if (btn.isConnected && !btn.disabled) start(); }, 300);   // 문제를 열면 자동 재생 (브라우저가 막으면 실패 토스트 후 버튼으로)
         card.append(h('p', { class: 'small muted' }, `${catName(g.cat)} · 문항 ${qs.length}개. 메모하면서 한 번 듣고, 다 들은 뒤 문제가 나옵니다. (음성은 전사 스크립트를 Kokoro로 만든 재구성 — 원본 음원 아님)`), btn, bar, next);
         return;
       }
