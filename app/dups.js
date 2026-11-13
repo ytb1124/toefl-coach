@@ -114,6 +114,7 @@
 
     // ---------- one group ----------
     function viewGroup(main, g) {
+      if (!cur || cur.id !== g.id) cur = { id: g.id, phase: 'q', qi: 0, ans: [], typed: '' };   // 다시 풀기는 cur를 비우고 다시 그린다
       const redraw = () => { main.innerHTML = ''; viewGroup(main, g); window.scrollTo(0, 0); };
       const nextGroup = () => { const d = load(); return queue(Z().groups, d.g, { cat: filterCat }).find(x => x.id !== g.id); };
       main.append(h('div', { class: 'swbar' }, back('#/dups', '목록'), h('span', { class: 'small muted' }, `${catName(g.cat)} · ${g.nt}회차 출제`)));
@@ -122,9 +123,11 @@
       const m = modeOf(g);
       const footer = () => {
         const nx = nextGroup();
+        const wrong = status(g, load().g[g.id]) === 'again';
         return h('div', { class: 'row' },
+          wrong ? h('button', { class: 'primary', onclick: () => { cur = null; redraw(); } }, '바로 다시 풀기') : '',
           h('button', { class: 'ghost', onclick: () => { cur = null; go('#/dups'); } }, '목록으로'),
-          nx ? h('button', { class: 'primary', onclick: () => { cur = null; go('#/dups/' + nx.id); } }, '다음 안 푼 문제 →') : '');
+          nx ? h('button', { class: wrong ? 'ghost' : 'primary', onclick: () => { cur = null; go('#/dups/' + nx.id); } }, '다음 안 푼 문제 →') : '');
       };
       const appears = () => h('p', { class: 'small muted' }, `나온 곳: ${wheres(g)}${g.partial ? ' (일부 출현은 전사가 잘려 있음)' : ''}`);
 
