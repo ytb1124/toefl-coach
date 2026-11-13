@@ -61,6 +61,18 @@
     const back = (hash, label) => h('a', { class: 'small', href: hash }, '← ' + label);
     const wheres = g => g.where.map(place).join(' · ');
 
+    // 대화·강의는 먼저 한 번 듣고(listen) 끝난 뒤에 문제(q)가 나온다. Task 1은 바로 문제 + 자동 재생 (리스닝 탭과 같음)
+    const newState = g => ({ id: g.id, phase: g.script && g.cat !== 'L1' ? 'listen' : 'q', qi: 0, ans: [], typed: '' });
+    let audio = null;
+    const stopAudio = () => { if (audio) { audio.pause(); audio.src = ''; audio = null; } };
+    window.addEventListener('hashchange', stopAudio);
+    function playFile(file, opts) {
+      stopAudio();
+      const a = audio = new Audio();
+      if (opts && opts.onEnded) a.addEventListener('ended', opts.onEnded);
+      if (opts && opts.onTime) a.addEventListener('timeupdate', () => opts.onTime(a));
+      return root.ZhanData.audioUrl(AUDIO_DIR + file + '.mp3').then(u => { a.src = u; return a.play(); });
+    }
     // 음성: 전사 스크립트를 Kokoro로 만든 재구성 (원본 음원 아님)
     function audioBox(file) {
       const a = h('audio', { controls: true, preload: 'auto', class: 'orig-audio' });
@@ -76,7 +88,7 @@
           retry: done => ensureData(() => { done(!!Z()); if (Z()) { toast('연결했습니다'); main.innerHTML = ''; view(main, []); } }) }));
         const [id] = parts;
         const g = id && Z().groups.find(x => x.id === decodeURIComponent(id));
-        if (g) { if (!cur || cur.id !== g.id) cur = { id: g.id, phase: 'q', qi: 0, ans: [], typed: '' }; return viewGroup(main, g); }
+        if (g) { if (!cur || cur.id !== g.id) cur = newState(g); return viewGroup(main, g); }
         cur = null;
         viewList(main);
       });
@@ -114,7 +126,7 @@
 
     // ---------- one group ----------
     function viewGroup(main, g) {
-      if (!cur || cur.id !== g.id) cur = { id: g.id, phase: 'q', qi: 0, ans: [], typed: '' };   // 다시 풀기는 cur를 비우고 다시 그린다
+      if (!cur || cur.id !== g.id) cur = newState(g);   // 다시 풀기는 cur를 비우고 다시 그린다
       const redraw = () => { main.innerHTML = ''; viewGroup(main, g); window.scrollTo(0, 0); };
       const nextGroup = () => { const d = load(); return queue(Z().groups, d.g, { cat: filterCat }).find(x => x.id !== g.id); };
       main.append(h('div', { class: 'swbar' }, back('#/dups', '목록'), h('span', { class: 'small muted' }, `${catName(g.cat)} · ${g.nt}회차 출제`)));
@@ -148,14 +160,32 @@
     function viewMc(card, g, st, redraw, footer, appears) {
       const listening = !!g.script;
       const qs = g.qs;
+      if (st.phase === 'listen') {
+        const bar = h('progress', { max: 1, value: 0, class: 'lprog' });
+        const btn = h('button', { class: 'primary' }, '▶ 듣기 시작');
+        const next = h('button', { class: 'ghost wide', disabled: true, onclick: () => { stopAudio(); st.phase = 'q'; redraw(); } }, '문제 풀기 →');
+        btn.onclick = () => {
+          btn.disabled = true; btn.textContent = '듣는 중… (시험처럼 한 번만)';
+          playFile(g.id, { onEnded: () => { next.disabled = false; next.className = 'primary'; btn.textContent = '다 들었음'; }, onTime: a => { if (a.duration) bar.value = a.currentTime / a.duration; } })
+            .catch(e => { toast('재생 실패: ' + e.message); btn.disabled = false; btn.textContent = '▶ 듣기 시작'; });
+          setTimeout(() => { next.disabled = false; }, 15000);   // 끝까지 못 들었을 때 넘어갈 수 있게
+        };
+        card.append(h('p', { class: 'small muted' }, `${catName(g.cat)} · 문항 ${qs.length}개. 메모하면서 한 번 듣고, 다 들은 뒤 문제가 나옵니다. (음성은 전사 스크립트를 Kokoro로 만든 재구성 — 원본 음원 아님)`), btn, bar, next);
+        return;
+      }
       if (st.phase === 'q') {
         const q = qs[st.qi];
-        if (listening) card.append(audioBox(g.id));
-        else card.append(passageBox(g));
+        if (g.cat === 'L1') {
+          const play = h('button', { class: 'ghost' }, '▶ 다시 듣기');
+          const go1 = () => playFile(g.id).catch(e => toast('재생 실패: ' + e.message));
+          play.onclick = go1;
+          card.append(h('p', null, h('b', null, 'Choose the best response.'), ' 들은 말에 가장 알맞은 대답을 고르세요.'), play);
+          setTimeout(go1, 200);
+        } else if (!listening) card.append(passageBox(g));
         card.append(h('p', { class: 'small muted' }, `문항 ${st.qi + 1} / ${qs.length}`),
-          q.q ? h('p', { class: 'stem' }, q.q) : h('p', { class: 'small muted' }, '들려 주는 문장에 가장 알맞은 응답을 고르세요.'),
+          q.q ? h('p', { class: 'stem' }, q.q) : '',
           h('div', { class: 'opts' }, q.opts.map((c, i) => h('button', { class: 'opt', onclick: () => {
-            st.ans[st.qi] = i;
+            stopAudio(); st.ans[st.qi] = i;
             if (st.qi + 1 < qs.length) { st.qi++; redraw(); return; }
             const ok = qs.filter((x, k) => st.ans[k] === L.indexOf(x.ans)).length;
             record(g, { ans: st.ans.slice(), ok, n: qs.length });
