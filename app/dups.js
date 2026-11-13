@@ -74,10 +74,10 @@
       return root.ZhanData.audioUrl(AUDIO_DIR + file + '.mp3').then(u => { a.src = u; return a.play(); });
     }
     // 음성: 전사 스크립트를 Kokoro로 만든 재구성 (원본 음원 아님)
-    function audioBox(file) {
+    function audioBox(file, auto) {
       const a = h('audio', { controls: true, preload: 'auto', class: 'orig-audio' });
       const note = h('p', { class: 'small muted' }, '음성은 전사 스크립트를 Kokoro로 만든 재구성입니다 (원본 음원 아님).');
-      root.ZhanData.audioUrl(AUDIO_DIR + file + '.mp3').then(u => { a.src = u; }).catch(() => { note.textContent = '음성 파일을 이 기기에서 불러오지 못했습니다. 아래 스크립트를 읽어 주세요.'; });
+      root.ZhanData.audioUrl(AUDIO_DIR + file + '.mp3').then(u => { a.src = u; if (auto) { stopAudio(); audio = a; a.play().catch(() => {}); } }).catch(() => { note.textContent = '음성 파일을 이 기기에서 불러오지 못했습니다. 아래 스크립트를 읽어 주세요.'; });
       return h('div', null, a, note);
     }
 
@@ -164,12 +164,14 @@
         const bar = h('progress', { max: 1, value: 0, class: 'lprog' });
         const btn = h('button', { class: 'primary' }, '▶ 듣기 시작');
         const next = h('button', { class: 'ghost wide', disabled: true, onclick: () => { stopAudio(); st.phase = 'q'; redraw(); } }, '문제 풀기 →');
-        btn.onclick = () => {
+        const start = () => {
           btn.disabled = true; btn.textContent = '듣는 중… (시험처럼 한 번만)';
           playFile(g.id, { onEnded: () => { next.disabled = false; next.className = 'primary'; btn.textContent = '다 들었음'; }, onTime: a => { if (a.duration) bar.value = a.currentTime / a.duration; } })
             .catch(e => { toast('재생 실패: ' + e.message); btn.disabled = false; btn.textContent = '▶ 듣기 시작'; });
           setTimeout(() => { next.disabled = false; }, 15000);   // 끝까지 못 들었을 때 넘어갈 수 있게
         };
+        btn.onclick = start;
+        setTimeout(start, 300);   // 문제를 열면 자동 재생 (브라우저가 막으면 실패 토스트 후 버튼으로)
         card.append(h('p', { class: 'small muted' }, `${catName(g.cat)} · 문항 ${qs.length}개. 메모하면서 한 번 듣고, 다 들은 뒤 문제가 나옵니다. (음성은 전사 스크립트를 Kokoro로 만든 재구성 — 원본 음원 아님)`), btn, bar, next);
         return;
       }
@@ -238,7 +240,7 @@
       const stop = () => { if (timer) clearInterval(timer); timer = null; };
       if (st.phase === 'q') {
         if (g.cat === 'S3' && st.qi === 0) card.append(h('p', { class: 'small' }, g.prompt));
-        card.append(h('p', { class: 'small muted' }, `질문 ${st.qi + 1} / ${qs.length}`), audioBox(file), h('p', { class: 'stem' }, text), clock,
+        card.append(h('p', { class: 'small muted' }, `질문 ${st.qi + 1} / ${qs.length}`), audioBox(file, true), h('p', { class: 'stem' }, text), clock,
           h('div', { class: 'row' },
             h('button', { class: 'ghost', onclick: () => { stop(); left = 45; clock.textContent = '45초'; timer = setInterval(() => { left--; clock.textContent = left + '초'; if (left <= 0) { stop(); clock.textContent = '끝'; } }, 1000); } }, '45초 타이머 시작'),
             h('button', { class: 'primary', onclick: () => {
