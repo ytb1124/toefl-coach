@@ -112,10 +112,12 @@
     const blobs = {};
     async function audioUrl(path) {
       if (!path) throw new Error('음원 없음');
-      if (localHost && !(state.pool && state.pool.remote)) return path;
+      // 중복 문제 음성(dups_audio/)은 2026-11-13에 대화를 남녀 목소리로 다시 만들었다: 예전 음성이 캐시에 남지 않게 버전을 붙인다
+      const ver = /\/dups_audio\//.test(path) ? '?v=dlg1' : '';
+      if (localHost && !(state.pool && state.pool.remote)) return path + ver;
       if (blobs[path]) return blobs[path];
       // 재구성 음성(tts/)은 2026-11-02에 Kokoro로 다시 만들었다: 예전에 보관한 macOS 음성을 쓰지 않도록 키를 바꾼다
-      const key = API + path + (/\/tts\//.test(path) ? '?v=kokoro1' : ''); let res = null, cache = null;
+      const key = API + path + (/\/tts\//.test(path) ? '?v=kokoro1' : ver); let res = null, cache = null;
       try { cache = await caches.open(AUDIO_CACHE); res = await cache.match(key); } catch (e) { /* no Cache API */ }
       if (!res) {
         const r = await ghFetch(path.replace(/^private\/zhan\//, ''));
