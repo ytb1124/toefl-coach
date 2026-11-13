@@ -52,6 +52,17 @@ def question_of(b):
     return {'n': b.qnum, 'q': q, 'opts': opts, 'ans': letter(b.fields.get('answer', ''))}
 
 
+def same_question(a, b):
+    oa = tuple(C.norm_key(x) for x in a['opts'])
+    ob = tuple(C.norm_key(x) for x in b['opts'])
+    if sum(1 for x in oa if x) >= 3 and oa == ob:
+        return True
+    ta, tb = set(C.norm_tokens(a['q'])), set(C.norm_tokens(b['q']))
+    if not ta or not tb:
+        return False
+    return len(ta & tb) / len(ta | tb) >= 0.8
+
+
 def attach_blocks(blocks):
     """build_units의 세트형(대화·강의·지문) 묶기를 그대로 따라, 단위 → 소속 블록(질문 포함)을 만든다."""
     byfile = defaultdict(list)
@@ -159,7 +170,7 @@ def main():
                 g.update(script=clean(b.fields.get('script', '') or b.fields.get('text', '')), qs=[{'n': b.qnum, 'q': '', 'opts': opts, 'ans': letter(b.fields.get('answer', ''))}])
             elif key in ('L2', 'L3', 'R2', 'R3', 'R1'):
                 heads = []
-                qmap = {}
+                qmap = []   # (score, 문항, 회차) 목록
                 for u in mem:
                     o = owner.get((u.file, C.norm_key(u.text)))
                     if not o:
@@ -169,11 +180,13 @@ def main():
                         qq = question_of(qb)
                         if not qq['q']:
                             continue
-                        k = C.norm_key(qq['q'])
-                        cur = qmap.get(k)
-                        score = (qq['ans'] is not None, sum(1 for x in qq['opts'] if x))
-                        if cur is None or score > cur[0]:
-                            qmap[k] = (score, qq, u.test)
+                        # 같은 문항 판정: 보기 네 개가 같거나, 질문이 같거나, 질문 단어가 80% 이상 겹치면 하나로 (전사본마다 오타·표기가 다름)
+                        score = (qq['ans'] is not None, sum(1 for x in qq['opts'] if x), len(qq['q']))
+                        hit = next((e for e in qmap if same_question(e[1], qq)), None)
+                        if hit is None:
+                            qmap.append((score, qq, u.test))
+                        elif score > hit[0]:
+                            qmap[qmap.index(hit)] = (score, qq, u.test)
                 head = min(heads, key=lambda x: x[0])[1] if heads else None
                 body = head.main_text() if head else best.text
                 if key == 'R1':
@@ -181,7 +194,7 @@ def main():
                 else:
                     g.update(passage=body.strip() if key in ('R2', 'R3') else None)
                     g['script'] = clean(C.strip_markup(C.strip_speakers(body))) if key in ('L2', 'L3') else None
-                    g['qs'] = [v[1] for v in sorted(qmap.values(), key=lambda v: (v[2], v[1]['n']))]
+                    g['qs'] = [v[1] for v in sorted(qmap, key=lambda v: (v[2], v[1]['n']))]
                     # 같은 지문 안의 순서: 가장 많은 문항을 가진 출현의 번호 순
                     g['qs'].sort(key=lambda q: q['n'])
                     if key in ('L2', 'L3'):
