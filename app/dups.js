@@ -61,8 +61,8 @@
     const back = (hash, label) => h('a', { class: 'small', href: hash }, '← ' + label);
     const wheres = g => g.where.map(place).join(' · ');
 
-    // 대화·강의는 먼저 한 번 듣고(listen) 끝난 뒤에 문제(q)가 나온다. Task 1은 바로 문제 + 자동 재생 (리스닝 탭과 같음)
-    const newState = g => ({ id: g.id, phase: g.script && g.cat !== 'L1' ? 'listen' : 'q', qi: 0, ans: [], typed: '' });
+    // 대화·강의·Task 1은 먼저 한 번 듣고(listen) 끝난 뒤에 문제(q)가 나온다. Task 1은 바로 문제 + 자동 재생 (리스닝 탭과 같음)
+    const newState = g => ({ id: g.id, phase: g.script ? 'listen' : 'q', qi: 0, ans: [], typed: '' });
     let audio = null;
     const stopAudio = () => { if (audio) { audio.pause(); audio.src = ''; audio = null; } };
     window.addEventListener('hashchange', stopAudio);
@@ -178,11 +178,7 @@
       if (st.phase === 'q') {
         const q = qs[st.qi];
         if (g.cat === 'L1') {
-          const play = h('button', { class: 'ghost' }, '▶ 다시 듣기');
-          const go1 = () => playFile(g.id).catch(e => toast('재생 실패: ' + e.message));
-          play.onclick = go1;
-          card.append(h('p', null, h('b', null, 'Choose the best response.'), ' 들은 말에 가장 알맞은 대답을 고르세요.'), play);
-          setTimeout(go1, 200);
+          card.append(h('p', null, h('b', null, 'Choose the best response.'), ' 들은 말에 가장 알맞은 대답을 고르세요.'));
         } else if (!listening) card.append(passageBox(g));
         card.append(h('p', { class: 'small muted' }, `문항 ${st.qi + 1} / ${qs.length}`),
           q.q ? h('p', { class: 'stem' }, q.q) : '',

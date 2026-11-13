@@ -113,7 +113,7 @@
     async function audioUrl(path) {
       if (!path) throw new Error('음원 없음');
       // 중복 문제 음성(dups_audio/)은 2026-11-13에 대화를 남녀 목소리로 다시 만들었다: 예전 음성이 캐시에 남지 않게 버전을 붙인다
-      const ver = /\/dups_audio\//.test(path) ? '?v=dlg1' : '';
+      const ver = /\/dups_audio\//.test(path) ? '?v=dlg2' : '';
       if (localHost && !(state.pool && state.pool.remote)) return path + ver;
       if (blobs[path]) return blobs[path];
       // 재구성 음성(tts/)은 2026-11-02에 Kokoro로 다시 만들었다: 예전에 보관한 macOS 음성을 쓰지 않도록 키를 바꾼다
