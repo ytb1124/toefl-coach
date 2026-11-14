@@ -177,22 +177,44 @@
       }
       if (st.phase === 'q') {
         const q = qs[st.qi];
+        const reading = !listening && g.cat !== 'L1';
+        const finish = () => {
+          stopAudio();
+          if (reading && st.t0) st.elapsed = Math.round((Date.now() - st.t0) / 1000);
+          const ok = qs.filter((x, k) => st.ans[k] === L.indexOf(x.ans)).length;
+          record(g, { ans: st.ans.slice(), ok, n: qs.length });
+          st.phase = 'review'; redraw();
+        };
         if (g.cat === 'L1') {
           card.append(h('p', null, h('b', null, 'Choose the best response.'), ' 들은 말에 가장 알맞은 대답을 고르세요.'));
-        } else if (!listening) card.append(passageBox(g));
+        } else if (!listening) {
+          // 리딩: 지문 하나를 푸는 동안 스톱워치 (지문당 한 번), 앞뒤 문항 이동 가능
+          if (!st.t0) st.t0 = Date.now();
+          const fmt = t => Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+          const sw = h('span', { class: 'chip' }, '⏱ ' + fmt(Math.round((Date.now() - st.t0) / 1000)));
+          const tick = setInterval(() => { if (!sw.isConnected) return clearInterval(tick); sw.textContent = '⏱ ' + fmt(Math.round((Date.now() - st.t0) / 1000)); }, 1000);
+          card.append(h('div', { class: 'row' }, sw), passageBox(g));
+        }
         card.append(h('p', { class: 'small muted' }, `문항 ${st.qi + 1} / ${qs.length}`),
           q.q ? h('p', { class: 'stem' }, q.q) : '',
-          h('div', { class: 'opts' }, q.opts.map((c, i) => h('button', { class: 'opt', onclick: () => {
-            stopAudio(); st.ans[st.qi] = i;
+          h('div', { class: 'opts' }, q.opts.map((c, i) => h('button', { class: 'opt' + (reading && st.ans[st.qi] === i ? ' sel' : ''), style: reading && st.ans[st.qi] === i ? 'outline:2px solid var(--accent,#2563eb)' : '', onclick: () => {
+            st.ans[st.qi] = i;
+            if (reading) { redraw(); return; }
+            stopAudio();
             if (st.qi + 1 < qs.length) { st.qi++; redraw(); return; }
-            const ok = qs.filter((x, k) => st.ans[k] === L.indexOf(x.ans)).length;
-            record(g, { ans: st.ans.slice(), ok, n: qs.length });
-            st.phase = 'review'; redraw();
+            finish();
           } }, h('b', null, L[i]), ' ', c))));
+        if (reading) {
+          const all = qs.every((x, k) => st.ans[k] != null);
+          card.append(h('div', { class: 'row' },
+            h('button', { class: 'ghost', disabled: st.qi === 0, onclick: () => { st.qi--; redraw(); } }, '← 이전 문항'),
+            st.qi + 1 < qs.length ? h('button', { class: 'ghost', onclick: () => { st.qi++; redraw(); } }, '다음 문항 →') : '',
+            h('button', { class: all ? 'primary' : 'ghost', disabled: !all, onclick: finish }, all ? '제출' : `제출 (${qs.filter((x, k) => st.ans[k] != null).length}/${qs.length} 답함)`)));
+        }
         return;
       }
       const ok = qs.filter((x, k) => st.ans[k] === L.indexOf(x.ans)).length;
-      card.append(h('h2', null, `${ok} / ${qs.length}`, ' ', h('span', { class: 'small ' + (ok === qs.length ? 'good-text' : 'warn') }, ok === qs.length ? '모두 맞힘' : '틀린 문항이 있음')));
+      card.append(h('h2', null, `${ok} / ${qs.length}`, st.elapsed ? ` · ⏱ ${Math.floor(st.elapsed / 60)}:${String(st.elapsed % 60).padStart(2, '0')}` : '', ' ', h('span', { class: 'small ' + (ok === qs.length ? 'good-text' : 'warn') }, ok === qs.length ? '모두 맞힘' : '틀린 문항이 있음')));
       if (listening) {
         card.append(audioBox(g.id), h('p', { class: 'small muted' }, '전사된 스크립트 (화자 구분 없음)'), h('div', { class: 'passage' }, h('p', null, g.script)));
       } else card.append(passageBox(g));
